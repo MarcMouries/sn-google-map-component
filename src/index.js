@@ -1,1 +1,1 @@
-import './x-snc-mycomponent';
+import './x_snc_google_map';

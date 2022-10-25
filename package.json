@@ -1,12 +1,12 @@
 {
-	"name": "@marc/x-snc-mycomponent",
+	"name": "x_snc_google_map",
 	"version": "0.0.1",
 	"private": false,
-	"description": "Does what a component got to do",
+	"description": "Google Map Component",
 	"keywords": [
 		"ServiceNow",
 		"Now Experience UI Component",
-		"My component special power"
+		"sn-google-map-component"
 	],
 	"readme": "./README.md",
 	"engines": {
@@ -15,17 +15,17 @@
 	},
 	"module": "src/index.js",
 	"dependencies": {
-		"@servicenow/cli-archetype": "rome",
-		"@servicenow/cli-component-archetype": "rome",
-		"@servicenow/library-translate": "rome",
-		"@servicenow/sass-kit": "rome",
-		"@servicenow/sass-theme": "rome",
-		"@servicenow/ui-core": "rome",
-		"@servicenow/ui-renderer-snabbdom": "rome"
+		"@servicenow/ui-core": "latest",
+		"@servicenow/ui-renderer-snabbdom": "latest",
+		"@servicenow/cli-archetype": "latest",
+		"@servicenow/cli-component-archetype": "latest",
+		"@servicenow/sass-theme": "latest",
+		"@servicenow/sass-kit": "latest",
+		"@servicenow/library-translate": "latest",
+		"load-google-maps-api": "^2.0.2"
 	},
 	"devDependencies": {
-		"@servicenow/cli-archetype-dev": "rome",
-		"@servicenow/cli-component-archetype-dev": "rome",
-		"react-error-overlay": "^6.0.9"
+		"@servicenow/cli-archetype-dev": "latest",
+		"@servicenow/cli-component-archetype-dev": "latest"
 	}
 }

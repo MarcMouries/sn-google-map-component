@@ -1,24 +1,14 @@
-{
+{"scopeName": "x_snc_google_map",
 	"components": {
-		"x-snc-mycomponent": {
-			"innerComponents": [],
+	    "x-snc-google-map": {
+	        "innerComponents": [],
 			"uiBuilder": {
 				"associatedTypes": ["global.core", "global.landing-page"],
-				"description": "Component Template",
-				"category": "Component",
+				"label": "My Component",
 				"icon": "document-outline",
-				"label": "Component Template"
-			},
-			"properties": [{
-				"description": "Array of items to display",
-				"fieldType": "json",
-				"label": "items",
-				"name": "items",
-				"readOnly": false,
-				"required": true,
-				"defaultValue": "[{\"Id\":1,\"description\":\"Jane\"},{\"Id\":2,\"description\":\"John\"}]"
-			}]
-		}
-	},
-	"scopeName": "x_snc_mycomponent"
+				"description": "A description of my component",
+				"category": "primitives"
+			}
+	    }
+	}
 }

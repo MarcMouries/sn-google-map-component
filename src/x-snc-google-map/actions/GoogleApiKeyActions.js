@@ -20,18 +20,10 @@ const actionTypes = {
 };
 
 const actions = {
-	[actionTypes.GOOGLE_MAPS_API_KEY_FETCH_REQUESTED]: {
-		private: true,
-	},
-	[actionTypes.GOOGLE_MAPS_API_KEY_FETCH_STARTED]: {
-		private: true,
-	},
-	[actionTypes.GOOGLE_MAPS_API_KEY_FETCH_SUCCEEDED]: {
-		private: true,
-	},
-	[actionTypes.GOOGLE_MAPS_API_KEY_FETCH_FAILED]: {
-		private: true,
-	}
+	[actionTypes.GOOGLE_MAPS_API_KEY_FETCH_REQUESTED]: {},
+	[actionTypes.GOOGLE_MAPS_API_KEY_FETCH_STARTED]: {},
+	[actionTypes.GOOGLE_MAPS_API_KEY_FETCH_SUCCEEDED]: {},
+	[actionTypes.GOOGLE_MAPS_API_KEY_FETCH_FAILED]: {}
 };
 
 const requestGoogleMapsApiKey = createGraphQLEffect(googleMapsApiKeyQuery, {
@@ -48,13 +40,13 @@ const startGoogleMapsApiKeyFetch = ({ action, state, dispatch }) => {
 const finishGoogleMapsApiKeyFetchSuccess = ({ action, state, dispatch }) => {
 	const { payload } = action;
 	console.log("finishGoogleMapsApiKeyFetchSuccess");
-	console.log(payload);
 	if (payload.errors.length) {
 		console.log(payload.errors);
 		dispatch('PROPERTIES_SET', { error: FETCH_ERROR });
 		return;
 	}
 	let googleApiKey = payload.data.GlideRecord_Query.sys_properties._results[0].value.value;
+	console.log("googleApiKey = " + googleApiKey);
 	if (!googleApiKey) {
 		console.error('No Google API Key found.');
 		dispatch('PROPERTIES_SET', { error: NO_API_KEY_ERROR });

@@ -1,5 +1,5 @@
-import { createCustomElement } from '@servicenow/ui-core';
-//import { createCustomElement, actionTypes } from "@servicenow/ui-core";
+import { createCustomElement, actionTypes } from "@servicenow/ui-core";
+const { COMPONENT_CONNECTED } = actionTypes;
 
 import snabbdom from '@servicenow/ui-renderer-snabbdom';
 import styles from './styles.scss';
@@ -26,20 +26,10 @@ createCustomElement('x-snc-google-map', {
 	view,
 	styles,
 
-	onBootstrap(host, dispatch) {
-		console.log("onBootstrap");
-		console.log(host);
-		console.log(dispatch);
-		//onBootstrap(host, dispatch);
-		// Fetch for the Google-Maps-Javascript-API-key in sys_properties table.
-		dispatch('GOOGLE_MAPS_API_KEY_FETCH_REQUESTED', {
-			sys_property_name: "google.maps.client.key"
-		});
-	},
 
 	properties: {
 		center: {
-			default: { lat: 39.8097343, lng: -98.5556199 }, /* USA Geographic center of the contiguous United States */
+			default: { lat: 39.8097343, lng: -98.5556199 }, /* Geographic center of the contiguous United States */
 		},
 		zoom: {
 			default: 5,
@@ -51,7 +41,14 @@ createCustomElement('x-snc-google-map', {
 		//...googleMapActions
 	},
 	actionHandlers: {
+		
+		[actionTypes.COMPONENT_BOOTSTRAPPED]: {
+			effect({ properties, action: { payload: { host } }, dispatch }) {			// Fetch for the Google-Maps-Javascript-API-key in sys_properties table.
+				dispatch('GOOGLE_MAPS_API_KEY_FETCH_REQUESTED', {
+					sys_property_name: "google.maps.client.key"
+				});
+			}
+		},
 		...googleApiKeyActionHandlers
-
 	}
 });

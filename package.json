@@ -15,14 +15,16 @@
 	},
 	"module": "src/index.js",
 	"dependencies": {
-		"@servicenow/ui-core": "latest",
-		"@servicenow/ui-renderer-snabbdom": "latest",
 		"@servicenow/cli-archetype": "latest",
 		"@servicenow/cli-component-archetype": "latest",
-		"@servicenow/sass-theme": "latest",
-		"@servicenow/sass-kit": "latest",
 		"@servicenow/library-translate": "latest",
-		"load-google-maps-api": "^2.0.2"
+		"@servicenow/sass-kit": "latest",
+		"@servicenow/sass-theme": "latest",
+		"@servicenow/ui-core": "latest",
+		"@servicenow/ui-effect-graphql": "latest",
+		"@servicenow/ui-renderer-snabbdom": "latest",
+		"load-google-maps-api": "^2.0.2",
+		"sn-translate": "latest"
 	},
 	"devDependencies": {
 		"@servicenow/cli-archetype-dev": "latest",

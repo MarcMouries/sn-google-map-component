@@ -1,12 +1,15 @@
 import { createCustomElement, actionTypes } from "@servicenow/ui-core";
 import snabbdom, { createRef } from '@seismic/snabbdom-renderer';
-import { loadGoogleApi, initializeMap } from './googleLoadMap';
+import { loadGoogleApi, initializeMap } from './loadGoogleMapsApi';
+import { googleApiKeyActionHandlers } from './actions/GoogleApiKeyActions';
+
 import styles from "./styles.scss";
 import view from './view';
 import {
 	fetchAgentDataEffect,
 	fetchTaskDataEffect
 } from "./dataProvider";
+
 import { stateConstants, customActions } from "./constants";
 const { COMPONENT_BOOTSTRAPPED } = actionTypes;
 const { STATES } = stateConstants;
@@ -93,8 +96,25 @@ createCustomElement("x-snc-googlemap", {
 
 	},
 
+	//googleApiKeyActions, googleApiKeyActionHandlers
+
 	actionHandlers: {
-		[actionTypes.COMPONENT_BOOTSTRAPPED]: loadGoogleApi,
+		// NEW
+		[actionTypes.COMPONENT_BOOTSTRAPPED]: (coeffects) => {
+			const { dispatch } = coeffects;
+			dispatch(customActions.GOOGLE_MAPS_API_KEY_FETCH_REQUESTED, {
+				sys_property_name: "google.maps.key"
+			});
+		},
+		...googleApiKeyActionHandlers,
+
+		[customActions.GOOGLE_API_LOAD_REQUESTED]: loadGoogleApi,
+
+	//	[actionTypes.COMPONENT_BOOTSTRAPPED]: loadGoogleApi,  // now load GoogleM Map API Key first
+
+		// BEFORE 
+		// [actionTypes.COMPONENT_BOOTSTRAPPED]: loadGoogleApi,
+
 		[customActions.INITIALIZE_MAP]: initializeMap,
 		[customActions.FETCH_AGENT_DATA]: fetchAgentDataEffect,
 		[customActions.FETCH_AGENT_DATA_SUCCESS]: {

@@ -1,16 +1,14 @@
 import { Fragment } from '@seismic/snabbdom-renderer';
-import { stateConstants} from "./constants";
+import { stateConstants } from "./constants";
+
 export default (state) => {
     const { mapElementRef } = state;
     const { STATES } = stateConstants;
-    console.log("Map State", state);
+    console.log("Map Component: state", state);
     return (
         <Fragment>
             <div>
-                <div
-                    className="map-container" ref={mapElementRef}>
-                </div>
-                
+                <div className="map-container" ref={mapElementRef}></div>
             </div>
         </Fragment>
     );

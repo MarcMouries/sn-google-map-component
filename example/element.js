@@ -4,5 +4,5 @@ const el = document.createElement('DIV');
 document.body.appendChild(el);
 
 el.innerHTML = `
-<x-snc-googlemap></x-snc-googlemap>
+<x-snc-googlemap data="[{"my-data: "dummy"}]]"></x-snc-googlemap>
 `;

@@ -2,27 +2,24 @@ import loadGoogleMapsApi from 'load-google-maps-api';
 import MarkerClusterer from '@google/markerclustererplus';
 import { customActions, tables } from './constants';
 
-const addMapApiOptions = ({ properties: { data } }) => {
-	let options = {};
-	options.client = "gme-servicenow";
-	options.libraries = ['places'];
-	return options;
-};
+export const loadGoogleApi = ({ action, state, dispatch, updateState }) => {
+console.log("in loadGoogleApi : payload=", action.payload);
 
-export const loadGoogleApi = ({ state, dispatch, updateState }) => {
+//	key: action.payload.googleApiKey,
+
 	let GOOGLE_MAPS_API_OPTIONS = {
-		key: state.apiKey || null,
-		...addMapApiOptions(state)
+		key: action.payload.googleApiKey,
+		libraries: ['places']
 	};
 	loadGoogleMapsApi(GOOGLE_MAPS_API_OPTIONS)
 		.then((googleMapsApi) => {
-			console.log("API loaded");
+			console.log("Map Component: API loaded");
 			updateState({ googleMapsApi });
 			dispatch(customActions.INITIALIZE_MAP);
 		})
 		.catch((error) => {
 			console.error(error);
-			console.log('Cannot load google maps API');
+			console.log('Map Component: Cannot load google maps API');
 		})
 };
 

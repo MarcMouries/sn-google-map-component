@@ -3,6 +3,8 @@
     "Error fetching Google Maps API Key",
     "Please ensure you have configured your API key in sys_properties",
     "No Google Maps API Key Found",
-    "Please configure your API key in your sys_properties (google.maps.key)"
+    "Please configure your API key in your sys_properties (google.maps.key)",
+    "Error loading Google Maps API",
+    "Please ensure you have a valid API key in sys_properties"
   ]
 }

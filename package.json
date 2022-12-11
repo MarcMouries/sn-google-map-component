@@ -1,12 +1,12 @@
 {
-	"name": "x_snc_google_map",
+	"name": "x-snc-googlemap",
 	"version": "0.0.1",
 	"private": false,
-	"description": "Google Map Component",
+	"description": "",
 	"keywords": [
 		"ServiceNow",
 		"Now Experience UI Component",
-		"sn-google-map-component"
+		"sn-googlemap"
 	],
 	"readme": "./README.md",
 	"engines": {
@@ -15,19 +15,19 @@
 	},
 	"module": "src/index.js",
 	"dependencies": {
-		"@servicenow/cli-archetype": "latest",
-		"@servicenow/cli-component-archetype": "latest",
-		"@servicenow/library-translate": "latest",
-		"@servicenow/sass-kit": "latest",
-		"@servicenow/sass-theme": "latest",
-		"@servicenow/ui-core": "latest",
-		"@servicenow/ui-effect-graphql": "latest",
-		"@servicenow/ui-renderer-snabbdom": "latest",
-		"load-google-maps-api": "^2.0.2",
-		"sn-translate": "latest"
+		"@google/markerclustererplus": "latest",
+		"@servicenow/cli-archetype": "22.0.0",
+		"@servicenow/cli-component-archetype": "22.0.0",
+		"@servicenow/library-translate": "quebec",
+		"@servicenow/sass-kit": "quebec",
+		"@servicenow/sass-theme": "quebec",
+		"@servicenow/ui-core": "quebec",
+		"@servicenow/ui-effect-graphql": "19.4.2",
+		"@servicenow/ui-renderer-snabbdom": "quebec",
+		"load-google-maps-api": "^2.0.2"
 	},
 	"devDependencies": {
-		"@servicenow/cli-archetype-dev": "latest",
-		"@servicenow/cli-component-archetype-dev": "latest"
+		"@servicenow/cli-archetype-dev": "22.0.0",
+		"@servicenow/cli-component-archetype-dev": "22.0.0"
 	}
 }

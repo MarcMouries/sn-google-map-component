@@ -1,6 +1,7 @@
-{"scopeName": "x_snc_google_map",
+{
+	"scopeName": "x_snc_googlemap",
 	"components": {
-	    "x-snc-google-map": {
+	    "x-snc-googlemap": {
 	        "innerComponents": [],
 			"uiBuilder": {
 				"associatedTypes": ["global.core", "global.landing-page"],

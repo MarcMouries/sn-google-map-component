@@ -13,12 +13,12 @@ import { actions as googleMapActions, actionHandlers as googleMapActionHandlers 
 
 
 const view = (state, { updateState }) => {
-	const { googleMapContainerElementRef }  = state.properties;
+	const { mapElementRef }  = state.properties;
 
 	return (
 		<div 
 		className="google-map-element"
-		ref={googleMapContainerElementRef}>
+		ref={mapElementRef}>
 		</div>
 	);
 };
@@ -26,12 +26,9 @@ const view = (state, { updateState }) => {
 
 
 createCustomElement('x-snc-google-map', {
-	renderer: {
-		type: snabbdom
-	},
+	renderer: { type: snabbdom },
 	view,
 	styles,
-
 
 	properties: {
 		center: {
@@ -40,7 +37,7 @@ createCustomElement('x-snc-google-map', {
 		zoom: {
 			default: 5,
 		},
-		googleMapContainerElementRef: {
+		mapElementRef: {
 			default: createRef()
 		},
 		googleMapsApi:  {

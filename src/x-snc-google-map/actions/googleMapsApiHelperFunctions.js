@@ -79,7 +79,7 @@ const loadGoogleMapWithListener = (dispatch, state, googleMapsApi) => {
         showFullscreenControl,
 		allowMultipleMarkers,
         defaultGeolocation,
-        googleMapContainerElementRef,
+        mapElementRef,
         mapMarkers,
         showPointsOfInterest
     } = state.properties;
@@ -114,7 +114,7 @@ const loadGoogleMapWithListener = (dispatch, state, googleMapsApi) => {
     };
     // Instantiate the Google Map Element Object
 	let googleMapElement = new googleMapsApi.Map(
-		googleMapContainerElementRef.current,
+		mapElementRef.current,
 		GOOGLE_MAPS_UI_OPTIONS
     );
 

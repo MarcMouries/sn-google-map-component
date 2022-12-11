@@ -6,7 +6,7 @@
 			"uiBuilder": {
 				"associatedTypes": ["global.core", "global.landing-page"],
 				"label": "AES Google Map Component",
-				"icon": "document-outline",
+				"icon": "map-pin-outline",
 				"description": "A Google Map Component",
 				"category": "primitives"
 			}

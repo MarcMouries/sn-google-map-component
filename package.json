@@ -23,6 +23,7 @@
 		"@servicenow/sass-theme": "quebec",
 		"@servicenow/ui-core": "quebec",
 		"@servicenow/ui-effect-graphql": "19.4.2",
+		"@servicenow/ui-effect-http": "^19.4.2",
 		"@servicenow/ui-renderer-snabbdom": "quebec",
 		"load-google-maps-api": "^2.0.2",
 		"sn-translate": "latest"

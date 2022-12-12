@@ -15,7 +15,8 @@ console.log("in loadGoogleApi : payload=", action.payload);
 		.then((googleMapsApi) => {
 			console.log("Map Component: API loaded");
 			updateState({ googleMapsApi });
-			dispatch(customActions.INITIALIZE_MAP);
+	//		dispatch(customActions.INITIALIZE_MAP);  // BEFORE
+	dispatch(customActions.CURRENT_USER_FETCH_REQUESTED);  // NOW
 		})
 		.catch((error) => {
 			console.error(error);
@@ -25,6 +26,8 @@ console.log("in loadGoogleApi : payload=", action.payload);
 
 export const initializeMap = ({ state, updateState, dispatch }) => {
 	const { googleMapsApi, mapElementRef } = state;
+	console.log("Map Component: initializeMap", state);
+
 	let mapOptions = {
 		zoom: 4,
 		center: new googleMapsApi.LatLng(-25.363882, 131.044922)

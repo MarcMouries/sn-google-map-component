@@ -56,7 +56,7 @@ const finishGoogleMapsApiKeyFetchSuccess = ({ action, state, dispatch }) => {
 		dispatch('PROPERTIES_SET', { error: NO_API_KEY_ERROR });
 		return;
 	}
-	dispatch('GOOGLE_API_LOAD_REQUESTED', { googleApiKey: googleMapApiKey });
+	dispatch(customActions.GOOGLE_API_LOAD_REQUESTED, { googleApiKey: googleMapApiKey });
 };
 
 const finishGoogleMapsApiKeyFetchFailure = ({ action, state, dispatch }) => {

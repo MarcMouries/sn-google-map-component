@@ -2,6 +2,7 @@ import { createCustomElement, actionTypes } from "@servicenow/ui-core";
 import snabbdom, { createRef } from '@seismic/snabbdom-renderer';
 import { loadGoogleApi, initializeMap } from './loadGoogleMapsApi';
 import { googleApiKeyActionHandlers } from './actions/GoogleApiKeyActions';
+import { createHttpEffect } from '@servicenow/ui-effect-http';
 
 import styles from "./styles.scss";
 import view from './view';
@@ -10,7 +11,7 @@ import {
 	fetchTaskDataEffect
 } from "./dataProvider";
 
-import { stateConstants, customActions } from "./constants";
+import { stateConstants, customActions, URL_CURRENT_USER } from "./constants";
 const { COMPONENT_BOOTSTRAPPED } = actionTypes;
 const { STATES } = stateConstants;
 
@@ -59,12 +60,6 @@ createCustomElement("x-snc-googlemap", {
 		zoom: {
 			default: 5,
 		},
-		apikey: {
-			default: {
-				type: "client",
-				key: "gme-servicenow",
-			},
-		},
 		table: {
 			default: "sys_user",
 		},
@@ -76,8 +71,7 @@ createCustomElement("x-snc-googlemap", {
 					sys_id: "ac26c34c1be37010b93654a2604bcbd5",
 					lat: 38.913014,
 					long: -77.224186,
-					image: 'https://d2q79iu7y748jz.cloudfront.net/s/_squarelogo/64x64/24b02bdf69dd777df55b306db3c5e214',
-					state: STATES.WIP
+					image: 'https://pbs.twimg.com/profile_images/1483341411911041025/hY5z-EDB_400x400.jpg',
 				}
 				,
 				/* New York, New York, United States of America */
@@ -86,7 +80,7 @@ createCustomElement("x-snc-googlemap", {
 					sys_id: "5137153cc611227c000bbd1bd8cd2005",
 					lat: 40.7896239,
 					long: -73.9598939,
-					image: 'https://d2q79iu7y748jz.cloudfront.net/s/_squarelogo/64x64/24b02bdf69dd777df55b306db3c5e214'
+					image: 'https://pbs.twimg.com/profile_images/1483341411911041025/hY5z-EDB_400x400.jpg'
 				}
 			],
 			onChange(currentValue, previousValue, dispatch) {
@@ -96,37 +90,68 @@ createCustomElement("x-snc-googlemap", {
 
 	},
 
-	//googleApiKeyActions, googleApiKeyActionHandlers
-
+	/*
+	1. COMPONENT_BOOTSTRAPPED
+	2. GOOGLE_MAPS_API_KEY_FETCH_REQUESTED
+	3. CURRENT_USER_FETCH_REQUESTED
+		- get location
+	4. ADDRESS_GEO_CODING_REQUESTED
+	5. INITIALIZE_MAP
+	*/
 	actionHandlers: {
-		// NEW
+
 		[actionTypes.COMPONENT_BOOTSTRAPPED]: (coeffects) => {
 			const { dispatch } = coeffects;
 			dispatch(customActions.GOOGLE_MAPS_API_KEY_FETCH_REQUESTED, {
 				sys_property_name: "google.maps.key"
 			});
 		},
+
 		...googleApiKeyActionHandlers,
 
 		[customActions.GOOGLE_API_LOAD_REQUESTED]: loadGoogleApi,
 
-	//	[actionTypes.COMPONENT_BOOTSTRAPPED]: loadGoogleApi,  // now load GoogleM Map API Key first
 
-		// BEFORE 
-		// [actionTypes.COMPONENT_BOOTSTRAPPED]: loadGoogleApi,
+		[customActions.CURRENT_USER_FETCH_REQUESTED]: createHttpEffect(
+			URL_CURRENT_USER, {
+			method: 'GET',
+			startActionType: customActions.CURRENT_USER_FETCH_STARTED,
+			successActionType: customActions.CURRENT_USER_FETCH_SUCCEEDED,
+			//errorActionType: customActions.CURRENT_USER_FETCH_FAILED,
+		}),
+		[customActions.CURRENT_USER_FETCH_STARTED]: ({ updateState }) => {
+			console.log("CURRENT_USER_FETCH_STARTED");
+			updateState({ isLoading: true });
+		},
+		[customActions.CURRENT_USER_FETCH_SUCCEEDED]: (
+			{
+				action: { payload: { result = {} } },
+				dispatch, updateState }) => {
+			const { user_sys_id: userSysId } = result;
+			console.log("CURRENT_USER_FETCH_SUCCEEDED");
+			//console.log("payload: ", payload);
+			console.log("result", result);
+
+			dispatch(customActions.INITIALIZE_MAP);
+
+			/* 
+			if (userSysId) {
+				updateState({ userSysId });
+				dispatch(FETCH_ITEM_REQUESTED, {
+					sysparm_fields: 'sys_id,short_description,active,assigned_to',
+					sysparm_query: `assigned_to=${userSysId}^ORDERBYDESCsys_created_on`
+				});
+			} else {
+				updateState({ isLoading: false });
+			}
+			*/
+		},
 
 		[customActions.INITIALIZE_MAP]: initializeMap,
 		[customActions.FETCH_AGENT_DATA]: fetchAgentDataEffect,
 		[customActions.FETCH_AGENT_DATA_SUCCESS]: {
 			effect: (coeffects) => {
-				const {
-					action: { payload, meta },
-					state,
-					dispatch,
-					updateState,
-					updateProperties,
-				} = coeffects;
-
+				const { action: { payload, meta }, state, dispatch, updateState, updateProperties } = coeffects;
 				const {
 					data: {
 						GlideRecord_Query: {
@@ -134,7 +159,7 @@ createCustomElement("x-snc-googlemap", {
 						},
 					},
 				} = payload;
-				const user  = payload.data.GlideRecord_Query.sys_user._results[0];
+				const user = payload.data.GlideRecord_Query.sys_user._results[0];
 				console.log("payload USER");
 				console.log(payload);
 				console.log(user);

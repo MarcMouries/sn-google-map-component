@@ -9,3 +9,7 @@
 
 ## TODO
 - Center the map based on the current user location
+    - query the current user
+    - geocode the user's address
+- set Initial Zoom property
+- Dispatch event when user clicks on map markers

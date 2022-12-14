@@ -1,1 +1,1 @@
-import './x-snc-googlemap';
+import './x-snc-gmap';

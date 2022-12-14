@@ -39,7 +39,7 @@ const createInfoWindow = (object) => {
 	return contentString;
 }
 
-createCustomElement("x-snc-googlemap", {
+createCustomElement("x-snc-gmap", {
 	renderer: { type: snabbdom },
 	view,
 	styles,
@@ -71,7 +71,7 @@ createCustomElement("x-snc-googlemap", {
 					sys_id: "ac26c34c1be37010b93654a2604bcbd5",
 					lat: 38.913014,
 					long: -77.224186,
-					image: 'https://pbs.twimg.com/profile_images/1483341411911041025/hY5z-EDB_400x400.jpg',
+					image: 'https://www.servicenow.com/content/dam/servicenow-assets/public/en-us/images/company-library/icon/icon-locations.svg',
 				}
 				,
 				/* New York, New York, United States of America */
@@ -80,7 +80,7 @@ createCustomElement("x-snc-googlemap", {
 					sys_id: "5137153cc611227c000bbd1bd8cd2005",
 					lat: 40.7896239,
 					long: -73.9598939,
-					image: 'https://pbs.twimg.com/profile_images/1483341411911041025/hY5z-EDB_400x400.jpg'
+					image: 'https://www.servicenow.com/content/dam/servicenow-assets/public/en-us/images/company-library/icon/icon-locations.svg'
 				}
 			],
 			onChange(currentValue, previousValue, dispatch) {

@@ -22,7 +22,28 @@
 					"readOnly": false,
 					"required": true,
 					"defaultValue": [],
-					"typeMetadata": {}
+					"typeMetadata": {
+						"schema": {
+							"type": "array",
+							"items": {
+								"table": {
+									"type": "string"
+								},
+								"sys_id": {
+									"type": "string"
+								},
+								"lat": {
+									"type": "number"
+								},
+								"long": {
+									"type": "number"
+								},
+								"image": {
+									"type": "string"
+								}
+							}
+						}
+					}
 				}
 			]
 		}

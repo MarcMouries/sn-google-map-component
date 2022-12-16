@@ -163,10 +163,28 @@ createCustomElement("x-snc-gmap", {
 				console.log("payload USER");
 				console.log(payload);
 				console.log(user);
-				const infowindow = new google.maps.InfoWindow({
+
+				// Marker with Link
+				/*const infowindow = new google.maps.InfoWindow({
 					content: `<a style='color:blue' href>${_results[0].name.displayValue}</a>
 					<div>Location: ${_results[0].location._reference.name.value}</div>`
 				});
+*/
+				const name = _results[0].name.displayValue;
+				const location = _results[0].location._reference.name.value;
+				const contentString =
+					'<div id="content">' +
+					'<div id="siteNotice">' + "</div>" +
+					'<h2 id="firstHeading" class="firstHeading">' + name + '</h2>' +
+					'<div id="bodyContent">' +
+					"<p>" + location + "</p>" +
+					"</div>" +
+					"</div>";
+
+				const infowindow = new google.maps.InfoWindow({
+					content: contentString
+				});
+
 				infowindow.open(window.googleMap, state.marker);
 			}
 		},

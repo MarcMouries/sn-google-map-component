@@ -6,6 +6,9 @@ export default (state) => {
     const { STATES } = stateConstants;
     console.log("Map Component: state", state);
 
+    const { properties } = state;
+	console.log("properties =", properties);
+
     const minHeight = "100%";
     const height = "100%";
 

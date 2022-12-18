@@ -49,7 +49,7 @@ export const setMarkers = (state, updateState, dispatch, googleMap) => {
 	state.markers.forEach((marker) => {
 		marker.setMap(null);
 	});
-	const marker_data = state.properties.data;
+	const marker_data = state.properties.mapMarkers;
 	let bounds = new googleMapsApi.LatLngBounds();
 	let markers = marker_data.map((item) => {
 		const locationObj = {

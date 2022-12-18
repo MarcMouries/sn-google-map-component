@@ -12,6 +12,8 @@ import {
 } from "./dataProvider";
 
 import { stateConstants, customActions, URL_CURRENT_USER } from "./constants";
+import properties from './properties'
+
 const { COMPONENT_BOOTSTRAPPED } = actionTypes;
 const { STATES } = stateConstants;
 
@@ -52,43 +54,7 @@ createCustomElement("x-snc-gmap", {
 		marker: null,
 		selectedTaskFilter: []
 	},
-
-	properties: {
-		center: {
-			default: { lat: 39.8097343, lng: -98.5556199 },
-		},
-		zoom: {
-			default: 5,
-		},
-		table: {
-			default: "sys_user",
-		},
-		data: {
-			default: [
-				/* 8045 Leesburg Pike, Vienna, VA 22182, United States of America */
-				{
-					table: "task",
-					sys_id: "ac26c34c1be37010b93654a2604bcbd5",
-					lat: 38.913014,
-					long: -77.224186,
-					image: 'https://www.servicenow.com/content/dam/servicenow-assets/public/en-us/images/company-library/icon/icon-locations.svg',
-				}
-				,
-				/* New York, New York, United States of America */
-				{
-					table: "sys_user",
-					sys_id: "5137153cc611227c000bbd1bd8cd2005",
-					lat: 40.7896239,
-					long: -73.9598939,
-					image: 'https://www.servicenow.com/content/dam/servicenow-assets/public/en-us/images/company-library/icon/icon-locations.svg'
-				}
-			],
-			onChange(currentValue, previousValue, dispatch) {
-				dispatch(customActions.INITIALIZE_MAP);
-			}
-		},
-
-	},
+	properties,
 
 	/*
 	1. COMPONENT_BOOTSTRAPPED
@@ -134,7 +100,7 @@ createCustomElement("x-snc-gmap", {
 
 			dispatch(customActions.INITIALIZE_MAP);
 
-			/* 
+			/*
 			if (userSysId) {
 				updateState({ userSysId });
 				dispatch(FETCH_ITEM_REQUESTED, {

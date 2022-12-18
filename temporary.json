@@ -1,3 +1,22 @@
+
+
+// INDEX
+[customActions.MARKER_DATA_FETCH]: getInfoWindowDetail,
+
+
+// handlers.js
+export const getInfoWindowDetail = createGraphQLEffect(glideRecordQuery, {
+	variableList: ["encodedQuery"],
+	templateVarList: ['table', 'fields', 'sysId'],
+	successActionType: customActions.MARKER_DATA_FETCH_SUCCEEDED,
+});
+
+
+
+// MARKER_DATA_FETCH_SUCCEEDED
+//it's not clear how the value for the active parameter in the graphQL query GQL_QUERY is passed to dataFetchHandler
+it's not clear how the value for the active parameter in the graphQL 
+
 [
     "defaultValue": [
         {

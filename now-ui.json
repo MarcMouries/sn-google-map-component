@@ -12,11 +12,25 @@
 				"category": "primitives",
 				"description": "A Google Map Component",
 				"icon": "map-pin-outline",
-				"label": "AES Google Map"
+				"label": "AES Google Map",
+				"configLayout": {
+					"layout": [
+						{
+							"initialOpenState": true,
+							"sectionType": "section",
+							"id": "data",
+							"title": "Data",
+							"children": [
+								"mapMarkers"
+							],
+							"icon": "database-outline"
+						}
+					]
+				}
 			},
 			"properties": [
 				{
-					"description": "NEW Array of objects that defines the items displayed on the map - each object can have values for 'table', 'sys_id', 'lat', 'long', 'image'",
+					"description": "Array of objects that defines the items displayed on the map - each object can have values for 'table', 'sys_id', 'lat', 'long', 'image'",
 					"fieldType": "json",
 					"label": "Map Markers",
 					"name": "mapMarkers",
@@ -29,7 +43,7 @@
 							"items": {
 								"type": "object",
 								"properties": {
-									"id": {
+									"table": {
 										"type": "string"
 									},
 									"sys_id": {

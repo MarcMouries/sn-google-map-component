@@ -3,9 +3,9 @@ import MarkerClusterer from '@google/markerclustererplus';
 import { customActions, tables } from './constants';
 
 export const loadGoogleApi = ({ action, state, dispatch, updateState }) => {
-console.log("in loadGoogleApi : payload=", action.payload);
+	console.log("in loadGoogleApi : payload=", action.payload);
 
-//	key: action.payload.googleApiKey,
+	//	key: action.payload.googleApiKey,
 
 	let GOOGLE_MAPS_API_OPTIONS = {
 		key: action.payload.googleApiKey,
@@ -15,8 +15,8 @@ console.log("in loadGoogleApi : payload=", action.payload);
 		.then((googleMapsApi) => {
 			console.log("Map Component: API loaded");
 			updateState({ googleMapsApi });
-	//		dispatch(customActions.INITIALIZE_MAP);  // BEFORE
-	dispatch(customActions.CURRENT_USER_FETCH_REQUESTED);  // NOW
+			//		dispatch(customActions.INITIALIZE_MAP);  // BEFORE
+			dispatch(customActions.CURRENT_USER_FETCH_REQUESTED);  // NOW
 		})
 		.catch((error) => {
 			console.error(error);
@@ -25,14 +25,15 @@ console.log("in loadGoogleApi : payload=", action.payload);
 };
 
 export const initializeMap = ({ state, updateState, dispatch }) => {
-	const { googleMapsApi, mapElementRef } = state;
+	const { googleMapsApi, mapElementRef, properties } = state;
 	console.log("Map Component: initializeMap", state);
 
+
 	let mapOptions = {
-		zoom: 4,
-		center: new googleMapsApi.LatLng(-25.363882, 131.044922)
+		zoom: properties.initialZoom,
+		center: new googleMapsApi.LatLng(properties.center.lat, properties.center.long)
 	}
-	let googleMap = new googleMapsApi.Map( mapElementRef.current,mapOptions	);
+	let googleMap = new googleMapsApi.Map(mapElementRef.current, mapOptions);
 	if (googleMapsApi, mapElementRef) {
 		new async function () {
 			updateState({

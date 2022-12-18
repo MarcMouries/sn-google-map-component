@@ -1,8 +1,11 @@
 import { createCustomElement, actionTypes } from "@servicenow/ui-core";
 import snabbdom, { createRef } from '@seismic/snabbdom-renderer';
-import { loadGoogleApi, initializeMap } from './loadGoogleMapsApi';
-import { googleApiKeyActionHandlers } from './actions/GoogleApiKeyActions';
 import { createHttpEffect } from '@servicenow/ui-effect-http';
+
+import { loadGoogleApi, initializeMap } from './loadGoogleMapsApi';
+import { googleApiKeyActionHandlers } from './actions/LoadGoogleApiKeyActions';
+
+import { requestGoogleMapAPIKey } from './actionHandlers';
 
 import styles from "./styles.scss";
 import view from './view';
@@ -66,12 +69,7 @@ createCustomElement("x-snc-gmap", {
 	*/
 	actionHandlers: {
 
-		[actionTypes.COMPONENT_BOOTSTRAPPED]: (coeffects) => {
-			const { dispatch } = coeffects;
-			dispatch(customActions.GOOGLE_MAPS_API_KEY_FETCH_REQUESTED, {
-				sys_property_name: "google.maps.key"
-			});
-		},
+		[actionTypes.COMPONENT_BOOTSTRAPPED]: requestGoogleMapAPIKey,
 
 		...googleApiKeyActionHandlers,
 

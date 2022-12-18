@@ -1,5 +1,6 @@
 import { createGraphQLEffect } from '@seismic/effect-graphql';
-import googleMapsApiKeyQuery from '../graphql/GoogleMapsApiKeyQuery';
+import { glideRecordQuery } from "../query"
+
 import { customActions, tables } from '../constants';
 
 import {t} from 'sn-translate';
@@ -14,41 +15,38 @@ const NO_API_KEY_ERROR = {
 	message: t('Please configure your API key in your sys_properties (google.maps.key)')
 };
 
-/* 
-const actionTypes = {
-	GOOGLE_MAPS_API_KEY_FETCH_REQUESTED: 'GOOGLE_MAPS_API_KEY_FETCH_REQUESTED',
-	GOOGLE_MAPS_API_KEY_FETCH_STARTED: 'GOOGLE_MAPS_API_KEY_FETCH_STARTED',
-	GOOGLE_MAPS_API_KEY_FETCH_SUCCEEDED: 'GOOGLE_MAPS_API_KEY_FETCH_SUCCEEDED',
-	GOOGLE_MAPS_API_KEY_FETCH_FAILED: 'GOOGLE_MAPS_API_KEY_FETCH_FAILED'
-};
-*/
-/* 
-const actions = {
-	[actionTypes.GOOGLE_MAPS_API_KEY_FETCH_REQUESTED]: {},
-	[actionTypes.GOOGLE_MAPS_API_KEY_FETCH_STARTED]: {},
-	[actionTypes.GOOGLE_MAPS_API_KEY_FETCH_SUCCEEDED]: {},
-	[actionTypes.GOOGLE_MAPS_API_KEY_FETCH_FAILED]: {}
-};
-*/
-const requestGoogleMapsApiKey = createGraphQLEffect(googleMapsApiKeyQuery, {
-	templateVarList: ['sys_property_name'],
+const requestGoogleMapsApiKey = createGraphQLEffect(glideRecordQuery, {
+	variableList: ["encodedQuery"],
+	templateVarList: ['table', 'fields'],
 	startActionType: customActions.GOOGLE_MAPS_API_KEY_FETCH_STARTED,
 	successActionType: customActions.GOOGLE_MAPS_API_KEY_FETCH_SUCCEEDED,
 	errorActionType: customActions.GOOGLE_MAPS_API_KEY_FETCH_FAILED,
 });
 
+
 const startGoogleMapsApiKeyFetch = ({ action, state, dispatch }) => {
 	console.log('Map Component: Fetching Google Maps API key...');
+	console.log("action", action);
+	console.log("dispatch", dispatch);
+
 };
 
 const finishGoogleMapsApiKeyFetchSuccess = ({ action, state, dispatch }) => {
-	const { payload } = action;
+	const { payload, meta } = action;
+
 	console.log("Map Component: Google Maps API Key Fetch Success");
 	if (payload.errors.length) {
-		console.log(payload.errors);
+		console.error(action);
+		console.error(payload);
+		console.error(payload.data);
+		console.error(meta);
 		dispatch('PROPERTIES_SET', { error: FETCH_ERROR });
 		return;
 	}
+	const table = (meta["options"]["templateVars"]["table"]||"");
+	const result = (payload["data"]["GlideRecord_Query"][table]["_results"][0]||{});
+	console.log("Map Component: google.maps.key RESULT= ", result);
+
 	let googleMapApiKey = payload.data.GlideRecord_Query.sys_properties._results[0].value.value;
 	console.log("Map Component: google.maps.key = " + googleMapApiKey);
 	if (!googleMapApiKey) {
@@ -60,6 +58,7 @@ const finishGoogleMapsApiKeyFetchSuccess = ({ action, state, dispatch }) => {
 };
 
 const finishGoogleMapsApiKeyFetchFailure = ({ action, state, dispatch }) => {
+	console.log("Error: action = ", action);
 	console.log(`Error: ${action.payload.response.statusText}`);
 	dispatch('PROPERTIES_SET', { error: FETCH_ERROR });
 };

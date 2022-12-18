@@ -9,15 +9,10 @@ export default {
             dispatch(customActions.INITIALIZE_MAP);
         }
     },
-    current: {
-        required: true,
-        schema: {type: 'string'},
-        default: "Triage"
-    },
     center: {
-        default: { lat: 39.8097343, lng: -98.5556199 },
+        default: { lat: 39.8097343, long: -98.5556199 }, /* USA Center */
     },
-    zoom: {
-        default: 5,
+    initialZoom: {
+        default: 6,
     },
 }

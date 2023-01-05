@@ -19,7 +19,10 @@
 					"name": "initialZoom",
 					"description": "The initial value for zoom. 0=World, 5=Continent, 10=City, 15=Street, 20=Buildings",
 					"label": "Initial Zoom",
-					"fieldType": "number"
+					"fieldType": "number",
+					"required": true,
+					"defaultValue": 6,
+					"typeMetadata": {}
 				},
 				{
 					"name": "mapItemMarkers",
@@ -27,7 +30,8 @@
 					"fieldType": "json",
 					"label": "Map Markers",
 					"readOnly": false,
-					"required": true
+					"required": true,
+					"defaultValue": "Here is some default text"
 				},
 				{
 					"name": "centerOn",

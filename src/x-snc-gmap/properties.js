@@ -14,6 +14,7 @@ export default {
     },
     initialZoom: {
         default: 6,
+        type: 'number'
     },
     newPropSimple : {
         default : ["a", "b", "c"]

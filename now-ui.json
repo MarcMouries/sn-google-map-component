@@ -21,8 +21,7 @@
 					"label": "Initial Zoom",
 					"fieldType": "number",
 					"required": true,
-					"defaultValue": 6,
-					"typeMetadata": {}
+					"defaultValue": 6
 				},
 				{
 					"name": "mapItemMarkers",
@@ -38,7 +37,7 @@
 					"label": "Center On",
 					"description": "Center the map on the current user's location or on the bounds of the markers",
 					"readOnly": false,
-					"fieldType": "string",
+					"fieldType": "choice",
 					"mandatory": false,
 					"defaultValue": "MAP_MARKERS",
 					"typeMetadata": {

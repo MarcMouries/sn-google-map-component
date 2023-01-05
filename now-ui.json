@@ -12,21 +12,7 @@
 				"category": "primitives",
 				"description": "A Google Map Component",
 				"icon": "map-pin-outline",
-				"label": "AES Google Map",
-				"configLayout": {
-					"layout": [
-						{
-							"initialOpenState": true,
-							"sectionType": "section",
-							"id": "data",
-							"title": "Data",
-							"children": [
-								"mapItemMarkers"
-							],
-							"icon": "database-outline"
-						}
-					]
-				}
+				"label": "AES Google Map"
 			},
 			"properties": [
 				{
@@ -39,7 +25,7 @@
 					"name": "mapItemMarkers",
 					"description": "Array of objects that defines the items displayed on the map - each object can have values for 'table', 'sys_id', 'lat', 'long', 'image'",
 					"fieldType": "json",
-					"label": "New Map Markers",
+					"label": "Map Markers",
 					"readOnly": false,
 					"required": true
 				},
@@ -52,14 +38,15 @@
 					"mandatory": false,
 					"defaultValue": "markers",
 					"typeMetadata": {
+					    	"variant": "dropdown",
 						"choices": [
 							{
-								"label": "bounds of the markers",
-								"value": "markers"
+							"label": "bounds of the markers",
+							"value": "markers"
 							},
 							{
-								"label": "user's location",
-								"value": "user_location"
+							"label": "user's location",
+							"value": "user_location"
 							}
 						]
 					}

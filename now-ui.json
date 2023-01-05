@@ -30,18 +30,39 @@
 			},
 			"properties": [
 				{
+					"name": "initialZoom",
 					"description": "The initial value for zoom. 0=World, 5=Continent, 10=City, 15=Street, 20=Buildings",
 					"label": "Initial Zoom",
-					"name": "initialZoom",
 					"fieldType": "number"
 				},
 				{
+					"name": "mapItemMarkers",
 					"description": "Array of objects that defines the items displayed on the map - each object can have values for 'table', 'sys_id', 'lat', 'long', 'image'",
 					"fieldType": "json",
 					"label": "New Map Markers",
-					"name": "mapItemMarkers",
 					"readOnly": false,
 					"required": true
+				},
+				{
+					"name": "centerOn",
+					"label": "Center On",
+					"description": "Center the map on the current user's location or on the bounds of the markers",
+					"readOnly": false,
+					"fieldType": "string",
+					"mandatory": false,
+					"defaultValue": "markers",
+					"typeMetadata": {
+						"choices": [
+							{
+								"label": "bounds of the markers",
+								"value": "markers"
+							},
+							{
+								"label": "user's location",
+								"value": "user_location"
+							}
+						]
+					}
 				}
 			]
 		}

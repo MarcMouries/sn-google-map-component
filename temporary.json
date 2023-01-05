@@ -112,3 +112,32 @@ it's not clear how the value for the active parameter in the graphQL
 					}
 				}
 			]
+
+
+
+
+			"typeMetadata": {
+				"schema": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"table": {
+								"type": "string"
+							},
+							"sys_id": {
+								"type": "string"
+							},
+							"lat": {
+								"type": "number"
+							},
+							"long": {
+								"type": "number"
+							},
+							"image": {
+								"type": "string"
+							}
+						}
+					}
+				}
+			}

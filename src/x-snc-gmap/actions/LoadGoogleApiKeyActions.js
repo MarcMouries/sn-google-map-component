@@ -25,16 +25,12 @@ const requestGoogleMapsApiKey = createGraphQLEffect(
 
 
 const startGoogleMapsApiKeyFetch = ({ action, state, dispatch }) => {
-	console.log('Map Component: Fetching Google Maps API key...');
-	console.log("action", action);
-	console.log("dispatch", dispatch);
-
+	console.log("📗 Map Component: Fetching Google Maps API key...");
 };
 
 const finishGoogleMapsApiKeyFetchSuccess = ({ action, state, dispatch }) => {
 	const { payload, meta } = action;
-
-	console.log("Map Component: Google Maps API Key Fetch Success");
+	console.log("📗 Map Component: Google Maps API Key Fetch Success");
 	if (payload.errors.length) {
 		console.error(action);
 		console.error(payload);
@@ -45,10 +41,10 @@ const finishGoogleMapsApiKeyFetchSuccess = ({ action, state, dispatch }) => {
 	}
 	const table = (meta["options"]["templateVars"]["table"]||"");
 	const result = (payload["data"]["GlideRecord_Query"][table]["_results"][0]||{});
-	console.log("Map Component: google.maps.key RESULT= ", result);
-
 	let googleMapApiKey = payload.data.GlideRecord_Query.sys_properties._results[0].value.value;
-	console.log("Map Component: google.maps.key = " + googleMapApiKey);
+
+	console.log("    - google.maps.key = ", googleMapApiKey);
+
 	if (!googleMapApiKey) {
 		console.error('No Google API Key found.');
 		dispatch('PROPERTIES_SET', { error: NO_API_KEY_ERROR });

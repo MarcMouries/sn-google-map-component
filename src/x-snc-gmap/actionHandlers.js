@@ -74,7 +74,7 @@ export const actionHandlers = {
      [customActions.USER_LOCATION_FETCH_REQUESTED]: queryCurrentUserLocation,
      /*
      [customActions.USER_LOCATION_FETCH_REQUESTED]:  ({dispatch, state, updateState}) => {
-          console.log('📗 Action: USER_LOCATION_FETCH_REQUESTED');
+          ccAction: USER_LOCATION_FETCH_REQUESTED');
           queryCurrentUserLocation;
      },
      */
@@ -85,8 +85,7 @@ export const actionHandlers = {
      [customActions.USER_LOCATION_FETCH_SUCCEEDED]: ({ action, dispatch, updateState, state }) => {
           console.log('📗 Action: USER_LOCATION_FETCH_SUCCEEDED');
           const { payload, meta } = action;
-          console.log("   meta: ", meta);
-          console.log("   meta - variables: ", meta["options"]["variables"]);
+          //console.log("   meta - variables: ", meta["options"]["variables"]);
 
           if (payload.errors.length) {
                console.error(payload.errors[0]);
@@ -96,12 +95,12 @@ export const actionHandlers = {
           }
 
           const result = payload.data.GlideRecord_Query.sys_user._results[0];
-          console.log("  result = ", result);
+          console.log("    result = ", result);
 
           let currentUser = state.currentUser;
           currentUser.name = result.name.displayValue;
 
-          console.log("  currentUser = ", currentUser);
+          //console.log("  currentUser = ", currentUser);
           updateState({ "currentUser" : currentUser });
 
           if (result.location) {  

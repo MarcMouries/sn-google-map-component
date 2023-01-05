@@ -6,7 +6,7 @@ document.body.appendChild(el);
 el.innerHTML =`
 <div id="example-container"
        style='width: 600px; height: 600px;'>
-       <x-snc-gmap>
+       <x-snc-gmap centerOn="user_location">
        </x-snc-gmap>
 </div>`;
 

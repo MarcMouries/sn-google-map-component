@@ -36,17 +36,17 @@
 					"readOnly": false,
 					"fieldType": "string",
 					"mandatory": false,
-					"defaultValue": "markers",
+					"defaultValue": "MAP_MARKERS",
 					"typeMetadata": {
-					    	"variant": "dropdown",
+					    "variant": "dropdown",
 						"choices": [
 							{
 							"label": "bounds of the markers",
-							"value": "markers"
+							"value": "MAP_MARKERS"
 							},
 							{
 							"label": "user's location",
-							"value": "user_location"
+							"value": "CURRENT_USER"
 							}
 						]
 					}

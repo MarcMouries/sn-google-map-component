@@ -93,8 +93,6 @@ export const setMarkers = (state, updateState, dispatch, googleMap) => {
 
 	console.log("state.properties.centerOn = ", state.properties.centerOn);
 
-
-	
 	if (state.properties.centerOn == CENTER_ON.MAP_MARKERS) {
 		googleMap.fitBounds(bounds);
 	}

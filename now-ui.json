@@ -16,23 +16,6 @@
 			},
 			"properties": [
 				{
-					"name": "initialZoom",
-					"description": "The initial value for zoom. 0=World, 5=Continent, 10=City, 15=Street, 20=Buildings",
-					"label": "Initial Zoom",
-					"fieldType": "number",
-					"required": true,
-					"defaultValue": 6
-				},
-				{
-					"name": "mapItemMarkers",
-					"description": "Array of objects that defines the items displayed on the map - each object can have values for 'table', 'sys_id', 'lat', 'long', 'image'",
-					"fieldType": "json",
-					"label": "Map Markers",
-					"readOnly": false,
-					"required": true,
-					"defaultValue": "Here is some default text"
-				},
-				{
 					"name": "centerOn",
 					"label": "Center On",
 					"description": "Center the map on the current user's location or on the bounds of the markers",
@@ -53,6 +36,23 @@
 							}
 						]
 					}
+				},
+				{
+					"name": "initialZoom",
+					"description": "The initial value for zoom. 0=World, 5=Continent, 10=City, 15=Street, 20=Buildings",
+					"label": "Initial Zoom",
+					"fieldType": "number",
+					"required": true,
+					"defaultValue": 6
+				},
+				{
+					"name": "mapItemMarkers",
+					"description": "Array of objects that defines the items displayed on the map - each object can have values for 'table', 'sys_id', 'lat', 'long', 'image'",
+					"fieldType": "json",
+					"label": "Map Markers",
+					"readOnly": false,
+					"required": true,
+					"defaultValue": "[\"item\" : \"value\"]"
 				}
 			]
 		}

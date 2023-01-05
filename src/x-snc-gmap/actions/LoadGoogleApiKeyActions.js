@@ -1,8 +1,6 @@
 import { createGraphQLEffect } from '@seismic/effect-graphql';
 import { glideRecordQuery } from "../query"
-
-import { customActions, tables } from '../constants';
-
+import { customActions } from '../constants';
 import {t} from 'sn-translate';
 
 const FETCH_ERROR = {
@@ -15,13 +13,15 @@ const NO_API_KEY_ERROR = {
 	message: t('Please configure your API key in your sys_properties (google.maps.key)')
 };
 
-const requestGoogleMapsApiKey = createGraphQLEffect(glideRecordQuery, {
-	variableList: ["encodedQuery"],
-	templateVarList: ['table', 'fields'],
-	startActionType: customActions.GOOGLE_MAPS_API_KEY_FETCH_STARTED,
-	successActionType: customActions.GOOGLE_MAPS_API_KEY_FETCH_SUCCEEDED,
-	errorActionType: customActions.GOOGLE_MAPS_API_KEY_FETCH_FAILED,
-});
+const requestGoogleMapsApiKey = createGraphQLEffect(
+	glideRecordQuery,
+	{
+		variableList: ["encodedQuery"],
+		templateVarList: ['table', 'fields'],
+		startActionType: customActions.GOOGLE_MAPS_API_KEY_FETCH_STARTED,
+		successActionType: customActions.GOOGLE_MAPS_API_KEY_FETCH_SUCCEEDED,
+		errorActionType: customActions.GOOGLE_MAPS_API_KEY_FETCH_FAILED,
+	});
 
 
 const startGoogleMapsApiKeyFetch = ({ action, state, dispatch }) => {

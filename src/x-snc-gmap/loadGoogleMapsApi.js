@@ -28,11 +28,19 @@ export const initializeMap = ({ state, updateState, dispatch }) => {
 	const { googleMapsApi, mapElementRef, properties } = state;
 	console.log("Map Component: initializeMap", state);
 
-
+	/* 
 	let mapOptions = {
 		zoom: properties.initialZoom,
 		center: new googleMapsApi.LatLng(properties.center.lat, properties.center.long)
 	}
+*/
+	let mapOptions = {
+		zoom: properties.initialZoom,
+		center: new googleMapsApi.LatLng(
+			state.currentUser.location.latitude,
+			state.currentUser.location.longitude)
+	}
+
 	let googleMap = new googleMapsApi.Map(mapElementRef.current, mapOptions);
 	if (googleMapsApi, mapElementRef) {
 		new async function () {
@@ -50,7 +58,7 @@ export const setMarkers = (state, updateState, dispatch, googleMap) => {
 	state.markers.forEach((marker) => {
 		marker.setMap(null);
 	});
-	const marker_data = state.properties.mapMarkers;
+	const marker_data = state.properties.mapItemMarkers;
 	let bounds = new googleMapsApi.LatLngBounds();
 	let markers = marker_data.map((item) => {
 		const locationObj = {
@@ -86,7 +94,11 @@ export const setMarkers = (state, updateState, dispatch, googleMap) => {
 		});
 		return marker;
 	});
-	googleMap.fitBounds(bounds);
+
+	bounds.extend(marker.position);
+
+	//googleMap.fitBounds(bounds);
+
 	let markerCluster = new MarkerClusterer(googleMap, markers,
 		{ imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' });
 	updateState({

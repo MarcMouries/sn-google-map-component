@@ -21,7 +21,7 @@
 							"id": "data",
 							"title": "Data",
 							"children": [
-								"mapMarkers"
+								"mapItemMarkers"
 							],
 							"icon": "database-outline"
 						}
@@ -30,38 +30,18 @@
 			},
 			"properties": [
 				{
+					"description": "The initial value for zoom. 0=World, 5=Continent, 10=City, 15=Street, 20=Buildings",
+					"label": "Initial Zoom",
+					"name": "initialZoom",
+					"fieldType": "number"
+				},
+				{
 					"description": "Array of objects that defines the items displayed on the map - each object can have values for 'table', 'sys_id', 'lat', 'long', 'image'",
 					"fieldType": "json",
-					"label": "Map Markers",
-					"name": "mapMarkers",
+					"label": "New Map Markers",
+					"name": "mapItemMarkers",
 					"readOnly": false,
-					"required": true,
-					"defaultValue": "[{\"table\":\"sys_user\"}, \"sys_id\": \"5137153cc611227c000bbd1bd8cd2005\", \"lat\": 32.582800, \"long\": -117.034330, \"image\": \"//now-logo.svg\"}]",
-					"typeMetadata": {
-						"schema": {
-							"type": "array",
-							"items": {
-								"type": "object",
-								"properties": {
-									"table": {
-										"type": "string"
-									},
-									"sys_id": {
-										"type": "string"
-									},
-									"lat": {
-										"type": "number"
-									},
-									"long": {
-										"type": "number"
-									},
-									"image": {
-										"type": "string"
-									}
-								}
-							}
-						}
-					}
+					"required": true
 				}
 			]
 		}

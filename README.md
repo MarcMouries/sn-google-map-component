@@ -8,6 +8,9 @@
 
 ## Versions
 
+- 0.3
+    - GraphQL query generic to be able to set map markers on any table
+
 - 0.2
     - Fixed Google Map Marker Info close icon visibility
     - Removed link from Map Marker Info Popup
@@ -15,6 +18,10 @@
     - initial version
 
 ## TODO
+
+- GraphQL query generic to be able to set map markers on any table
+
+
 1. Dispatch event when user clicks on a map marker or a link inside the map marker
 2. Add easier way to add Markers on the map
     - simply ask for the name of table that contains lat and long coordinates or a location

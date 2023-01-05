@@ -1,12 +1,3 @@
-export const stateConstants = {
-	STATES: {
-		PENDING_DISPATCH: '10',
-		SCHEDULED: '-2',
-		WIP: '18',
-		ACCEPTED: '17',
-		ASSIGNED: '16',
-	},
-};
 
 export const tables = {
 	USER_TABLE: 'sys_user',
@@ -14,7 +5,10 @@ export const tables = {
 };
 
 export const URL_CURRENT_USER = 'api/now/ui/user/current_user';
-//export const URL_CURRENT_USER = 'api/now/ui/user/current_user'; // get the long version
+//export const URL_CURRENT_USER = 'api/now/table/sys_user?sysparm_query=sys_id=javascript:gs.getUserID()&sysparm_display_value=true&sysparm_fields=sys_id%2Cname%2Clocation.longitude%2Clocation.latitude%2Clocation'
+//export const URL_CURRENT_USER = 'api/now/table/sys_user?sysparm_query=sys_id=javascript%3Ags.getUserID%28%29&sysparm_display_value=true&sysparm_fields=sys_id%2Cname%2Clocation.longitude%2Clocation.latitude%2Clocation'
+
+
 
 export const customActions = {
 
@@ -29,6 +23,11 @@ export const customActions = {
 	CURRENT_USER_FETCH_REQUESTED : 'CURRENT_USER_FETCH_REQUESTED',
 	CURRENT_USER_FETCH_STARTED   : 'CURRENT_USER_FETCH_STARTED',
 	CURRENT_USER_FETCH_SUCCEEDED : 'CURRENT_USER_FETCH_SUCCEEDED',
+
+	USER_LOCATION_FETCH_REQUESTED : 'USER_LOCATION_FETCH_REQUESTED',
+	USER_LOCATION_FETCH_STARTED   : 'USER_LOCATION_FETCH_STARTED',
+	USER_LOCATION_FETCH_SUCCEEDED : 'USER_LOCATION_FETCH_SUCCEEDED',
+
 
 	ADDRESS_GEO_CODING_REQUESTED : 'ADDRESS_GEO_CODING_REQUESTED',
 	ADDRESS_GEO_CODING_STARTED   : 'ADDRESS_GEO_CODING_STARTED',

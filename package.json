@@ -15,7 +15,6 @@
 	},
 	"module": "src/index.js",
 	"dependencies": {
-		"@google/markerclustererplus": "latest",
 		"@servicenow/cli-archetype": "latest",
 		"@servicenow/cli-component-archetype": "latest",
 		"@servicenow/library-translate": "latest",
@@ -26,6 +25,7 @@
 		"@servicenow/ui-effect-http": "latest",
 		"@servicenow/ui-renderer-snabbdom": "latest",
 		"load-google-maps-api": "^2.0.2",
+		"@google/markerclustererplus": "latest",
 		"sn-translate": "latest"
 	},
 	"devDependencies": {

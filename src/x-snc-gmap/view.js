@@ -2,12 +2,12 @@ import { Fragment } from '@seismic/snabbdom-renderer';
 import { stateConstants } from "./constants";
 
 export default (state) => {
+    console.log("Map Component: state NEW ", state);
     const { mapElementRef } = state;
-    const { STATES } = stateConstants;
-    console.log("Map Component: state", state);
+  //  const { STATES } = stateConstants;
 
     const { properties } = state;
-	console.log("properties =", properties);
+	console.log("Map Component: properties", properties);
 
     const minHeight = "100%";
     const height = "100%";

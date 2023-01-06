@@ -1,12 +1,11 @@
 import { createGraphQLEffect } from '@servicenow/ui-effect-graphql';
+import { customActions } from "./constants";
 
-import { stateConstants, customActions } from "./constants";
-
-const fetchAgentDataQueryString =
+const queryMarkerDataString =
   `query ($encodedQuery: String!) {
    GlideRecord_Query {
-      sys_user(queryConditions: $encodedQuery) {
-        _rowCount
+    {{table}}(queryConditions: $encodedQuery) {
+      _rowCount
         _results {
           name {
             value
@@ -30,52 +29,12 @@ const fetchAgentDataQueryString =
     }
   }`;
 
-
-
-const fetchTaskDataQueryString = `query ($encodedQuery: String!) {
-    GlideRecord_Query {
-       task(queryConditions: $encodedQuery) {
-         _rowCount
-         _results {
-           number {
-             value
-             displayValue
-           }
-           state {
-            value
-            displayValue
-           }
-           location {
-             _reference {
-               name {
-                 value
-               }
-               latitude {
-                 value
-               }
-               longitude {
-                 value
-               }
-             }
-           }
-         }
-       }
-     }
-   }`;
-
-export const fetchAgentDataEffect = createGraphQLEffect(
-  fetchAgentDataQueryString, {
+export const queryMarkerData = createGraphQLEffect(
+  queryMarkerDataString, {
   variableList: ["encodedQuery"],
-  successActionType: customActions.FETCH_AGENT_DATA_SUCCESS,
+  templateVarList: ['table'],
+  successActionType: customActions.FETCH_MARKER_DATA_SUCCESS,
 });
-
-export const fetchTaskDataEffect = createGraphQLEffect(
-  fetchTaskDataQueryString, {
-  variableList: ["encodedQuery"],
-  successActionType: customActions.FETCH_TASK_DATA_SUCCESS,
-});
-
-
 
 
 

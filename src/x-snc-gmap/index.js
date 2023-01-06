@@ -44,18 +44,9 @@ createCustomElement("x-snc-gmap", {
 		mapItemMarkers: DEFAULT_VALUES,
 		markers: [],
 		markerCluster: null,
-		marker: null,
-		selectedTaskFilter: []
+		marker: null
 	},
 
-	/*
-	1. COMPONENT_BOOTSTRAPPED
-	2. GOOGLE_MAPS_API_KEY_FETCH_REQUESTED
-	3. CURRENT_USER_FETCH_REQUESTED
-		- get location
-	4. ADDRESS_GEO_CODING_REQUESTED
-	5. INITIALIZE_MAP
-	*/
 	actionHandlers: {
 		...actionHandlers
 	}

@@ -6,7 +6,7 @@ import { actionTypes } from "@servicenow/ui-core";
 const { COMPONENT_BOOTSTRAPPED } = actionTypes;
 import { loadGoogleApi, initializeMap } from './loadGoogleMapsApi';
 import { URL_CURRENT_USER } from "./constants";
-import { fetchAgentDataEffect, fetchTaskDataEffect, queryCurrentUserLocation } from "./dataProvider";
+import { queryMarkerData, fetchTaskDataEffect, queryCurrentUserLocation } from "./dataProvider";
 import { createGraphQLEffect } from "@servicenow/ui-effect-graphql";
 import { glideRecordQuery } from "./query"
 
@@ -23,7 +23,14 @@ const requestGoogleMapAPIKey = (coeffects) => {
 }
 
 /** Handlers **/
-
+	/*
+	1. COMPONENT_BOOTSTRAPPED
+	2. GOOGLE_MAPS_API_KEY_FETCH_REQUESTED
+	3. CURRENT_USER_FETCH_REQUESTED
+		- get location
+	4. ADDRESS_GEO_CODING_REQUESTED
+	5. INITIALIZE_MAP
+	*/
 export const actionHandlers = {
      [actionTypes.COMPONENT_BOOTSTRAPPED]: requestGoogleMapAPIKey,
      ...googleApiKeyActionHandlers,
@@ -103,7 +110,7 @@ export const actionHandlers = {
           //console.log("  currentUser = ", currentUser);
           updateState({ "currentUser" : currentUser });
 
-          if (result.location) {  
+          if (result.location) {
                let location = {
                     name: result.location._reference.name.value,
                     latitude: result.location._reference.latitude.value,
@@ -117,21 +124,22 @@ export const actionHandlers = {
 
 
 
-		[customActions.FETCH_AGENT_DATA]: fetchAgentDataEffect,
-		[customActions.FETCH_AGENT_DATA_SUCCESS]: {
+		[customActions.FETCH_MARKER_DATA]: queryMarkerData,
+		[customActions.FETCH_MARKER_DATA_SUCCESS]: {
 			effect: (coeffects) => {
 				const { action: { payload, meta }, state, dispatch, updateState, updateProperties } = coeffects;
-				const { 
+				const {
 					data: {
 						GlideRecord_Query: {
 							sys_user: { _rowCounts: _rowCounts, _results: _results },
 						},
 					},
 				} = payload;
-				const user = payload.data.GlideRecord_Query.sys_user._results[0];
-				console.log("payload USER");
-				console.log(payload);
-				console.log(user);
+
+                    console.log('📗 Action: FETCH_MARKER_DATA_SUCCESS');
+				const result = payload.data.GlideRecord_Query.sys_user._results[0];
+				console.log("    - result = ", result);
+				console.log("    - payload = ", payload);
 
 				// Marker with Link
 				/*const infowindow = new google.maps.InfoWindow({
@@ -139,8 +147,8 @@ export const actionHandlers = {
 					<div>Location: ${_results[0].location._reference.name.value}</div>`
 				});
 */
-				const name = _results[0].name.displayValue;
-				const location = _results[0].location._reference.name.value;
+				const name = result.name.displayValue;
+				const location = result.location._reference.name.value;
 				const contentString =
 					'<div id="content">' +
 					'<div id="siteNotice">' + "</div>" +
@@ -154,43 +162,6 @@ export const actionHandlers = {
 					content: contentString
 				});
 
-				infowindow.open(window.googleMap, state.marker);
-			}
-		},
-		[customActions.FETCH_TASK_DATA]: fetchTaskDataEffect,
-
-          [customActions.FETCH_TASK_DATA_SUCCESS]: {
-			effect: (coeffects) => {
-				const {
-					action: { payload, meta },
-					state,
-					dispatch,
-					updateState,
-					updateProperties,
-				} = coeffects;
-				const {
-					data: {
-						GlideRecord_Query: {
-							task: { _rowCounts: _rowCounts, _results: _results },
-						},
-					},
-				} = payload;
-				console.log("payload TASK");
-				console.log(payload);
-				const task = payload.data.GlideRecord_Query.task._results[0];
-				const infowindow = new google.maps.InfoWindow({
-					content: `<div [COLOR="#FF0000"]background-color: #ebf3fb;[/COLOR]>
-					<a style='color:blue' href>${task.number.displayValue}</a>
-					<div>State: ${task.state.displayValue}</div>
-					<div>Location: ${task.location._reference.name.value}</div>
-					</div>`,
-				});
-				// const infowindow = new google.maps.InfoWindow(
-				// 	{
-				// 		content: "createInfoWindow({})",
-				// 		closeBoxMargin: "20px 20px 20px 20px",
-
-				// 	});
 				infowindow.open(window.googleMap, state.marker);
 			}
 		}

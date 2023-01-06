@@ -1,7 +1,7 @@
 import loadGoogleMapsApi from 'load-google-maps-api';
 import MarkerClusterer from '@google/markerclustererplus';
 import { customActions, tables, svg_you_are_here } from './constants';
-import {CENTER_ON} from './constants';
+import { CENTER_ON } from './constants';
 
 export const loadGoogleApi = ({ action, state, dispatch, updateState }) => {
 	console.log("📗 Map Component: Loading GoogleApi...");
@@ -75,18 +75,10 @@ export const setMarkers = (state, updateState, dispatch, googleMap) => {
 				marker: marker
 			});
 			let encodedQuery = "sys_id=" + marker.sys_id;
-			switch (marker.table) {
-				case tables.USER_TABLE:
-					dispatch(customActions.FETCH_AGENT_DATA, {
-						encodedQuery: encodedQuery,
-					});
-					break;
-				case tables.TASK_TABLE:
-					dispatch(customActions.FETCH_TASK_DATA, {
-						encodedQuery: encodedQuery,
-					});
-					break;
-			}
+			dispatch(customActions.FETCH_MARKER_DATA, {
+				table: marker.table,
+				encodedQuery: encodedQuery,
+			});
 		});
 		return marker;
 	});
@@ -106,7 +98,7 @@ export const setMarkers = (state, updateState, dispatch, googleMap) => {
 			path: svg_you_are_here
 		});
 	}
- 
+
 
 	let markerCluster = new MarkerClusterer(googleMap, markers,
 		{ imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' });

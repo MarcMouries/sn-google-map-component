@@ -19,9 +19,9 @@
 					"name": "centerOn",
 					"label": "Center On",
 					"description": "Center the map on the current user's location or on the bounds of the markers",
-					"readOnly": false,
 					"fieldType": "choice",
 					"mandatory": false,
+					"readOnly": false,
 					"defaultValue": "MAP_MARKERS",
 					"typeMetadata": {
 					    "variant": "dropdown",

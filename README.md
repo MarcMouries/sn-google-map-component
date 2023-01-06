@@ -19,9 +19,14 @@
 
 ## TODO
 
-3. Specifiy what fields to show in the pop info
-1. Dispatch event when user clicks on a map marker or a link inside the map marker
-2. Add easier way to add Markers on the map
+1. Specifiy what fields to show in the pop info
+    -  add a property "Display Fields"
+        -  { "table" : "sys_user" , "displayFields" : "name, location"}
+        -  { "table" : "task"     , "displayFields" : "name, location, priority, short_description"}
+2. Find locations in a given radius
+3. Dispatch event when user clicks on a map marker or a link inside the map marker
+4. 
+5. Add easier way to add Markers on the map
     - simply ask for the name of table that contains lat and long coordinates or a location
 
 

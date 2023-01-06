@@ -8,11 +8,11 @@
 
 ## Versions
 
-- 0.4 
-    - Center the map based on the current user location
+- 0.4
+    - Center the map based on the current user's location or or the bounds of the markerss
+    - Add markers on any table with a location field
 - 0.3
     - GraphQL query generic to be able to set map markers on any table
-
 - 0.2
     - Fixed Google Map Marker Info close icon visibility
     - Removed link from Map Marker Info Popup
@@ -21,16 +21,14 @@
 
 ## TODO
 
-- GraphQL query generic to be able to set map markers on any table
-
-
+3. Specifiy what fields to show in the pop info
 1. Dispatch event when user clicks on a map marker or a link inside the map marker
 2. Add easier way to add Markers on the map
     - simply ask for the name of table that contains lat and long coordinates or a location
 
-4. Add ability to set the Initial Zoom property
 
 # Done
+1. 
 3. Center the map based on the current user location
-    - query the current user
-    - geocode the user's address
+    - query the current user & get the coordinate
+4. Add ability to set the Initial Zoom property

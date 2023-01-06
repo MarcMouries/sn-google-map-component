@@ -8,11 +8,9 @@
 
 ## Versions
 
-- 0.4
+- 0.3
     - Center the map based on the current user's location or or the bounds of the markerss
     - Add markers on any table with a location field
-- 0.3
-    - GraphQL query generic to be able to set map markers on any table
 - 0.2
     - Fixed Google Map Marker Info close icon visibility
     - Removed link from Map Marker Info Popup

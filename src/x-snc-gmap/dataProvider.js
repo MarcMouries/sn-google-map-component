@@ -44,20 +44,13 @@ export const queryCurrentUserLocation = createGraphQLEffect(
       GlideRecord_Query {
         sys_user(sys_id: $sys_id) {
           _results {
-            name {
-                displayValue
-            }
+            name                { displayValue  }
+            preferred_language  { value displayValue }
             location {
               _reference {
-                name {
-                  value
-                }
-                latitude {
-                  value
-                }
-                longitude {
-                  value
-                }
+                name            { value }
+                latitude        { value }
+                longitude       { value }
               }
             }
           }

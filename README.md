@@ -19,7 +19,7 @@
 
 ## TODO
 
-1. Specifiy what fields to show in the pop info
+1. Allow to specifiy the list of fields to show in the pop info
     -  add a property "Display Fields"
         -  { "table" : "sys_user" , "displayFields" : "name, location"}
         -  { "table" : "task"     , "displayFields" : "name, location, priority, short_description"}

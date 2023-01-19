@@ -9,7 +9,8 @@
 ## Versions
 
 - 0.4
-    - Map can be localized by setting the language property
+    - Map can be localized by setting the language property using the [BCP 47 code](https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry) of the target language. Example: English (en), Mandarin Chinese (zh-CN), Spanish (es), French (fr), Arabic (ar), German (de), Japanese (ja), Russian (ru), Portuguese (pt), Italian (it)
+
 - 0.3
     - Center the map based on the current user's location or or the bounds of the markerss
     - Add markers on any table with a location field

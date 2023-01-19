@@ -166,9 +166,9 @@ export const setMarkers = (state, updateState, dispatch, googleMap) => {
 			icon: svg_icon
 		});
 
-		var contentString = t("You are here");
+		var youAreHereMsg = t("You are here");
 		var infowindow = new google.maps.InfoWindow({
-			content: contentString,
+			content: youAreHereMsg,
 			maxWidth: 200
 		});
 

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+  <rect id="rectangle" x="1" y="1" rx="10" ry="10" width="120" height="50" style="fill:#baf9ab; stroke:#71D358; stroke-width:2" />
+  <text x="50%" y="50%" font-size="16" dy=".3em" text-anchor="middle">You are here</text>
+  <text x="60" y="35" font-size="16" dy=".3em" text-anchor="middle">Vous êtes ici</text>
+  <polyline points="55 50, 60 60, 65 50"     style="fill:#baf9ab; stroke:#71D358;stroke-width:2"></polyline>
+<!--
+  <text x="56" y="51" font-size="11" dy=".3em" text-align="center">1</text>
+  <text x="60" y="60" font-size="11" dy=".3em" text-align="">2</text>
+  <text x="70" y="50" font-size="11" dy=".3em" text-align="">3</text>
+-->
+</svg>

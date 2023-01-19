@@ -56,6 +56,7 @@ export const actionHandlers = {
      [customActions.CURRENT_USER_FETCH_SUCCEEDED]: ({ action, dispatch, updateState }) => {
           console.log('📗 Action: CURRENT_USER_FETCH_SUCCEEDED');
           const { user_sys_id: userSysId } = action.payload.result;
+          console.log("  result = ", action.payload.result);
 
           let currentUser = { "SysId" : userSysId}
           console.log("  currentUser = ", currentUser);
@@ -107,7 +108,7 @@ export const actionHandlers = {
           let currentUser = state.currentUser;
           currentUser.name = result.name.displayValue;
 
-          //console.log("  currentUser = ", currentUser);
+          console.log("  currentUser = ", currentUser);
           updateState({ "currentUser" : currentUser });
 
           if (result.location) {

@@ -13,13 +13,28 @@ body {
   height: 100%;
 }
 
-  .map-container {
-    position: relative;
-    height: 100% !important;
-    width: 100% !important;
-    border: 2px solid red;
+.map-container {
+  display: flex;
+  flex-direction: column;
+
+  position: relative;
+  height: 100% !important;
+  width: 100% !important;
+  border: 2px solid red;
 }
 
+
+.input-container {
+  border: 1px solid blue;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+
+}
+.address-input {
+  border: 1px solid green;
+  width: 100%;
+}
 .map-container_OLD {
   display: flex;
   border: 2px solid;
@@ -27,6 +42,7 @@ body {
   height: 100% !important;
   width: 100% !important;
 }
+
 /*
 .map {
   width: 100%;

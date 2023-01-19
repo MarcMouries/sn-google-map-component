@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="5 5 210 110"
+  width="100%" height="100%">
+  <!--the rect/text group-->
+  <g transform="translate(10,10)">
+    <rect rx="5" ry="5" width="200" height="100" stroke="green" fill="none" stroke-width="2" />
+    <svg width="200px" height="100px">
+      <text x="50%" y="50%" alignment-baseline="middle" text-anchor="middle" fill="green">CENTER</text>
+    </svg>
+  </g>
+</svg>

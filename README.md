@@ -8,6 +8,8 @@
 
 ## Versions
 
+- 0.4
+    - Map can be localized by setting the language property
 - 0.3
     - Center the map based on the current user's location or or the bounds of the markerss
     - Add markers on any table with a location field

@@ -6,7 +6,10 @@ document.body.appendChild(el);
 el.innerHTML =`
 <div id="example-container"
        style='width: 600px; height: 600px;'>
-       <x-snc-gmap initialZoom=1 centerOn="MAP_MARKERS">
+       <x-snc-gmap
+              centerOn="MAP_MARKERS"
+              initialZoom=1
+              language="fr">
        </x-snc-gmap>
 </div>`;
 

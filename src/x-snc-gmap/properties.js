@@ -15,11 +15,11 @@ export default {
     initialZoom: {
         default: 6
     },
-    newPropSimple: {
-        default: ["a", "b", "c"]
-    },
-    newPropDefaultValues: {
-        default: DEFAULT_VALUES
+    language: {
+        default: "en",
+        onChange(currentValue, previousValue, dispatch) {
+            dispatch(customActions.INITIALIZE_MAP);
+        }
     },
     mapItemMarkers: {
         default: DEFAULT_VALUES,

@@ -9,7 +9,13 @@
 ## Versions
 
 - 0.4
-    - Map can be localized by setting the language property using the [BCP 47 code](https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry) of the target language. Example: English (en), Mandarin Chinese (zh-CN), Spanish (es), French (fr), Arabic (ar), German (de), Japanese (ja), Russian (ru), Portuguese (pt), Italian (it)
+    - Map can be localized by setting the language property using the [BCP 47 code](https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry) of the target language. Example: Chinese (zh), English (en), French (fr), German (de),  Italian (it), Japanese (ja), Portuguese (pt), Spanish (es)
+
+    - **Option to use the user's location from ServiceNow or from the browser's geolocation**
+
+    - **Circle**
+        - 1. Find locations in a given radius
+
 
 - 0.3
     - Center the map based on the current user's location or or the bounds of the markerss
@@ -26,10 +32,8 @@
     -  add a property "Display Fields"
         -  { "table" : "sys_user" , "displayFields" : "name, location"}
         -  { "table" : "task"     , "displayFields" : "name, location, priority, short_description"}
-2. Find locations in a given radius
-3. Dispatch event when user clicks on a map marker or a link inside the map marker
-4. 
-5. Add easier way to add Markers on the map
+2. Dispatch event when user clicks on a map marker or a link inside the map marker
+3. Add easier way to add Markers on the map
     - simply ask for the name of table that contains lat and long coordinates or a location
 
 

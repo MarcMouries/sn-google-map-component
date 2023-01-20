@@ -52,7 +52,7 @@
 					"label": "Map Markers",
 					"readOnly": false,
 					"required": true,
-					"defaultValue": "[\"item\" : \"value\"]"
+					"defaultValue": "[ { \"table\" : \"sys_user\"]}"
 				}
 			]
 		}

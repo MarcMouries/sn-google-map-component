@@ -1,0 +1,13 @@
+{
+    "home": "Home",
+    "You are here": {
+        "en" : "You are here",
+        "de" : "Sie sind hier",
+        "fr" : "Vous êtes ici",
+        "ja" : "現在地",
+        "pt" : "Você está aqui",
+        "es" : "Usted está aquí",
+        "zh" : "您在这里",
+        "it" : "Tu sei qui"
+    }
+}

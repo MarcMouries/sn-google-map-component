@@ -5,6 +5,7 @@
     "No Google Maps API Key Found",
     "Please configure your API key in your sys_properties (google.maps.key)",
     "You are here",
-    "Enter an address"
+    "Enter an address",
+    "you-are-here"
   ]
 }

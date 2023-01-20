@@ -14,6 +14,6 @@ export const DEFAULT_VALUES = [
         sys_id: "5137153cc611227c000bbd1bd8cd2005",
         lat: 32.582376,
         long: -117.034507,
-        image: 'https://www.servicenow.com/content/dam/servicenow-assets/public/en-us/images/company-library/icon/icon-locations.svg'
+        image: 'https://www.servicenow.com/content/dam/servicenow-assets/images/meganav/servicenow-header-logo.svg'
     }
 ]

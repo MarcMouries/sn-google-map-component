@@ -7,6 +7,8 @@ import { triangle } from './assets/triangle.svg';
 import { svg_icon } from './assets/svg-icon.svg';
 import { t } from 'sn-translate';
 
+import {translate} from './translate';
+
 
 export const loadGoogleApi = ({ action, state, dispatch, updateState }) => {
 	console.log("📗 Map Component: Loading GoogleApi...");
@@ -90,6 +92,8 @@ function showPosition(position) {
 
 export const setMarkers = (state, updateState, dispatch, googleMap) => {
 	const { googleMapsApi } = state;
+    const { properties } = state;
+
 	if (state.markerCluster) state.markerCluster.setMap(null);
 	state.markers.forEach((marker) => {
 		marker.setMap(null);
@@ -120,10 +124,6 @@ export const setMarkers = (state, updateState, dispatch, googleMap) => {
 	});
 
 	console.log("state.properties.centerOn = ", state.properties.centerOn);
-
-
-
-
 
 	const svgMarker = {
 		path: "M-1.547 12l6.563-6.609-1.406-1.406-5.156 5.203-2.063-2.109-1.406 1.406zM0 0q2.906 0 4.945 2.039t2.039 4.945q0 1.453-0.727 3.328t-1.758 3.516-2.039 3.070-1.711 2.273l-0.75 0.797q-0.281-0.328-0.75-0.867t-1.688-2.156-2.133-3.141-1.664-3.445-0.75-3.375q0-2.906 2.039-4.945t4.945-2.039z",
@@ -166,7 +166,13 @@ export const setMarkers = (state, updateState, dispatch, googleMap) => {
 			icon: svg_icon
 		});
 
-		var youAreHereMsg = t("You are here");
+		/**
+		 *  You are Here Marker
+		 */
+		// The short answer is Genzaichi (現在地). This is the way Japanese maps say ‘You are here’. It is closer in meaning to ‘current location’, or can be translated literally as ‘the ground on which you are presently standing’. 
+		console.log(" - en_Messages - ");
+		//var youAreHereMsg = t("you-are-here");
+		var youAreHereMsg = translate("You are here", properties.language);
 		var infowindow = new google.maps.InfoWindow({
 			content: youAreHereMsg,
 			maxWidth: 200

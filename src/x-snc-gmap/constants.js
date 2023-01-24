@@ -10,6 +10,9 @@ export const CENTER_ON = {
 
 export const customActions = {
 
+	ACTION_ON_CLICK : "ACTION_ON_CLICK",
+
+
 	GOOGLE_API_LOAD_REQUESTED: 'GOOGLE_API_LOAD_REQUESTED',
 
 	GOOGLE_MAPS_API_KEY_FETCH_REQUESTED: 'GOOGLE_MAPS_API_KEY_FETCH_REQUESTED',
@@ -36,6 +39,7 @@ export const customActions = {
 
 	FETCH_MARKER_DATA: 'AES_GMAP#AGENT_DATA_FETCH_REQUESTED',
 	FETCH_MARKER_DATA_SUCCESS: 'AES_GMAP#AGENT_DATA_FETCH_SUCCEEDED',
+
 };
 
 export const svg_you_are_here = `<meta http-equiv="content-type" content="application/xhtml+xml; charset=utf-8"/>

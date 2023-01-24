@@ -5,7 +5,6 @@ import { CENTER_ON } from './constants';
 import { you_are_here } from './assets/you-are-here.svg';
 import { triangle } from './assets/triangle.svg';
 import { svg_icon } from './assets/svg-icon.svg';
-import { t } from 'sn-translate';
 
 import {translate} from './translate';
 
@@ -44,7 +43,6 @@ export const initializeMap = ({ state, updateState, dispatch }) => {
 	// 	center: new googleMapsApi.LatLng(properties.center.lat, properties.center.long)
 	// }
 
-	
 	/* CENTER ON USER's LOCATION BY DEFAULT */
 	let mapOptions = {
 		zoom: properties.initialZoom,

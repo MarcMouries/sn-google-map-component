@@ -26,7 +26,7 @@
 - 0.1
     - initial version
 
-## TODO
+## Enhancement Ideas
 
 1. Allow to specifiy the list of fields to show in the pop info
     -  add a property "Display Fields"
@@ -35,10 +35,16 @@
 2. Dispatch event when user clicks on a map marker or a link inside the map marker
 3. Add easier way to add Markers on the map
     - simply ask for the name of table that contains lat and long coordinates or a location
+4. add an option to draw a line between markers
+    - add markers to show the train stations that a train goes through
 
-
-# Done
+## Done
 1. 
 3. Center the map based on the current user location
     - query the current user & get the coordinate
 4. Add ability to set the Initial Zoom property
+
+## To add the event
+
+1. https://developer.servicenow.com/blog.do?p=/post/quebec-ui-builder-custom-component-events/
+2. https://github.com/ServiceNowNextExperience/uic-event-fixer

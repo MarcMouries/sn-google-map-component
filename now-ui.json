@@ -24,15 +24,15 @@
 					"readOnly": false,
 					"defaultValue": "MAP_MARKERS",
 					"typeMetadata": {
-					    "variant": "dropdown",
+						"variant": "dropdown",
 						"choices": [
 							{
-							"label": "bounds of the markers",
-							"value": "MAP_MARKERS"
+								"label": "bounds of the markers",
+								"value": "MAP_MARKERS"
 							},
 							{
-							"label": "user's location",
-							"value": "CURRENT_USER"
+								"label": "user's location",
+								"value": "CURRENT_USER"
 							}
 						]
 					}
@@ -53,6 +53,14 @@
 					"readOnly": false,
 					"required": true,
 					"defaultValue": "[ { \"table\" : \"sys_user\"]}"
+				}
+			],
+			"actions": [
+				{
+					"description": "Dispatched when the button is clicked",
+					"label": "Button clicked",
+					"name": "ACTION_ON_CLICK",
+					"payload": []
 				}
 			]
 		}

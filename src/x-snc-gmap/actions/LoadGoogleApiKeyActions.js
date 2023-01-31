@@ -28,9 +28,9 @@ const startGoogleMapsApiKeyFetch = ({ action, state, dispatch }) => {
 	console.log("📗 Map Component: Fetching Google Maps API key...");
 };
 
-const finishGoogleMapsApiKeyFetchSuccess = ({ action, state, dispatch }) => {
+const finishGoogleMapsApiKeyFetchSuccess = ({ action, state, dispatch, updateState }) => {
 	const { payload, meta } = action;
-	console.log("📗 Map Component: Google Maps API Key Fetch Success");
+	console.log("📗 Map Component: Google Maps API Key Fetch Success", payload);
 	if (payload.errors.length) {
 		console.error(action);
 		console.error(payload);
@@ -47,6 +47,7 @@ const finishGoogleMapsApiKeyFetchSuccess = ({ action, state, dispatch }) => {
 
 	if (!googleMapApiKey) {
 		console.error('No Google API Key found.');
+		updateState({ hasError: true, error: "No Google API Key found." });
 		dispatch('PROPERTIES_SET', { error: NO_API_KEY_ERROR });
 		return;
 	}

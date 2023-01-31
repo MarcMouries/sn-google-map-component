@@ -10,18 +10,16 @@ export default (state, { updateState, dispatch }) => {
   const minHeight = "100%";
   const height = "100%";
 
-  /* 
-    if (state.isLoading) {
+    if (state.hasError) {
         return (
             <Fragment>
                 <div>
-                    <div className="map-container"> Loading...</div>
+                    <div className="map-container"> Error: {state.error}</div>
                 </div>
             </Fragment>
         );
     }
     else {
-        */
 
   return (
     <Fragment>
@@ -39,5 +37,5 @@ export default (state, { updateState, dispatch }) => {
       </div>
     </Fragment>
   );
-  // }
+  }
 };

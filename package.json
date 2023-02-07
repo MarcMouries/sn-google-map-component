@@ -2,7 +2,7 @@
 	"name": "x-snc-gmap",
 	"version": "0.0.1",
 	"private": false,
-	"description": "",
+	"description": "AES Goole Map Component",
 	"keywords": [
 		"ServiceNow",
 		"Now Experience UI Component",

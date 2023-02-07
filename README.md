@@ -9,13 +9,14 @@
 ## Versions
 
 - 0.4
-    - Map can be localized by setting the language property using the [BCP 47 code](https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry) of the target language. Example: Chinese (zh), English (en), French (fr), German (de),  Italian (it), Japanese (ja), Portuguese (pt), Spanish (es)
+    - **Localization:** Map can be localized by setting the language property using the [BCP 47 code](https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry) of the target language. Example: Chinese (zh), English (en), French (fr), German (de),  Italian (it), Japanese (ja), Portuguese (pt), Spanish (es)
 
-    - **Option to use the user's location from ServiceNow or from the browser's geolocation**
+    - **user's location** Option to use the user's location from ServiceNow or from the browser's geolocation
 
     - **Circle**
-        - 1. Find locations in a given radius
-
+        1. Enable drawing
+        2. Find locations in a given radius
+    - **Dispatch event**
 
 - 0.3
     - Center the map based on the current user's location or or the bounds of the markerss

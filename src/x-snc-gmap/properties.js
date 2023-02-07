@@ -12,6 +12,9 @@ export default {
             dispatch(customActions.INITIALIZE_MAP);
         }
     },
+    displayFields :{
+        default: []
+    },
     initialZoom: {
         default: 6
     },

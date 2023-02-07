@@ -57,9 +57,9 @@
 			],
 			"actions": [
 				{
-					"description": "Dispatched when the button is clicked",
-					"label": "Button clicked",
-					"name": "ACTION_ON_CLICK",
+					"description": "Dispatched when a user clicks a marker, related button or a link",
+					"label": "Map marker item clicked",
+					"name": "AES_GMAP#MARKER_ITEM_CLICK",
 					"payload": []
 				}
 			]

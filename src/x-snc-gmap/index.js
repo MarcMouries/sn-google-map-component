@@ -50,5 +50,11 @@ createCustomElement("x-snc-gmap", {
 
 	actionHandlers: {
 		...actionHandlers
-	}
+	},
+	actions: {
+        ACTION_NAME: {
+            // Define config properties here
+        }
+    }
+
 });

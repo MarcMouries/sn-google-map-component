@@ -24,9 +24,11 @@ export default (state, { updateState, dispatch }) => {
       </Fragment>
     );
   }
+  /*
   else  if (state.isLoading){
     return <now-loader></now-loader>;
   }
+   */
   else {
     return (
       <Fragment>

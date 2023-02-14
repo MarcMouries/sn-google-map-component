@@ -16,7 +16,7 @@ export default {
         default: []
     },
     initialZoom: {
-        default: 6
+        default: 10
     },
     language: {
         default: "en",

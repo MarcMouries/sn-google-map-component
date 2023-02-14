@@ -20,6 +20,7 @@
 		"@servicenow/cli-component-archetype": "latest",
 		"@servicenow/library-translate": "latest",
 		"@servicenow/now-input": "^19.8.2-ecd",
+		"@servicenow/now-loader": "^19.8.2-ecd",
 		"@servicenow/sass-kit": "latest",
 		"@servicenow/sass-theme": "latest",
 		"@servicenow/ui-core": "latest",

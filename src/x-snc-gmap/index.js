@@ -42,6 +42,7 @@ createCustomElement("x-snc-gmap", {
 		autoCompleteRef: createRef(),
 		googleMapsApi: null,
 		googleMapsRef: null,
+		isLoading : true,
 		mapItemMarkers: DEFAULT_VALUES,
 		markers: [],
 		markerCluster: null,

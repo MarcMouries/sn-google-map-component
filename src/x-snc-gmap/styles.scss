@@ -1,6 +1,13 @@
 @import '@servicenow/sass-kit/host';
 @import '@servicenow/sass-global/index';
 
+$white: #FCFCFC;
+$gray: #CBCDD3;
+$dark: #777777;
+$error: #EF8D9C;
+$orange: #FFC39E;
+$success: #B0DB7D;
+$secondary: #99DBB4;
 
 html,
 body {
@@ -16,7 +23,6 @@ body {
 .map-container {
   display: flex;
   flex-direction: column;
-
   position: relative;
   height: 100% !important;
   width: 100% !important;
@@ -31,10 +37,12 @@ body {
   flex-direction: row;
 
 }
+
 .address-input {
   border: 1px solid green;
   width: 100%;
 }
+
 .map-container_OLD {
   display: flex;
   border: 2px solid;
@@ -67,4 +75,48 @@ body {
   .gm-ui-hover-effect>span {
     background-color: ButtonText
   }
+}
+
+
+.error-box {
+	min-height: 100%;
+	display: grid;
+  align-items: center;
+	grid-template-rows: auto 1fr auto;
+	grid-template-columns: 100%;
+  font-family: var(--now-font-family);
+  background: linear-gradient(to bottom left, $error 40%, $orange 100%);
+  border-radius: 10px;
+  box-shadow: 5px 5px 20px rgba($gray, 10%);
+
+  .message {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+      width: 100%;
+    text-align: center;
+    height: 40%;
+  }
+
+  h1 {
+    font-size: 0.9em;
+    font-weight: 400;
+    letter-spacing: 3px;
+    padding-top: 5px;
+    color: $white;
+    padding-bottom: 5px;
+    text-transform: uppercase;
+  }
+
+  .alert {
+    font-weight: 700;
+    letter-spacing: 5px;
+  }
+
+  footer {
+    padding: 1rem;
+  }
+
 }

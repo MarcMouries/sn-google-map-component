@@ -2,6 +2,8 @@ import { createHttpEffect } from '@servicenow/ui-effect-http';
 
 import { customActions } from "./constants"
 import { googleApiKeyActionHandlers } from './actions/LoadGoogleApiKeyActions';
+import { googleMapMethodActionHandlers } from './actions/LoadGoogleApiMethod';
+
 import { actionTypes } from "@servicenow/ui-core";
 const { COMPONENT_BOOTSTRAPPED } = actionTypes;
 import { loadGoogleApi, initializeMap } from './loadGoogleMapsApi';
@@ -11,9 +13,20 @@ import { createGraphQLEffect } from "@servicenow/ui-effect-graphql";
 import { glideRecordQuery } from "./query"
 
 
+const requestGoogleMapMethod = (coeffects) => {
+     const { action, state, updateState, dispatch } = coeffects;
+     console.log("🚀 requestGoogleMapMethod", action.payload);
+     dispatch(customActions.GMAP_API_METHOD_FETCH_REQUESTED,
+          {
+               encodedQuery: `name=google.maps.method`,
+               table: "sys_properties",
+               fields: "value { label value displayValue }",
+          });
+}
+
 const requestGoogleMapAPIKey = (coeffects) => {
      const { action, state, updateState, dispatch } = coeffects;
-     console.log("requestGoogleMapAPIKey", action.payload);
+     console.log("🚀 requestGoogleMapAPIKey", action.payload);
      dispatch(customActions.GOOGLE_MAPS_API_KEY_FETCH_REQUESTED,
           {
                encodedQuery: `name=google.maps.key`,
@@ -32,8 +45,13 @@ const requestGoogleMapAPIKey = (coeffects) => {
 	5. INITIALIZE_MAP
 	*/
 export const actionHandlers = {
-     [actionTypes.COMPONENT_BOOTSTRAPPED]: requestGoogleMapAPIKey,
+//     [actionTypes.COMPONENT_BOOTSTRAPPED]: requestGoogleMapAPIKey,
+//     ...googleApiKeyActionHandlers,
+
+     [actionTypes.COMPONENT_BOOTSTRAPPED]: requestGoogleMapMethod,
+     ...googleMapMethodActionHandlers,
      ...googleApiKeyActionHandlers,
+
      [customActions.GOOGLE_API_LOAD_REQUESTED]: loadGoogleApi,
 
      [customActions.INITIALIZE_MAP]: initializeMap,

@@ -26,6 +26,9 @@ const requestGoogleMapsApiKey = createGraphQLEffect(
 
 const startGoogleMapsApiKeyFetch = ({ action, state, dispatch }) => {
 	console.log("📗 Map Component: Fetching Google Maps API key...");
+	console.log("📗 Map Component: Fetching Google Maps API key...", state);
+	console.log("📗 Map Component: Fetching Google Maps API key...", action);
+	console.log("📗 Map Component: Fetching Google Maps API key...", action.payload);
 };
 
 const finishGoogleMapsApiKeyFetchSuccess = ({ action, state, dispatch, updateState }) => {
@@ -51,22 +54,21 @@ const finishGoogleMapsApiKeyFetchSuccess = ({ action, state, dispatch, updateSta
 		dispatch('PROPERTIES_SET', { error: NO_API_KEY_ERROR });
 		return;
 	}
-	dispatch(customActions.GOOGLE_API_LOAD_REQUESTED, { googleApiKey: googleMapApiKey });
+	dispatch(customActions.GOOGLE_API_LOAD_REQUESTED,
+	{
+		googleApiKey: googleMapApiKey 
+	});
 };
 
 const finishGoogleMapsApiKeyFetchFailure = ({ action, state, dispatch }) => {
-	console.log("Error: action = ", action);
-	console.log(`Error: ${action.payload.response.statusText}`);
+	console.log(`❌ Error: ${action.payload}`);
+	console.log("Error:" , action.payload);
 	dispatch('PROPERTIES_SET', { error: FETCH_ERROR });
 };
 
-const googleApiKeyActionHandlers = {
+export const googleApiKeyActionHandlers = {
 	[customActions.GOOGLE_MAPS_API_KEY_FETCH_REQUESTED]: requestGoogleMapsApiKey,
 	[customActions.GOOGLE_MAPS_API_KEY_FETCH_STARTED]: startGoogleMapsApiKeyFetch,
 	[customActions.GOOGLE_MAPS_API_KEY_FETCH_SUCCEEDED]: finishGoogleMapsApiKeyFetchSuccess,
 	[customActions.GOOGLE_MAPS_API_KEY_FETCH_FAILED]: finishGoogleMapsApiKeyFetchFailure
-};
-
-export {
-	googleApiKeyActionHandlers
 };

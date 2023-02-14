@@ -9,7 +9,7 @@ el.innerHTML =`
        <x-snc-gmap
               centerOn="MAP_MARKERS"
               initialZoom=1
-              language="ja">
+              language="en">
        </x-snc-gmap>
 </div>`;
 

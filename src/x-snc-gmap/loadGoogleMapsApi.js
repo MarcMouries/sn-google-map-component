@@ -5,20 +5,31 @@ import { CENTER_ON } from './constants';
 import { you_are_here } from './assets/you-are-here.svg';
 import { triangle } from './assets/triangle.svg';
 import { svg_icon } from './assets/svg-icon.svg';
-
 import {translate} from './translate';
-
 
 export const loadGoogleApi = ({ action, state, dispatch, updateState }) => {
 	console.log("📗 Map Component: Loading GoogleApi...");
-	console.log("📗 Map Component: LANGUAGE ?", state);
+	console.log(" - Map Component: googleMapMethod = ", state.googleMapMethod);
+
     const { properties } = state;
 
-	let GOOGLE_MAPS_API_OPTIONS = {
-		key: action.payload.googleApiKey,
-		libraries: ['places'],
-		language: properties.language
-	};
+	// Google Map Libraries
+	// - places  : 
+	// - geometry: 
+	// - drawing : 
+
+	let GOOGLE_MAPS_API_OPTIONS = {};
+     if (state.googleMapMethod == "key") {
+		GOOGLE_MAPS_API_OPTIONS.key = action.payload.googleApiKey;
+	}
+	else {
+		GOOGLE_MAPS_API_OPTIONS.client = action.payload.googleApiKey;
+	}
+
+	GOOGLE_MAPS_API_OPTIONS.libraries = ['places'];
+
+	GOOGLE_MAPS_API_OPTIONS.language = properties.language;
+
 	loadGoogleMapsApi(GOOGLE_MAPS_API_OPTIONS)
 		.then((googleMapsApi) => {
 			console.log("    - Map API loaded");
@@ -34,9 +45,8 @@ export const loadGoogleApi = ({ action, state, dispatch, updateState }) => {
 
 export const initializeMap = ({ state, updateState, dispatch }) => {
 	const { googleMapsApi, mapElementRef, autoCompleteRef, properties } = state;
-
-
 	console.log("📗 Map Component: initializeMap", state);
+	updateState({ isLoading: false });
 
 	// let mapOptions = {
 	// 	zoom: properties.initialZoom,

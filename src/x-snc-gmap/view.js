@@ -3,6 +3,18 @@ import { stateConstants } from "./constants";
 import { customActions } from "./constants";
 import { translate } from "./translate";
 
+
+const handleInput = (e, dispatch) => {
+	const fieldValue = e.target.value;
+	const data = e.data;
+  console.log ("handleInput: fieldValue ", fieldValue)
+	//debounceDispatch(() => {
+		dispatch(({properties: {name}}) => {
+			return {type: 'NOW_INPUT#INPUT', payload: {name, data, fieldValue}};
+		});
+//	});
+};
+
 export default (state, { updateState, dispatch }) => {
   console.log("Map Component: state ", state);
   const { mapElementRef, autoCompleteRef } = state;
@@ -38,7 +50,11 @@ export default (state, { updateState, dispatch }) => {
           </button>
           <div className="input-container">
             <label>Address</label>
-            <input type="text" id="address-input" className="address-input" placeholder={translate("Enter an address")} ref={autoCompleteRef} />
+            <input type="text" id="address-input" 
+              className="address-input" placeholder={translate("Enter an address")} 
+              ref={autoCompleteRef}
+              on-input={(e) => handleInput(e, dispatch)}
+              />
           </div>
           <div id="map">
             <div style={{ height: height, "min-height": minHeight }} ref={mapElementRef}></div>

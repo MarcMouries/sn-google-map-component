@@ -80,52 +80,70 @@ export const initializeMap = ({ state, updateState, dispatch }) => {
   }
 
   const autoCompleteOptions = {
-    fields: ["address_components", "geometry", "icon", "name"],
-
+    fields: ["address_components", "geometry", "icon", "name"], // Set the fields to include in the prediction results
   };
-
   // Set the value of the input field to a specific address
-  autoCompleteRef.current.value = "ServiceNow, Leesburg Pike, Vienna, VA, USA";
+  autoCompleteRef.current.value = properties.place;
 
   const addressSearch = new google.maps.places.Autocomplete(autoCompleteRef.current, autoCompleteOptions);
-// Set the fields to include in the prediction results
-//addressSearch.setFields(['formatted_address']);
 
-
-
-addressSearch.addListener('blur', function() { address.value = "Giant"; });
-
-var places = addressSearch.getPlaces();
-console.log("places", places);
+  // programmatically set the Place object for the Autocomplete field
+  // retrieve a list of suggested places based on the input value
+  // and set the selected Place object as the value of the Autocomplete field.
+  const autocompleteService = new google.maps.places.AutocompleteService();
+  let request = { input: properties.place };
+  autocompleteService.getPlacePredictions(request, (predictions, status) => {
+    if (status === google.maps.places.PlacesServiceStatus.OK) {
+      const placeId = predictions[0].place_id;
+      const placesService = new google.maps.places.PlacesService(googleMap);
+      placesService.getDetails({ placeId }, (place, status) => {
+        if (status === google.maps.places.PlacesServiceStatus.OK) {
+          addressSearch.set("place", place);
+        }
+      });
+    }
+  });
 
 
   addressSearch.addListener("place_changed", () => {
     const place = addressSearch.getPlace();
-	updateNewPlace(place);
+    updateNewPlace(place, googleMap);
+
   });
-
-  const new_place = {
-	name: 'ServiceNow',
-	formatted_address: '8045 Leesburg pike, Vienna, VA 22182, United States'
-  };
- // addressSearch.set("place", new_place);
-
-
-
 
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition((position) => {
-		console.log(" >>>>>>>>>>>>>>>>>>user's location: " + "Latitude: " + position.coords.latitude + "<br>Longitude: " + position.coords.longitude);
-
-	});
+      console.log(" >>>>>>>>>>>>>>>>>>user's location: " + "Latitude: " + position.coords.latitude + "<br>Longitude: " + position.coords.longitude);
+    });
   } else {
     console.log("Geolocation is not supported by this browser.");
   }
 };
 
-export const updateNewPlace = (place) => {
-    console.log("🌎 updateNewPlace", place);
-}
+export const updateNewPlace = (place, googleMap) => {
+  console.log("🌎 updateNewPlace", place);
+
+  let marker = new google.maps.Marker({
+    map: googleMap,
+    draggable: true,
+    animation: google.maps.Animation.DROP,
+    position: place.geometry.location,
+  });
+
+  const locationCircle = new google.maps.Circle({
+    strokeColor: "#FF0000",
+    strokeOpacity: 0.8,
+    strokeWeight: 2,
+    fillColor: "#FF0000",
+    fillOpacity: 0.35,
+    map: googleMap,
+    center: place.geometry.location, // radius of the circle, in meters
+    radius: 10000,
+    draggable: true,
+    geodesic: true,
+  });
+
+};
 
 export const setMarkers = (state, updateState, dispatch, googleMap) => {
   const { googleMapsApi } = state;
@@ -170,16 +188,7 @@ export const setMarkers = (state, updateState, dispatch, googleMap) => {
     scale: 2,
     anchor: new google.maps.Point(0, 20),
   };
-  const circleMarker = {
-    path: "M1,1 66,0 66,50 0,50",
-    fillColor: "red",
-    fillOpacity: 0.2,
-    strokeColor: "red",
-    strokeWeight: 1,
-    rotation: 0,
-    scale: 1,
-    anchor: new google.maps.Point(0, 20),
-  };
+
 
   if (state.properties.centerOn == CENTER_ON.MAP_MARKERS) {
     googleMap.fitBounds(bounds);
@@ -232,20 +241,9 @@ export const setMarkers = (state, updateState, dispatch, googleMap) => {
     //map.setMapTypeId('styled_map');
     infowindow.open(googleMap, marker);
 
-    // radius of the circle, in meters
+    
 
-    const locationCircle = new google.maps.Circle({
-      strokeColor: "#FF0000",
-      strokeOpacity: 0.8,
-      strokeWeight: 2,
-      fillColor: "#FF0000",
-      fillOpacity: 0.35,
-      map: googleMap,
-      center: currentUserLatlng,
-      radius: 10000,
-      draggable: true,
-      geodesic: true,
-    });
+    
   }
 
   let markerCluster = new MarkerClusterer(googleMap, markers, { imagePath: "https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m" });

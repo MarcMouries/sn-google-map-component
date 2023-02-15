@@ -2,7 +2,7 @@ import { createHttpEffect } from '@servicenow/ui-effect-http';
 
 import { customActions } from "./constants"
 import { googleApiKeyActionHandlers } from './actions/LoadGoogleApiKeyActions';
-import { googleMapMethodActionHandlers } from './actions/LoadGoogleApiMethod';
+import { googleMapMethodActionHandlers } from './actions/LoadGoogleApiMethodActions';
 
 import { actionTypes } from "@servicenow/ui-core";
 const { COMPONENT_BOOTSTRAPPED } = actionTypes;

@@ -4,7 +4,7 @@ import { customActions } from "./constants";
 import { translate } from "./translate";
 
 
-const handleInput = (e, dispatch) => {
+const handleInputChange = (e, dispatch) => {
 	const fieldValue = e.target.value;
 	const data = e.data;
   console.log ("handleInput: fieldValue ", fieldValue)
@@ -53,7 +53,7 @@ export default (state, { updateState, dispatch }) => {
             <input type="text" id="address-input" 
               className="address-input" placeholder={translate("Enter an address")} 
               ref={autoCompleteRef}
-              on-input={(e) => handleInput(e, dispatch)}
+              on-change={(e) => handleInputChange(e, dispatch)}
               />
           </div>
           <div id="map">

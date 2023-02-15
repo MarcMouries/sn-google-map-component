@@ -104,23 +104,21 @@ export const initializeMap = ({ state, updateState, dispatch }) => {
     }
   });
 
-
   addressSearch.addListener("place_changed", () => {
     const place = addressSearch.getPlace();
-    updateNewPlace(place, googleMap);
-
+    handlePlaceChanged(place, googleMap);
   });
 
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition((position) => {
-      console.log(" >>>>>>>>>>>>>>>>>>user's location: " + "Latitude: " + position.coords.latitude + "<br>Longitude: " + position.coords.longitude);
+      console.log("user's location: " + "Latitude: " + position.coords.latitude + "<br>Longitude: " + position.coords.longitude);
     });
   } else {
     console.log("Geolocation is not supported by this browser.");
   }
 };
 
-export const updateNewPlace = (place, googleMap) => {
+export const handlePlaceChanged = (place, googleMap) => {
   console.log("🌎 updateNewPlace", place);
 
   let marker = new google.maps.Marker({
@@ -129,6 +127,9 @@ export const updateNewPlace = (place, googleMap) => {
     animation: google.maps.Animation.DROP,
     position: place.geometry.location,
   });
+  marker.setVisible(true);
+  const infowindow = createInfoWindow(place);
+  infowindow.open(googleMap, marker);
 
   googleMap.setCenter(marker.getPosition());
 
@@ -144,8 +145,31 @@ export const updateNewPlace = (place, googleMap) => {
     draggable: true,
     editable: true,
   });
-
 };
+
+function createtInfoWindowContent() {
+  return (
+    <div id="infowindow-content">
+      <span id="place-name" className="title"></span>
+      <br />
+      <span id="place-address"></span>
+    </div>
+  );
+}
+function createInfoWindow(place) {
+  const content = document.createElement("div");
+  const name = document.createElement("div");
+  const address = document.createElement("div");
+  // name.textContent = place.name;
+  name.innerHTML = `<b>${place.name}</b>`;
+  address.textContent = place.formatted_address;
+  content.appendChild(name);
+  content.appendChild(address);
+  const infowindow = new google.maps.InfoWindow({
+    content: content,
+  });
+  return infowindow;
+}
 
 export const setMarkers = (state, updateState, dispatch, googleMap) => {
   const { googleMapsApi } = state;
@@ -178,7 +202,6 @@ export const setMarkers = (state, updateState, dispatch, googleMap) => {
     });
     return marker;
   });
-
 
   const svgMarker = {
     path: "M-1.547 12l6.563-6.609-1.406-1.406-5.156 5.203-2.063-2.109-1.406 1.406zM0 0q2.906 0 4.945 2.039t2.039 4.945q0 1.453-0.727 3.328t-1.758 3.516-2.039 3.070-1.711 2.273l-0.75 0.797q-0.281-0.328-0.75-0.867t-1.688-2.156-2.133-3.141-1.664-3.445-0.75-3.375q0-2.906 2.039-4.945t4.945-2.039z",
@@ -241,8 +264,6 @@ export const setMarkers = (state, updateState, dispatch, googleMap) => {
     //map.mapTypes.set('styled_map', styledMapType);
     //map.setMapTypeId('styled_map');
     infowindow.open(googleMap, marker);
-
-
   }
 
   let markerCluster = new MarkerClusterer(googleMap, markers, { imagePath: "https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m" });
@@ -250,4 +271,6 @@ export const setMarkers = (state, updateState, dispatch, googleMap) => {
     markers: markers,
     markerCluster: markerCluster,
   });
+
+ 
 };

@@ -16,7 +16,19 @@
     - **Circle**
         1. Enable drawing
         2. Find locations in a given radius
+
     - **Dispatch event**
+
+    - **Properties**
+        - new property: place
+
+    - Retrieves the Google Maps API Key from the platform Google Maps properties
+
+## Properties
+| Property                | Description                                    | Type      | Usage     |
+| ----------------------- | ---------------------------------------------- | --------- | --------- |
+| `place`                 |                                                | string    |           |
+
 
 - 0.3
     - Center the map based on the current user's location or or the bounds of the markerss

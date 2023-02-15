@@ -25,7 +25,7 @@ export const loadGoogleApi = ({ action, state, dispatch, updateState }) => {
     GOOGLE_MAPS_API_OPTIONS.client = action.payload.googleApiKey;
   }
 
-  GOOGLE_MAPS_API_OPTIONS.libraries = ["places"];
+  GOOGLE_MAPS_API_OPTIONS.libraries = ["places,drawing"];
 
   GOOGLE_MAPS_API_OPTIONS.language = properties.language;
 
@@ -130,17 +130,19 @@ export const updateNewPlace = (place, googleMap) => {
     position: place.geometry.location,
   });
 
+  googleMap.setCenter(marker.getPosition());
+
   const locationCircle = new google.maps.Circle({
     strokeColor: "#FF0000",
-    strokeOpacity: 0.8,
+    strokeOpacity: 0.7,
     strokeWeight: 2,
     fillColor: "#FF0000",
-    fillOpacity: 0.35,
+    fillOpacity: 0.2,
     map: googleMap,
     center: place.geometry.location, // radius of the circle, in meters
     radius: 10000,
     draggable: true,
-    geodesic: true,
+    editable: true,
   });
 
 };
@@ -177,7 +179,6 @@ export const setMarkers = (state, updateState, dispatch, googleMap) => {
     return marker;
   });
 
-  console.log("state.properties.centerOn = ", state.properties.centerOn);
 
   const svgMarker = {
     path: "M-1.547 12l6.563-6.609-1.406-1.406-5.156 5.203-2.063-2.109-1.406 1.406zM0 0q2.906 0 4.945 2.039t2.039 4.945q0 1.453-0.727 3.328t-1.758 3.516-2.039 3.070-1.711 2.273l-0.75 0.797q-0.281-0.328-0.75-0.867t-1.688-2.156-2.133-3.141-1.664-3.445-0.75-3.375q0-2.906 2.039-4.945t4.945-2.039z",
@@ -189,6 +190,7 @@ export const setMarkers = (state, updateState, dispatch, googleMap) => {
     anchor: new google.maps.Point(0, 20),
   };
 
+  console.log("state.properties.centerOn = ", state.properties.centerOn);
 
   if (state.properties.centerOn == CENTER_ON.MAP_MARKERS) {
     googleMap.fitBounds(bounds);
@@ -223,7 +225,6 @@ export const setMarkers = (state, updateState, dispatch, googleMap) => {
     });
 
     var marker = new google.maps.Marker({
-      //	var marker = new googleMapsApi.Marker({
       position: { lat: location.latitude, lng: location.longitude },
       map: googleMap,
       title: "title",
@@ -241,9 +242,7 @@ export const setMarkers = (state, updateState, dispatch, googleMap) => {
     //map.setMapTypeId('styled_map');
     infowindow.open(googleMap, marker);
 
-    
 
-    
   }
 
   let markerCluster = new MarkerClusterer(googleMap, markers, { imagePath: "https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m" });

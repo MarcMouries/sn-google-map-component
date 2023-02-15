@@ -79,9 +79,25 @@ export const initializeMap = ({ state, updateState, dispatch }) => {
     console.log("Cannot initialize google map");
   }
 
-  const autoCompleteOptions = {};
+  const autoCompleteOptions = {
+    fields: ["address_components", "geometry", "icon", "name"],
+
+  };
+
+  // Set the value of the input field to a specific address
+  autoCompleteRef.current.value = "ServiceNow, Leesburg Pike, Vienna, VA, USA";
+
   const addressSearch = new google.maps.places.Autocomplete(autoCompleteRef.current, autoCompleteOptions);
-  addressSearch.setFields(['name', 'formatted_address']);
+// Set the fields to include in the prediction results
+//addressSearch.setFields(['formatted_address']);
+
+
+
+addressSearch.addListener('blur', function() { address.value = "Giant"; });
+
+var places = addressSearch.getPlaces();
+console.log("places", places);
+
 
   addressSearch.addListener("place_changed", () => {
     const place = addressSearch.getPlace();
@@ -92,7 +108,10 @@ export const initializeMap = ({ state, updateState, dispatch }) => {
 	name: 'ServiceNow',
 	formatted_address: '8045 Leesburg pike, Vienna, VA 22182, United States'
   };
-  addressSearch.set("place", new_place);
+ // addressSearch.set("place", new_place);
+
+
+
 
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition((position) => {

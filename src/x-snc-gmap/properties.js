@@ -29,5 +29,10 @@ export default {
         onChange(currentValue, previousValue, dispatch) {
             dispatch(customActions.INITIALIZE_MAP);
         }
+    },
+    place: {
+        onChange(currentValue, previousValue, dispatch) {
+            dispatch(customActions.SET_PLACE);
+        }
     }
 }

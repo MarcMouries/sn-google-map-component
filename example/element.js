@@ -7,9 +7,10 @@ el.innerHTML =`
 <div id="example-container"
        style='width: 600px; height: 600px;'>
        <x-snc-gmap
-              centerOn="MAP_MARKERS"
+              centerOn="CURRENT_USER"
               initialZoom=1
-              language="en">
+              language="en"
+              place="ServiceNow, Leesburg Pike, Vienna, VA">
        </x-snc-gmap>
 </div>`;
 

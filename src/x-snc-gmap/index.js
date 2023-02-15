@@ -1,6 +1,5 @@
 import { createCustomElement, actionTypes } from "@servicenow/ui-core";
 import snabbdom, { createRef } from '@seismic/snabbdom-renderer';
-import { createHttpEffect } from '@servicenow/ui-effect-http';
 import styles from "./styles.scss";
 import view from './view';
 

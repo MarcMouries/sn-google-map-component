@@ -7,7 +7,7 @@ export default {
         default: { lat: 39.8097343, long: -98.5556199 }, /* USA Center */
     },
     centerOn: {
-        default: CENTER_ON.CURRENT_USER,
+        default: CENTER_ON.ADDRESS,
         onChange(currentValue, previousValue, dispatch) {
             dispatch(customActions.INITIALIZE_MAP);
         }

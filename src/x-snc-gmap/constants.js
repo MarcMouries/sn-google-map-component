@@ -6,12 +6,13 @@ export const URL_CURRENT_USER = 'api/now/ui/user/current_user';
 export const CENTER_ON = {
 	CURRENT_USER: 'CURRENT_USER',
 	MAP_MARKERS: 'MAP_MARKERS',
+	ADDRESS: 'ADDRESS'
 };
 
 export const customActions = {
 
 	ACTION_ON_CLICK : "ACTION_ON_CLICK",
-
+	SET_PLACE : "SET_PLACE",
 
 	GOOGLE_API_LOAD_REQUESTED: 'GOOGLE_API_LOAD_REQUESTED',
 

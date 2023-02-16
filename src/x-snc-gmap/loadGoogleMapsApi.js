@@ -128,12 +128,20 @@ export const handlePlaceChanged = (place, googleMap) => {
     position: place.geometry.location,
   });
   marker.setVisible(true);
+
+  marker.addListener("click", () => {
+    //infoWindow.close();
+    //infoWindow.setContent(marker.getTitle());
+    //infoWindow.open(marker.getMap(), marker);
+  });
+
+
   const infowindow = createInfoWindow(place);
   infowindow.open(googleMap, marker);
 
   googleMap.setCenter(marker.getPosition());
 
-  const locationCircle = new google.maps.Circle({
+  const placeCircle = new google.maps.Circle({
     strokeColor: "#FF0000",
     strokeOpacity: 0.7,
     strokeWeight: 2,
@@ -145,6 +153,20 @@ export const handlePlaceChanged = (place, googleMap) => {
     draggable: true,
     editable: true,
   });
+
+  placeCircle.setRadius(32000);
+  google.maps.event.addListener(placeCircle, "radius_changed", function (event) {
+    console.log("Circle radius_changed: " + placeCircle.getRadius());
+    var radiusInMeters = placeCircle.getRadius();
+    var radiusInMiles = radiusInMeters * 0.000621371;
+    // document.getElementById('radius').innerHTML = radiusInMiles.toFixed(2) + ' miles';
+    // displayInfo(circle);
+  });
+  google.maps.event.addListener(placeCircle, 'mousemove', function (event) {
+    console.log("Circle radius_changed: " + placeCircle.getRadius());
+    var radiusInMeters = placeCircle.getRadius();
+  });
+
 };
 
 function createtInfoWindowContent() {
@@ -174,14 +196,14 @@ function createInfoWindow(place) {
 export const setMarkers = (state, updateState, dispatch, googleMap) => {
   const { googleMapsApi } = state;
   const { properties } = state;
+  const { mapMarkers } = properties;
 
   if (state.markerCluster) state.markerCluster.setMap(null);
   state.markers.forEach((marker) => {
     marker.setMap(null);
   });
-  const marker_data = state.properties.mapItemMarkers;
   let bounds = new googleMapsApi.LatLngBounds();
-  let markers = marker_data.map((item) => {
+  let markers = mapMarkers.map((item) => {
     const marker = new googleMapsApi.Marker({
       position: { lat: item.lat, lng: item.long },
       map: googleMap,

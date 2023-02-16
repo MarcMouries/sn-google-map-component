@@ -1,4 +1,4 @@
-import { DEFAULT_VALUES } from './defaultValues';
+import { AIRPORTS, DEFAULT_VALUES } from './defaultValues';
 import { CENTER_ON } from './constants';
 
 export default {
@@ -24,8 +24,8 @@ export default {
             dispatch(customActions.INITIALIZE_MAP);
         }
     },
-    mapItemMarkers: {
-        default: DEFAULT_VALUES,
+    mapMarkers: {
+        default: AIRPORTS,
         onChange(currentValue, previousValue, dispatch) {
             dispatch(customActions.INITIALIZE_MAP);
         }

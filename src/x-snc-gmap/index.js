@@ -42,7 +42,7 @@ createCustomElement("x-snc-gmap", {
 		googleMapsApi: null,
 		googleMapsRef: null,
 		isLoading : true,
-		mapItemMarkers: DEFAULT_VALUES,
+		mapMarkers: DEFAULT_VALUES,
 		markers: [],
 		markerCluster: null,
 		marker: null

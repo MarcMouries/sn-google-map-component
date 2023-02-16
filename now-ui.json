@@ -46,7 +46,7 @@
 					"defaultValue": 6
 				},
 				{
-					"name": "mapItemMarkers",
+					"name": "mapMarkers",
 					"description": "Array of objects that defines the items displayed on the map - each object can have values for 'table', 'sys_id', 'lat', 'long', 'image'",
 					"fieldType": "json",
 					"label": "Map Markers",

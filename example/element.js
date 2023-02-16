@@ -5,7 +5,7 @@ document.body.appendChild(el);
 
 el.innerHTML =`
 <div id="example-container"
-       style='width: 600px; height: 600px;'>
+       style='width: 800px; height: 800px;'>
        <x-snc-gmap
               centerOn="PLACE"
               initialZoom=1

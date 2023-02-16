@@ -25,10 +25,13 @@
     - Retrieves the Google Maps API Key from the platform Google Maps properties
 
 ## Properties
-| Property                | Description                                    | Type      | Usage     |
+| Property                | Description                                    | Type      | Example     |
 | ----------------------- | ---------------------------------------------- | --------- | --------- |
 | `place`                 |                                                | string    |           |
+| `mapMarkers`        |                                                | string    |           |
+lng
 
+## Versions
 
 - 0.3
     - Center the map based on the current user's location or or the bounds of the markerss

@@ -119,3 +119,26 @@ body {
   }
 
 }
+
+/* Google Map Styling*/
+
+#iw-container  .iw-title {
+  font-family: 'Open Sans Condensed', sans-serif;
+  font-size: 22px;
+  font-weight: 400;
+  padding: 10px;
+  background-color: #48b5e9;
+  color: white;
+  margin: 1px;
+  border-radius: 2px 2px 0 0; /* In accordance with the rounding of the default infowindow corners. */
+}
+
+.overlay-content {
+  background-color: rgba( #FFCCCB, 0.9);
+  border: 1px solid red;
+  color: black;
+  width: 200px;
+  text-align: center;
+  font-size: 12px;
+  padding: 0.1rem
+}

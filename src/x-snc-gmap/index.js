@@ -31,6 +31,9 @@ const createInfoWindow = (object) => {
 	return contentString;
 }
 
+//console.log = function() {}
+
+
 createCustomElement("x-snc-gmap", {
 	renderer: { type: snabbdom },
 	view,

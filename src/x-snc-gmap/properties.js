@@ -4,7 +4,7 @@ import { CENTER_ON } from './constants';
 export default {
 
     center: {
-        default: { lat: 39.8097343, long: -98.5556199 }, /* USA Center */
+        default: { lat: 39.8097343, long: -98.5556199 }, /* Center of continental USA */
     },
     centerOn: {
         default: CENTER_ON.ADDRESS,
@@ -16,7 +16,8 @@ export default {
         default: []
     },
     initialZoom: {
-        default: 10
+        default: 10,
+        schema: {type: 'number'}
     },
     language: {
         default: "en",

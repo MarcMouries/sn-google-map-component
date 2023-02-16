@@ -8,8 +8,8 @@ el.innerHTML =`
        style='width: 800px; height: 800px;'>
        <x-snc-gmap
               center-on="PLACE"
-              initial-zoom=20
-              language="ja"
+              initial-zoom=10
+              language="en"
               place="ServiceNow, Leesburg Pike, Vienna, VA">
        </x-snc-gmap>
 </div>`;

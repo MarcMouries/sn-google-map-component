@@ -7,6 +7,8 @@ import { triangle } from "./assets/triangle.svg";
 import { svg_icon } from "./assets/svg-icon.svg";
 import { translate } from "./translate";
 
+import { computeMarkerPosition, getCircleRadiusDescription } from "./googleMapUtils";
+
 export const loadGoogleApi = ({ action, state, dispatch, updateState }) => {
   console.log("📗 Map Component: Loading GoogleApi...");
   console.log(" - Map Component: googleMapMethod = ", state.googleMapMethod);
@@ -25,7 +27,7 @@ export const loadGoogleApi = ({ action, state, dispatch, updateState }) => {
     GOOGLE_MAPS_API_OPTIONS.client = action.payload.googleApiKey;
   }
 
-  GOOGLE_MAPS_API_OPTIONS.libraries = ["places,drawing"];
+  GOOGLE_MAPS_API_OPTIONS.libraries = ["places,drawing,geometry"];
 
   GOOGLE_MAPS_API_OPTIONS.language = properties.language;
 
@@ -43,7 +45,7 @@ export const loadGoogleApi = ({ action, state, dispatch, updateState }) => {
 };
 
 export const initializeMap = ({ state, updateState, dispatch }) => {
-  const { googleMapsApi, mapElementRef, autoCompleteRef, properties } = state;
+  const { googleMapsApi, mapElementRef, autoCompleteRef, radiusInputRef, properties } = state;
   console.log("📗 Map Component: initializeMap", state);
   updateState({ isLoading: false });
 
@@ -88,8 +90,8 @@ export const initializeMap = ({ state, updateState, dispatch }) => {
   const addressSearch = new google.maps.places.Autocomplete(autoCompleteRef.current, autoCompleteOptions);
 
   // programmatically set the Place object for the Autocomplete field
-  // retrieve a list of suggested places based on the input value
-  // and set the selected Place object as the value of the Autocomplete field.
+  //  - retrieve a list of suggested places based on the input value
+  //  - and set the selected Place object as the value of the Autocomplete field.
   const autocompleteService = new google.maps.places.AutocompleteService();
   let request = { input: properties.place };
   autocompleteService.getPlacePredictions(request, (predictions, status) => {
@@ -106,7 +108,7 @@ export const initializeMap = ({ state, updateState, dispatch }) => {
 
   addressSearch.addListener("place_changed", () => {
     const place = addressSearch.getPlace();
-    handlePlaceChanged(place, googleMap);
+    handlePlaceChanged(place, googleMap, updateState);
   });
 
   if (navigator.geolocation) {
@@ -118,28 +120,27 @@ export const initializeMap = ({ state, updateState, dispatch }) => {
   }
 };
 
-export const handlePlaceChanged = (place, googleMap) => {
+export const handlePlaceChanged = (place, googleMap, updateState) => {
   console.log("🌎 updateNewPlace", place);
 
   let marker = new google.maps.Marker({
     map: googleMap,
     draggable: true,
-    animation: google.maps.Animation.DROP,
+    animation: google.maps.Animation.BOUNCE,
     position: place.geometry.location,
   });
   marker.setVisible(true);
+  googleMap.setCenter(marker.getPosition());
 
+  //TODO show the marker
   marker.addListener("click", () => {
     //infoWindow.close();
     //infoWindow.setContent(marker.getTitle());
     //infoWindow.open(marker.getMap(), marker);
   });
 
-
   const infowindow = createInfoWindow(place);
   infowindow.open(googleMap, marker);
-
-  googleMap.setCenter(marker.getPosition());
 
   const placeCircle = new google.maps.Circle({
     strokeColor: "#FF0000",
@@ -154,19 +155,85 @@ export const handlePlaceChanged = (place, googleMap) => {
     editable: true,
   });
 
-  placeCircle.setRadius(32000);
+  placeCircle.setRadius(18000); // TESTING
+
+  var labelText = '<div id="iw-container">Text goes here</div>';
+  var boxText = document.createElement("div");
+  boxText.style.cssText = "margin-top: 8px; background: #fff; padding: 0px;";
+  boxText.innerHTML = "the content";
+  var ibOptions = {
+    disableAutoPan: false,
+    maxWidth: 0,
+    position: computeMarkerPosition(placeCircle, "top"),
+    boxStyle: {
+      padding: "0px 0px 0px 0px",
+      width: "252px",
+      height: "40px",
+    },
+    closeBoxURL: "",
+    infoBoxClearance: new google.maps.Size(1, 1),
+    //pane: "floatPane",
+    pane: "overlayLayer",
+    enableEventPropagation: false,
+  };
+  ibOptions.content = boxText;
+
+  var circleLabelOptions = {
+    content: labelText,
+    boxClass: "infowindow-bg", // Use the CSS class to style the InfoWindow
+
+    boxStyle: {
+      background: "#000",
+      border: "1px solid black",
+      textAlign: "center",
+      fontSize: "8pt",
+      width: "190px",
+    },
+    position: computeMarkerPosition(placeCircle, "top"),
+  };
+
+  let elm = document.createElement('div');
+  elm.classList.add('overlay-content');
+  elm.textContent = "hello";
+
+  //var labelText = '<div class="overlay-content">Text goes here</div>';
+  //var boxText = document.createElement("div");
+  //boxText.style.cssText = "margin-top: 8px; background: #fff; padding: 0px;";
+  //boxText.innerHTML = "the content";
+
+
+  //elm.setAttribute("item-id", "marker.id");
+  //elm.setAttribute("parent-id", "marker.cid");
+  let overlay = new OverlayView(computeMarkerPosition(placeCircle, "bottom"), elm);
+  overlay.setMap(googleMap);
+  console.log("overlay ", overlay);
+
+
+  const circleRadiuslabel = new google.maps.InfoWindow(ibOptions);
+  circleRadiuslabel.open(googleMap);
+
   google.maps.event.addListener(placeCircle, "radius_changed", function (event) {
     console.log("Circle radius_changed: " + placeCircle.getRadius());
-    var radiusInMeters = placeCircle.getRadius();
-    var radiusInMiles = radiusInMeters * 0.000621371;
-    // document.getElementById('radius').innerHTML = radiusInMiles.toFixed(2) + ' miles';
-    // displayInfo(circle);
-  });
-  google.maps.event.addListener(placeCircle, 'mousemove', function (event) {
-    console.log("Circle radius_changed: " + placeCircle.getRadius());
-    var radiusInMeters = placeCircle.getRadius();
+    circleRadiuslabel.setContent(getCircleRadiusDescription(placeCircle));
+    circleRadiuslabel.setPosition(computeMarkerPosition(placeCircle, "top"));
+
+    overlay.setContentText (getCircleRadiusDescription(placeCircle));
+    overlay.setPosition(computeMarkerPosition(placeCircle, "top"));
+
+    //updateState({ circleRadius: circleRadiusDesc });
   });
 
+  google.maps.event.addListener(placeCircle, "center_changed", function (event) {
+    console.log("Circle center_changed: " + placeCircle.getRadius());
+    var radiusInMeters = placeCircle.getRadius();
+
+    overlay.setContentText (getCircleRadiusDescription(placeCircle));
+    overlay.setPosition(computeMarkerPosition(placeCircle, "top"));
+
+    circleRadiuslabel.setContent(getCircleRadiusDescription(placeCircle));
+
+    circleRadiuslabel.setPosition(computeMarkerPosition(placeCircle, "top"));
+  });
 };
 
 function createtInfoWindowContent() {
@@ -204,12 +271,21 @@ export const setMarkers = (state, updateState, dispatch, googleMap) => {
   });
   let bounds = new googleMapsApi.LatLngBounds();
   let markers = mapMarkers.map((item) => {
+    //@TODO check item has lat & lng
+
     const marker = new googleMapsApi.Marker({
-      position: { lat: item.lat, lng: item.long },
+      position: { lat: item.lat, lng: item.lng },
       map: googleMap,
       table: item.table,
       sys_id: item.sys_id,
-      icon: item.image,
+      //icon: item.image,
+      title: item.name,
+      label: {
+        text: "✈",
+        //fontFamily: "Material Icons",
+        color: "#ffffff",
+        fontSize: "28px",
+      },
     });
     bounds.extend(marker.position);
     marker.addListener("click", function () {
@@ -249,8 +325,9 @@ export const setMarkers = (state, updateState, dispatch, googleMap) => {
       table: "sys_user",
       sys_id: state.currentUser.sys_id,
       label: {
-        text: "??", // codepoint from https://fonts.google.com/icons
-        fontFamily: "Material Icons",
+        //text: "\ue539", // codepoint from https://fonts.google.com/icons
+        text: "✈",
+        //fontFamily: "Material Icons",
         color: "#ffffff",
         fontSize: "18px",
       },
@@ -294,5 +371,54 @@ export const setMarkers = (state, updateState, dispatch, googleMap) => {
     markerCluster: markerCluster,
   });
 
- 
+  class OverlayView extends google.maps.OverlayView {
+    position = null;
+    content = null;
+
+    constructor(position, content) {
+      super(position, content);
+      position && (this.position = position);
+      content && (this.content = content);
+    }
+
+    onAdd = () => {
+      this.getPanes().floatPane.appendChild(this.content);
+    };
+    onRemove = () => {
+      if (this.content.parentElement) {
+        this.content.parentElement.removeChild(this.content);
+      }
+    };
+    draw = () => {
+      const projection = this.getProjection();
+      const point = projection.fromLatLngToDivPixel(this.position);
+      const { offsetWidth, offsetHeight } = this.content;
+      // center the content on the specified position
+      const x = point.x - offsetWidth / 2;
+      const y = point.y - offsetHeight / 2;
+      this.content.style.transform = `translate(${x}px, ${y}px)`;
+    };
+
+    // changes the node element
+    setContent = (newContent) => {
+      if (this.content.parentElement) {
+        this.content.parentElement.removeChild(this.content);
+      }
+      this.content = newContent;
+      this.onAdd();
+    }
+    // only changes the text
+    setContentText = (newContentText) => {
+      if (this.content) {
+        this.content.textContent = newContentText;
+        this.draw();
+      }
+    }
+    setPosition(newPosition) {
+      this.position = newPosition;
+      this.draw();
+    }
+  }
+
+  window.OverlayView = OverlayView;
 };

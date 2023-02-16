@@ -1,3 +1,32 @@
+
+export const AIRPORTS = [
+    {
+      "name": "Ronald Reagan Washington Natl",
+      "city": "Washington",
+      "country": "United States",
+      "iata_code": "DCA",
+      "lat": 38.852083,
+      "lng": -77.037722
+    },
+    {
+      "name": "Washington Dulles Intl",
+      "city": "Washington",
+      "country": "United States",
+      "iata_code": "IAD",
+      "lat": 38.944533,
+      "lng": -77.455811
+    },
+    {
+      "name": "Baltimore Washington Intl",
+      "city": "Baltimore",
+      "country": "United States",
+      "iata_code": "BWI",
+      "lat": 39.175361,
+      "lng": -76.668333
+    }
+  ]
+
+
 export const DEFAULT_VALUES = [
     /* David Loo's location */
     {

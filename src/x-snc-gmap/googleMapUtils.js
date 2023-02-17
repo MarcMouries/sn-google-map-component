@@ -4,8 +4,34 @@
  * Requires the use of the geometry library
  */
 
-/* Compute the position of the marker at the top of the circle */
+ const defaultCircleOptions = {
+  strokeColor: "#FF0000",
+  strokeOpacity: 0.7,
+  strokeWeight: 2,
+  fillColor: "#FF0000",
+  fillOpacity: 0.2,
+  draggable: true,
+  editable: true,
+};
 
+/**
+ * Create a Circle
+ */
+export function createCircle(map, center, radius, options) {
+  const circle = new google.maps.Circle({
+    ...defaultCircleOptions,
+    ...options,
+  });
+
+  circle.setMap(map);
+  circle.setCenter(center);
+  circle.setRadius(radius);
+
+  return circle;
+}
+
+
+/* Compute the position of the marker at the top of the circle */
 export function computeMarkerPosition(circle, position) {
   let radius = circle.getRadius();
   let center = circle.getCenter();

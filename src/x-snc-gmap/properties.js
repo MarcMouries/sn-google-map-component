@@ -12,6 +12,12 @@ export default {
             dispatch(customActions.INITIALIZE_MAP);
         }
     },
+    circleRadius: {
+        /* 16093.4 = 10 miles in meters */
+        /* 19312.1 = 12 miles in meters */
+        default: 19312.1,
+        schema: {type: 'number'}
+    },
     displayFields :{
         default: []
     },

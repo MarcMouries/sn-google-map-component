@@ -9,6 +9,15 @@ export const CENTER_ON = {
 	ADDRESS: 'ADDRESS'
 };
 
+export const COLOR = {
+	INITIAL_MARKER: "#0f4d92",
+};
+
+export const SVG_SQUARE =
+  '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" > \
+    <path fill="{{background}}" d="M3.5 3.5h25v25h-25z" ></path> \
+   </svg>';
+
 export const customActions = {
 
 	MAP_CIRCLE_CHANGED : "AES_GMAP#MAP_CIRCLE_CHANGED",

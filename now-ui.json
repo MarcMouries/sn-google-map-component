@@ -53,6 +53,15 @@
 					"readOnly": false,
 					"required": true,
 					"defaultValue": "[ { \"table\" : \"sys_user\"]}"
+				},
+				{
+					"name": "place",
+					"description": "A place to focus on the map",
+					"fieldType": "string",
+					"label": "Place",
+					"readOnly": false,
+					"required": false,
+					"defaultValue": ""
 				}
 			],
 			"actions": [

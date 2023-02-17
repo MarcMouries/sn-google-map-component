@@ -9,7 +9,7 @@ import { translate } from "./translate";
 import { createCircle, computeMarkerPosition, getCircleRadiusDescription, getPlaceDetails } from "./googleMapUtils";
 
 const SVG_SQUARE =
-'<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" > \
+  '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" > \
   <path fill="{{background}}" d="M3.5 3.5h25v25h-25z" ></path> \
 </svg>';
 
@@ -17,6 +17,7 @@ const INITIAL_MARKER_COLOR = "#0f4d92";
 
 const circleOptions = {};
 let radiusOverlay;
+let gmMmarkers = [];
 
 export const loadGoogleApi = ({ action, state, dispatch, updateState }) => {
   console.log("📗 Map Component: Loading GoogleApi...");
@@ -57,7 +58,7 @@ export const initializeMap = ({ state, updateState, dispatch }) => {
   const { googleMapsApi, mapElementRef, autoCompleteRef, radiusInputRef, properties } = state;
   console.log(" 🌎 Map Component: initializeMap", state);
   updateState({ isLoading: false });
- 
+
   // let mapOptions = {
   // 	zoom: properties.initialZoom,
   // 	center: new googleMapsApi.LatLng(properties.center.lat, properties.center.long)
@@ -83,14 +84,11 @@ export const initializeMap = ({ state, updateState, dispatch }) => {
       });
     }
     init().then(() => {
-
       // call second function here
       //if  enable circle
       initializeCircle(state, updateState, dispatch, googleMap);
 
-
       setMarkers(state, updateState, dispatch, googleMap);
-
     });
   } else {
     console.log("Cannot initialize google map");
@@ -151,15 +149,13 @@ export const handlePlaceChanged = (place, googleMap, state, dispatch, updateStat
   infowindow.open(googleMap, marker);
 
   const circleCenter = place.geometry.location;
-  const circleRadius = 16093.4; // 16093.4 = 10 miles in meters
-  const placeCircle = createCircle(googleMap, circleCenter, circleRadius, circleOptions);
+  const placeCircle = createCircle(googleMap, circleCenter, state.properties.circleRadius, circleOptions);
 
   let elm = document.createElement("div");
   elm.classList.add("overlay-content");
   radiusOverlay = new OverlayView(computeMarkerPosition(placeCircle, "bottom"), elm);
   radiusOverlay.setMap(googleMap);
   handleCircleChanged(googleMap, placeCircle, state, dispatch);
-
 
   // LISTENERS
   google.maps.event.addListener(placeCircle, "radius_changed", function (event) {
@@ -180,7 +176,7 @@ export const handleCircleChanged = (googleMap, placeCircle, state, dispatch, upd
   getRadiusOverlay().setContentText(getCircleRadiusDescription(placeCircle));
   getRadiusOverlay().setPosition(computeMarkerPosition(placeCircle, "bottom"));
   console.log("🌎 handleCircleChanged dispatch ?????", dispatch);
-  
+
   const { mapMarkers } = state.properties;
   console.log("🌎 handleCircleChanged mapMarkers", mapMarkers);
   console.log("🌎 handleCircleChanged placeCircle", placeCircle);
@@ -188,20 +184,27 @@ export const handleCircleChanged = (googleMap, placeCircle, state, dispatch, upd
   let radius = placeCircle.getRadius(); // radius of the circle
   let center = placeCircle.getCenter();
   let markersInsideCircle = [];
-  googleMap.markers.forEach(function(marker) {
+
+  //console.log("🌎 handleCircleChanged placeCircle", placeCircle);
+
+  gmMmarkers.forEach(function (marker) {
     let position = marker.getPosition();
     let distance = google.maps.geometry.spherical.computeDistanceBetween(center, position);
-    let insideCircle = (distance <= radius);
-    const markerColor = insideCircle ? "blue" : "red";
-    let updatedSvgSquare = svgSquare.replace(/{{background}}/g, markerColor);
-
+    let insideCircle = distance <= radius;
+    const markerColor = insideCircle ? "green" : INITIAL_MARKER_COLOR;
     if (insideCircle) {
-      markersInsideCircle.push(marker);
-
+      let markerObject = {
+        table: marker.table,
+        sys_id: marker.sys_id,
+        name: marker.title,
+      };
+      markersInsideCircle.push(markerObject);
     }
+    marker.setIcon(getMarkerIcon(markerColor));
   });
-
-  //TODO dispatch
+  console.log("🌎 handleCircleChanged markersInsideCircle", markersInsideCircle);
+  
+  dispatch(customActions.CIRCLE_CHANGED, markersInsideCircle   );
 };
 
 function createtInfoWindowContent() {
@@ -240,7 +243,7 @@ function getRadiusOverlay() {
 
 const initializeCircle = (state, updateState, dispatch, googleMap) => {
   console.log("initializeCircle");
-}
+};
 
 function getMarkerIcon(color) {
   const svgSquare = encodeURIComponent(SVG_SQUARE.replace("{{background}}", color));
@@ -248,9 +251,6 @@ function getMarkerIcon(color) {
     url: "data:image/svg+xml;utf-8, " + svgSquare,
   };
 }
-
-
-
 
 const setMarkers = (state, updateState, dispatch, googleMap) => {
   console.log(" 🌎 setMarkers");
@@ -265,25 +265,7 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
   });
   let bounds = new googleMapsApi.LatLngBounds();
   let markers = mapMarkers.map((item) => {
-    //@TODO check item has lat & lng
-
-    var svg =
-      '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">' +
-      '<path d="M23.36,342.13a3.3,3.3,0,0,1-2.78-1.64l-.25-.46-.27-.44a3.37,3.37,0,0,1,.14-2.91L202,21.48a4.79,4.79,0,0,1,3.54-2.38A4.08,4.08,0,0,1,208.65,21l182,315a4,4,0,0,1,.31,3.54l-.27.43-.23.44a3.34,3.34,0,0,1-2.8,1.66Z" style="fill:#fff"/>' +
-      '<path d="M344.78,313.39l-139.26-241L66.27,313.39ZM23.36,342.13a3.3,3.3,0,0,1-2.78-1.64l-.25-.46-.27-.44a3.37,3.37,0,0,1,.14-2.91L202,21.48a4.79,4.79,0,0,1,3.54-2.38A4.08,4.08,0,0,1,208.65,21l182,315a4,4,0,0,1,.31,3.54l-.27.43-.23.44a3.34,3.34,0,0,1-2.8,1.66Z" style="fill:#666"/>' +
-      '<path d="M166,216.36l-8.44-6.14a13.08,13.08,0,0,1-.93,1.4c-2.22,2.57-5.25,2.94-7.68,1a5.56,5.56,0,0,1-.83-8.05c4.06-5.19,8.19-10.32,12.3-15.47,1.94-2.44,4-4.82,5.81-7.35a8.52,8.52,0,0,1,7.33-3.64c10.22,0,20.44-.12,30.65,0,8.81.13,16,7.72,16,16.56q0,26.06,0,52.1a3.1,3.1,0,0,0,1.4,2.9c9.21,6.61,18.35,13.29,27.51,20,.23.17.47.3.81.52l3.31-4.8c1.51-2.18,2.91-2.44,5-.91L275,276.62c.3.23.62.43,1.06.72a42.66,42.66,0,0,0,3.43-4.58,5.07,5.07,0,0,0,.27-3.08c-.55-3.42,1-5.16,3.85-7.05,5.31-3.49,10.72-5.25,17.08-4.62a10.23,10.23,0,0,1,5.77,2c4,3.13,8.17,6,12.25,9.06a5,5,0,0,1,1.36,1.42q12.24,21.15,24.42,42.32a4.9,4.9,0,0,1,.26.61h-112a67.9,67.9,0,0,0,5-7.07c2.05-3.81,4.93-5.45,9.17-4.6,2.86.57,4.68-.63,6.06-3.1a53.06,53.06,0,0,1,3.49-4.89l-8-5.6c-1.69-1.18-3.4-2.34-5.07-3.56s-2-2.82-.73-4.59,2.36-3.23,3.61-4.93L218,254.15c-.41.19-.85.41-1.3.59-3.74,1.53-7.59-.79-7.56-4.83a4.58,4.58,0,0,0-2.41-4.27c-4.57-3.1-9-6.37-13.52-9.58a3.9,3.9,0,0,0-1.51-.7c1.26,1.94,2.5,3.9,3.78,5.83,4.41,6.71,8.81,13.43,13.28,20.11a11.32,11.32,0,0,1,2,6.45c0,12.23,0,24.46,0,36.69,0,4.35-2.36,7.64-5.92,8.55a8.11,8.11,0,0,1-9.77-7,22.43,22.43,0,0,1-.16-2.84c0-10,0-20,0-30a5.57,5.57,0,0,0-.83-2.77c-5-7.83-10.16-15.62-15.25-23.42-.27-.41-.57-.81-1-1.48-.05.75-.1,1.21-.1,1.67,0,7.43,0,14.85,0,22.28a11.47,11.47,0,0,1-1.59,6.05q-9.69,16.51-19.34,33.07a8.16,8.16,0,0,1-8.2,4.43,7.56,7.56,0,0,1-6.58-5.22c-1-2.6-.39-5,1-7.35q8.12-14,16.14-28a6.15,6.15,0,0,0,.79-3c.06-13.13.11-26.25,0-39.37a15.88,15.88,0,0,1,3.33-9.93C164.07,218.93,165,217.69,166,216.36Zm43-5c-5,6.36-9.62,12.33-14.33,18.35L209,240Zm-47.43-5.92,8.25,6L185.2,191.9a2.85,2.85,0,0,0-.6-.25c-3.79-.12-7.58-.26-11.37-.31a1.78,1.78,0,0,0-1.18.73C168.59,196.45,165.17,200.86,161.57,205.47Z"/>' +
-      '<path d="M205.43,161.57a15.86,15.86,0,0,1,15.81-15.9c8.52,0,15.72,7.43,15.69,16.12A16.11,16.11,0,0,1,221,177.51,15.83,15.83,0,0,1,205.43,161.57Z"/></svg>';
-
-    var svg2 =
-      '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 27 43">' +
-      '<style type="text/css">.st0{fill:#555A5D;} .st1{fill:#555A5D;stroke:#9CA5AC;stroke-width:3;}</style>' +
-      '<path class="st0" d="M13.5 0c-7.5 0-13.5 6-13.5 13.4 0 13.5 13.5 29.6 13.5 29.6s13.5-16.1 13.5-29.6c0-7.4-6-13.4-13.5-13.4z" />' +
-      '<path class="st1" d="M13.5 5c4.7 0 8.5 3.8 8.5 8.5s-3.8 8.5-8.5 8.5-8.5-3.8-8.5-8.5 3.8-8.5 8.5-8.5z" /></svg>';
-
-    var svg3 =
-      '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0z"/><path d="M19 9A7 7 0 1 0 5 9c0 1.387.41 2.677 1.105 3.765h-.008C8.457 16.46 12 22 12 22l5.903-9.235h-.007A6.98 6.98 0 0 0 19 9zm-7 3a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></svg>';
-
-    //
+    //TODO add error check if item has lat & lng
 
     const marker = new google.maps.Marker({
       position: { lat: item.lat, lng: item.lng },
@@ -298,6 +280,9 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
         fontSize: "28px",
       },
     });
+
+    gmMmarkers.push(marker);
+
     bounds.extend(marker.position);
     marker.addListener("click", function () {
       updateState({

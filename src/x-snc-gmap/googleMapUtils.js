@@ -22,11 +22,9 @@ export function createCircle(map, center, radius, options) {
     ...defaultCircleOptions,
     ...options,
   });
-
   circle.setMap(map);
   circle.setCenter(center);
   circle.setRadius(radius);
-
   return circle;
 }
 
@@ -103,5 +101,33 @@ export function getPlaceDetails(placeDescription, googleMap) {
   });
 }
 
+export function createInfoWindowFromObject(title, obj) {
+    var content = document.createElement('div');
+
+    // Create a header with the value of the title parameter
+    var header = document.createElement('h3');
+    header.textContent = title;
+    content.appendChild(header);
+
+    // Iterate over each property of the object and add it to the content
+    for (var prop in obj) {
+      if (obj.hasOwnProperty(prop) && prop !== 'name') {
+        var element = document.createElement('p');
+        element.innerHTML = '<strong>' + prop + ': </strong>' + obj[prop];
+        content.appendChild(element);
+      }
+    }
+
+    // Create a string with the HTML content for the InfoWindow
+    var contentString = content.outerHTML;
+
+    // Create a new InfoWindow with the content string
+    var infowindow = new google.maps.InfoWindow({
+      content: contentString
+    });
+    
+    return infowindow;
+  }
+  
 
 

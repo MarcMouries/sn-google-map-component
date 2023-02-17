@@ -93,12 +93,13 @@ export const initializeMap = ({ state, updateState, dispatch }) => {
 
   /**  programmatically set the Place object for the Autocomplete field
    the addressSearch.set("place", place) method expects a google place object (not just an address string)*/
-  getPlaceDetails(properties.place, googleMap).then((place) => {
-    addressSearch.set("place", place);
-  }).catch((error) => {
-    console.error(`Error retrieving place data: ${error}`);
-  });
-
+  getPlaceDetails(properties.place, googleMap)
+    .then((place) => {
+      addressSearch.set("place", place);
+    })
+    .catch((error) => {
+      console.error(`Error retrieving place data: ${error}`);
+    });
 
   addressSearch.addListener("place_changed", () => {
     const place = addressSearch.getPlace();
@@ -149,24 +150,22 @@ export const handlePlaceChanged = (place, googleMap, updateState) => {
   // LISTENERS
   google.maps.event.addListener(placeCircle, "radius_changed", function (event) {
     console.log("Circle radius_changed: " + placeCircle.getRadius());
-    // overlay.setContentText(getCircleRadiusDescription(placeCircle));
-    // overlay.setPosition(computeMarkerPosition(placeCircle, "bottom"));
     //updateState({ circleRadius: circleRadiusDesc });
-    handleCircleChanged(placeCircle)
+    handleCircleChanged(placeCircle);
   });
 
   google.maps.event.addListener(placeCircle, "center_changed", function (event) {
     console.log("Circle center_changed: " + placeCircle.getRadius());
     // overlay.setContentText(getCircleRadiusDescription(placeCircle));
     // overlay.setPosition(computeMarkerPosition(placeCircle, "bottom"));
-    handleCircleChanged(placeCircle)
+    handleCircleChanged(placeCircle);
   });
 };
 
 export const handleCircleChanged = (placeCircle, googleMap, updateState) => {
   getRadiusOverlay().setContentText(getCircleRadiusDescription(placeCircle));
   getRadiusOverlay().setPosition(computeMarkerPosition(placeCircle, "bottom"));
-}
+};
 
 function createtInfoWindowContent() {
   return (
@@ -201,7 +200,7 @@ function getRadiusOverlay() {
   radiusOverlay.setMap(googleMap);
 
   //radiusOverlay = createOverlay(placeCircle, googleMap, "bottom")
-return radiusOverlay;
+  return radiusOverlay;
 }
 
 export const setMarkers = (state, updateState, dispatch, googleMap) => {
@@ -235,15 +234,13 @@ export const setMarkers = (state, updateState, dispatch, googleMap) => {
 
     //
     var svgSquare =
-      'data:image/svg+xml;utf-8, \
-    <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"> \
-      <path fill="{{background}}" stroke="white" stroke-width="1.5" d="M3.5 3.5h25v25h-25z" ></path> \
+    '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" > \
+      <path fill="{{background}}" d="M3.5 3.5h25v25h-25z" ></path> \
     </svg>';
 
-    let color = "MediumBlue";
-    //let color = "#0f4d92";
+    let color = "#0f4d92";
     svgSquare = svgSquare.replace("{{background}}", color);
-    console.log("svgSquare", svgSquare);
+    svgSquare = encodeURIComponent( svgSquare); 
 
     const marker = new google.maps.Marker({
       position: { lat: item.lat, lng: item.lng },
@@ -251,7 +248,7 @@ export const setMarkers = (state, updateState, dispatch, googleMap) => {
       table: item.table,
       sys_id: item.sys_id,
       icon: {
-        url: svgSquare,
+        url: "data:image/svg+xml;utf-8, " + svgSquare,
       },
       title: item.name,
       label: {
@@ -344,8 +341,6 @@ export const setMarkers = (state, updateState, dispatch, googleMap) => {
     markerCluster: markerCluster,
   });
 
-
-  
   class OverlayView extends google.maps.OverlayView {
     position = null;
     content = null;
@@ -402,7 +397,6 @@ export const setMarkers = (state, updateState, dispatch, googleMap) => {
     overlay.setMap(googleMap);
     return overlay;
   }
-
 
   window.OverlayView = OverlayView;
 };

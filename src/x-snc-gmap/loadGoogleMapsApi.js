@@ -8,6 +8,13 @@ import { svg_icon } from "./assets/svg-icon.svg";
 import { translate } from "./translate";
 import { createCircle, computeMarkerPosition, getCircleRadiusDescription, getPlaceDetails } from "./googleMapUtils";
 
+const SVG_SQUARE =
+'<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" > \
+  <path fill="{{background}}" d="M3.5 3.5h25v25h-25z" ></path> \
+</svg>';
+
+const INITIAL_MARKER_COLOR = "#0f4d92";
+
 const circleOptions = {};
 let radiusOverlay;
 
@@ -48,9 +55,9 @@ export const loadGoogleApi = ({ action, state, dispatch, updateState }) => {
 
 export const initializeMap = ({ state, updateState, dispatch }) => {
   const { googleMapsApi, mapElementRef, autoCompleteRef, radiusInputRef, properties } = state;
-  console.log("📗 Map Component: initializeMap", state);
+  console.log(" 🌎 Map Component: initializeMap", state);
   updateState({ isLoading: false });
-
+ 
   // let mapOptions = {
   // 	zoom: properties.initialZoom,
   // 	center: new googleMapsApi.LatLng(properties.center.lat, properties.center.long)
@@ -76,8 +83,14 @@ export const initializeMap = ({ state, updateState, dispatch }) => {
       });
     }
     init().then(() => {
-      setMarkers(state, updateState, dispatch, googleMap);
+
       // call second function here
+      //if  enable circle
+      initializeCircle(state, updateState, dispatch, googleMap);
+
+
+      setMarkers(state, updateState, dispatch, googleMap);
+
     });
   } else {
     console.log("Cannot initialize google map");
@@ -103,7 +116,7 @@ export const initializeMap = ({ state, updateState, dispatch }) => {
 
   addressSearch.addListener("place_changed", () => {
     const place = addressSearch.getPlace();
-    handlePlaceChanged(place, googleMap, updateState);
+    handlePlaceChanged(place, googleMap, state, dispatch, updateState);
   });
 
   if (navigator.geolocation) {
@@ -115,7 +128,7 @@ export const initializeMap = ({ state, updateState, dispatch }) => {
   }
 };
 
-export const handlePlaceChanged = (place, googleMap, updateState) => {
+export const handlePlaceChanged = (place, googleMap, state, dispatch, updateState) => {
   console.log("🌎 updateNewPlace", place);
 
   let marker = new google.maps.Marker({
@@ -145,26 +158,50 @@ export const handlePlaceChanged = (place, googleMap, updateState) => {
   elm.classList.add("overlay-content");
   radiusOverlay = new OverlayView(computeMarkerPosition(placeCircle, "bottom"), elm);
   radiusOverlay.setMap(googleMap);
-  handleCircleChanged(placeCircle);
+  handleCircleChanged(googleMap, placeCircle, state, dispatch);
+
 
   // LISTENERS
   google.maps.event.addListener(placeCircle, "radius_changed", function (event) {
     console.log("Circle radius_changed: " + placeCircle.getRadius());
     //updateState({ circleRadius: circleRadiusDesc });
-    handleCircleChanged(placeCircle);
+    handleCircleChanged(googleMap, placeCircle, state, dispatch, updateState);
   });
 
-  google.maps.event.addListener(placeCircle, "center_changed", function (event) {
-    console.log("Circle center_changed: " + placeCircle.getRadius());
+  google.maps.event.addListener(placeCircle, "dragend", function (event) {
+    console.log("Circle dragend: " + placeCircle.getRadius());
     // overlay.setContentText(getCircleRadiusDescription(placeCircle));
     // overlay.setPosition(computeMarkerPosition(placeCircle, "bottom"));
-    handleCircleChanged(placeCircle);
+    handleCircleChanged(googleMap, placeCircle, state, dispatch, updateState);
   });
 };
 
-export const handleCircleChanged = (placeCircle, googleMap, updateState) => {
+export const handleCircleChanged = (googleMap, placeCircle, state, dispatch, updateState) => {
   getRadiusOverlay().setContentText(getCircleRadiusDescription(placeCircle));
   getRadiusOverlay().setPosition(computeMarkerPosition(placeCircle, "bottom"));
+  console.log("🌎 handleCircleChanged dispatch ?????", dispatch);
+  
+  const { mapMarkers } = state.properties;
+  console.log("🌎 handleCircleChanged mapMarkers", mapMarkers);
+  console.log("🌎 handleCircleChanged placeCircle", placeCircle);
+
+  let radius = placeCircle.getRadius(); // radius of the circle
+  let center = placeCircle.getCenter();
+  let markersInsideCircle = [];
+  googleMap.markers.forEach(function(marker) {
+    let position = marker.getPosition();
+    let distance = google.maps.geometry.spherical.computeDistanceBetween(center, position);
+    let insideCircle = (distance <= radius);
+    const markerColor = insideCircle ? "blue" : "red";
+    let updatedSvgSquare = svgSquare.replace(/{{background}}/g, markerColor);
+
+    if (insideCircle) {
+      markersInsideCircle.push(marker);
+
+    }
+  });
+
+  //TODO dispatch
 };
 
 function createtInfoWindowContent() {
@@ -193,17 +230,31 @@ function createInfoWindow(place) {
 
 function getRadiusOverlay() {
   if (radiusOverlay) return radiusOverlay;
-
+  // otherwise create it
   let elm = document.createElement("div");
   elm.classList.add("overlay-content");
   radiusOverlay = new OverlayView(computeMarkerPosition(placeCircle, position), elm);
   radiusOverlay.setMap(googleMap);
-
-  //radiusOverlay = createOverlay(placeCircle, googleMap, "bottom")
   return radiusOverlay;
 }
 
-export const setMarkers = (state, updateState, dispatch, googleMap) => {
+const initializeCircle = (state, updateState, dispatch, googleMap) => {
+  console.log("initializeCircle");
+}
+
+function getMarkerIcon(color) {
+  const svgSquare = encodeURIComponent(SVG_SQUARE.replace("{{background}}", color));
+  return {
+    url: "data:image/svg+xml;utf-8, " + svgSquare,
+  };
+}
+
+
+
+
+const setMarkers = (state, updateState, dispatch, googleMap) => {
+  console.log(" 🌎 setMarkers");
+
   const { googleMapsApi } = state;
   const { properties } = state;
   const { mapMarkers } = properties;
@@ -233,23 +284,13 @@ export const setMarkers = (state, updateState, dispatch, googleMap) => {
       '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0z"/><path d="M19 9A7 7 0 1 0 5 9c0 1.387.41 2.677 1.105 3.765h-.008C8.457 16.46 12 22 12 22l5.903-9.235h-.007A6.98 6.98 0 0 0 19 9zm-7 3a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></svg>';
 
     //
-    var svgSquare =
-    '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" > \
-      <path fill="{{background}}" d="M3.5 3.5h25v25h-25z" ></path> \
-    </svg>';
-
-    let color = "#0f4d92";
-    svgSquare = svgSquare.replace("{{background}}", color);
-    svgSquare = encodeURIComponent( svgSquare); 
 
     const marker = new google.maps.Marker({
       position: { lat: item.lat, lng: item.lng },
       map: googleMap,
       table: item.table,
       sys_id: item.sys_id,
-      icon: {
-        url: "data:image/svg+xml;utf-8, " + svgSquare,
-      },
+      icon: getMarkerIcon(INITIAL_MARKER_COLOR),
       title: item.name,
       label: {
         text: "✈",
@@ -307,7 +348,6 @@ export const setMarkers = (state, updateState, dispatch, googleMap) => {
     /**
      *  You are Here Marker
      */
-    // The short answer is Genzaichi (現在地). This is the way Japanese maps say ‘You are here’. It is closer in meaning to ‘current location’, or can be translated literally as ‘the ground on which you are presently standing’.
     console.log(" - en_Messages - ");
     //var youAreHereMsg = t("you-are-here");
     var youAreHereMsg = translate("You are here", properties.language);

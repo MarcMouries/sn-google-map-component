@@ -38,6 +38,7 @@ export default {
         }
     },
     place: {
+        schema: {type: 'string'},
         onChange(currentValue, previousValue, dispatch) {
             dispatch(customActions.SET_PLACE);
         }

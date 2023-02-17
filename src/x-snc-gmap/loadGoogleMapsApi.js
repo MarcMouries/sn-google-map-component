@@ -9,6 +9,7 @@ import { translate } from "./translate";
 import { createCircle, computeMarkerPosition, getCircleRadiusDescription, getPlaceDetails } from "./googleMapUtils";
 
 const circleOptions = {};
+let radiusOverlay;
 
 export const loadGoogleApi = ({ action, state, dispatch, updateState }) => {
   console.log("📗 Map Component: Loading GoogleApi...");
@@ -136,32 +137,36 @@ export const handlePlaceChanged = (place, googleMap, updateState) => {
   infowindow.open(googleMap, marker);
 
   const circleCenter = place.geometry.location;
-  const circleRadius = 10000;
+  const circleRadius = 16093.4; // 16093.4 = 10 miles in meters
   const placeCircle = createCircle(googleMap, circleCenter, circleRadius, circleOptions);
 
-   let elm = document.createElement("div");
-   elm.classList.add("overlay-content");
-   elm.textContent = "RADIUS";
-
-   let overlay = new OverlayView(computeMarkerPosition(placeCircle, "bottom"), elm);
-   overlay.setMap(googleMap);
-
-  //let overlay = createOverlay(placeCircle, googleMap, "bottom")
+  let elm = document.createElement("div");
+  elm.classList.add("overlay-content");
+  radiusOverlay = new OverlayView(computeMarkerPosition(placeCircle, "bottom"), elm);
+  radiusOverlay.setMap(googleMap);
+  handleCircleChanged(placeCircle);
 
   // LISTENERS
   google.maps.event.addListener(placeCircle, "radius_changed", function (event) {
     console.log("Circle radius_changed: " + placeCircle.getRadius());
-    overlay.setContentText(getCircleRadiusDescription(placeCircle));
-    overlay.setPosition(computeMarkerPosition(placeCircle, "bottom"));
+    // overlay.setContentText(getCircleRadiusDescription(placeCircle));
+    // overlay.setPosition(computeMarkerPosition(placeCircle, "bottom"));
     //updateState({ circleRadius: circleRadiusDesc });
+    handleCircleChanged(placeCircle)
   });
 
   google.maps.event.addListener(placeCircle, "center_changed", function (event) {
     console.log("Circle center_changed: " + placeCircle.getRadius());
-    overlay.setContentText(getCircleRadiusDescription(placeCircle));
-    overlay.setPosition(computeMarkerPosition(placeCircle, "bottom"));
+    // overlay.setContentText(getCircleRadiusDescription(placeCircle));
+    // overlay.setPosition(computeMarkerPosition(placeCircle, "bottom"));
+    handleCircleChanged(placeCircle)
   });
 };
+
+export const handleCircleChanged = (placeCircle, googleMap, updateState) => {
+  getRadiusOverlay().setContentText(getCircleRadiusDescription(placeCircle));
+  getRadiusOverlay().setPosition(computeMarkerPosition(placeCircle, "bottom"));
+}
 
 function createtInfoWindowContent() {
   return (
@@ -185,6 +190,18 @@ function createInfoWindow(place) {
     content: content,
   });
   return infowindow;
+}
+
+function getRadiusOverlay() {
+  if (radiusOverlay) return radiusOverlay;
+
+  let elm = document.createElement("div");
+  elm.classList.add("overlay-content");
+  radiusOverlay = new OverlayView(computeMarkerPosition(placeCircle, position), elm);
+  radiusOverlay.setMap(googleMap);
+
+  //radiusOverlay = createOverlay(placeCircle, googleMap, "bottom")
+return radiusOverlay;
 }
 
 export const setMarkers = (state, updateState, dispatch, googleMap) => {
@@ -217,14 +234,16 @@ export const setMarkers = (state, updateState, dispatch, googleMap) => {
       '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0z"/><path d="M19 9A7 7 0 1 0 5 9c0 1.387.41 2.677 1.105 3.765h-.008C8.457 16.46 12 22 12 22l5.903-9.235h-.007A6.98 6.98 0 0 0 19 9zm-7 3a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></svg>';
 
     //
-    var svg4 =
+    var svgSquare =
       'data:image/svg+xml;utf-8, \
     <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"> \
       <path fill="{{background}}" stroke="white" stroke-width="1.5" d="M3.5 3.5h25v25h-25z" ></path> \
     </svg>';
 
-    let color = "blue";
-    svg4 = svg4.replace("{{background}}", color);
+    let color = "MediumBlue";
+    //let color = "#0f4d92";
+    svgSquare = svgSquare.replace("{{background}}", color);
+    console.log("svgSquare", svgSquare);
 
     const marker = new google.maps.Marker({
       position: { lat: item.lat, lng: item.lng },
@@ -232,7 +251,7 @@ export const setMarkers = (state, updateState, dispatch, googleMap) => {
       table: item.table,
       sys_id: item.sys_id,
       icon: {
-        url: svg4,
+        url: svgSquare,
       },
       title: item.name,
       label: {

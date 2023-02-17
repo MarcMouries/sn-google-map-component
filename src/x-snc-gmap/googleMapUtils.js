@@ -74,3 +74,34 @@ export function getCircleRadiusDescription(circle) {
   return circleRadiusDesc;
 }
 
+ /**
+   * Retrieve place details based on the place description ("ServiceNow, leesburg pike")
+   It returns a Promise that resolves with the place details if the request is successful,
+   or rejects with an error status if the request fails.
+   - retrieve a list of suggested places based on the input value
+    - and set the selected Place object as the value of the Autocomplete field.
+ */
+export function getPlaceDetails(placeDescription, googleMap) {
+  const autocompleteService = new google.maps.places.AutocompleteService();
+  let request = { input: placeDescription };
+  return new Promise((resolve, reject) => {
+    autocompleteService.getPlacePredictions(request, (predictions, status) => {
+      if (status === google.maps.places.PlacesServiceStatus.OK) {
+        const placeId = predictions[0].place_id;
+        const placesService = new google.maps.places.PlacesService(googleMap);
+        placesService.getDetails({ placeId }, (place, status) => {
+          if (status === google.maps.places.PlacesServiceStatus.OK) {
+            resolve(place);
+          } else {
+            reject(status);
+          }
+        });
+      } else {
+        reject(status);
+      }
+    });
+  });
+}
+
+
+

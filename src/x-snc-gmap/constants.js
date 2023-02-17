@@ -11,14 +11,11 @@ export const CENTER_ON = {
 
 export const customActions = {
 
-	MAP_CIRCLE_CHANGED : "MAP_CIRCLE_CHANGED",
-	SET_PLACE : "SET_PLACE",
+	MAP_CIRCLE_CHANGED : "AES_GMAP#MAP_CIRCLE_CHANGED",
+	MAP_PLACE_CHANGED :  "AES_GMAP#MAP_PLACE_CHANGED",
 
 	GOOGLE_API_LOAD_REQUESTED: 'GOOGLE_API_LOAD_REQUESTED',
 
-	//@TODO read google.maps.method
-	// googleKeyMethod 
-	// const key = method == "key" ? state.properties.googleKey["key"] : state.properties.googleKey["client"];
 
 	GMAP_API_METHOD_FETCH_REQUESTED: 'GMAP_API_METHOD_FETCH_REQUESTED',
 	GMAP_API_METHOD_FETCH_STARTED  : 'GMAP_API_METHOD_FETCH_STARTED',

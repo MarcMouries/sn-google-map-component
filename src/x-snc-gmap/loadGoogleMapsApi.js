@@ -204,7 +204,7 @@ export const handleCircleChanged = (googleMap, placeCircle, state, dispatch, upd
   });
   console.log("🌎 handleCircleChanged markersInsideCircle", markersInsideCircle);
   
-  dispatch(customActions.CIRCLE_CHANGED, markersInsideCircle   );
+  dispatch(customActions.MAP_CIRCLE_CHANGED, markersInsideCircle );
 };
 
 function createtInfoWindowContent() {

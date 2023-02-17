@@ -61,7 +61,14 @@
 					"label": "Map marker item clicked",
 					"name": "AES_GMAP#MARKER_ITEM_CLICK",
 					"payload": []
+				},
+				{
+					"description": "Dispatched when the user updates the circle on the map",
+					"label": "Map Circle changed",
+					"name": "AES_GMAP#MAP_CIRCLE_CHANGED",
+					"payload": []
 				}
+
 			]
 		}
 	}

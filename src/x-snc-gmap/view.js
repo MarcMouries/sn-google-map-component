@@ -25,9 +25,9 @@ export default (state, { updateState, dispatch }) => {
   const targetDate = new Date("March 1, 2023");
 
   if (currentDate < targetDate) {
-    console.log("Today is before February 1, 2023.");
+   // console.log("Today is before February 1, 2023.");
   } else {
-    console.log("Today is February 1, 2023 or later.");
+   // console.log("Today is February 1, 2023 or later.");
   }
 
   if (currentDate > targetDate) {

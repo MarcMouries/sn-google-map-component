@@ -159,13 +159,13 @@ export const handlePlaceChanged = (place, googleMap, state, dispatch, updateStat
 
   // LISTENERS
   google.maps.event.addListener(placeCircle, "radius_changed", function (event) {
-    console.log("Circle radius_changed: " + placeCircle.getRadius());
+    //console.log("Circle radius_changed: " + placeCircle.getRadius());
     //updateState({ circleRadius: circleRadiusDesc });
     handleCircleChanged(googleMap, placeCircle, state, dispatch, updateState);
   });
 
   google.maps.event.addListener(placeCircle, "dragend", function (event) {
-    console.log("Circle dragend: " + placeCircle.getRadius());
+    //console.log("Circle dragend: " + placeCircle.getRadius());
     // overlay.setContentText(getCircleRadiusDescription(placeCircle));
     // overlay.setPosition(computeMarkerPosition(placeCircle, "bottom"));
     handleCircleChanged(googleMap, placeCircle, state, dispatch, updateState);
@@ -177,15 +177,12 @@ export const handleCircleChanged = (googleMap, placeCircle, state, dispatch, upd
   getRadiusOverlay().setPosition(computeMarkerPosition(placeCircle, "bottom"));
   console.log("🌎 handleCircleChanged dispatch ?????", dispatch);
 
-  const { mapMarkers } = state.properties;
-  console.log("🌎 handleCircleChanged mapMarkers", mapMarkers);
-  console.log("🌎 handleCircleChanged placeCircle", placeCircle);
+  //const { mapMarkers } = state.properties;
 
   let radius = placeCircle.getRadius(); // radius of the circle
   let center = placeCircle.getCenter();
   let markersInsideCircle = [];
 
-  //console.log("🌎 handleCircleChanged placeCircle", placeCircle);
 
   gmMmarkers.forEach(function (marker) {
     let position = marker.getPosition();
@@ -307,8 +304,6 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
     anchor: new google.maps.Point(0, 20),
   };
 
-  console.log("state.properties.centerOn = ", state.properties.centerOn);
-
   if (state.properties.centerOn == CENTER_ON.MAP_MARKERS) {
     googleMap.fitBounds(bounds);
   } else if (state.currentUser.location) {
@@ -333,7 +328,6 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
     /**
      *  You are Here Marker
      */
-    console.log(" - en_Messages - ");
     //var youAreHereMsg = t("you-are-here");
     var youAreHereMsg = translate("You are here", properties.language);
     var infowindow = new google.maps.InfoWindow({

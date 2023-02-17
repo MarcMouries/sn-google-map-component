@@ -13,8 +13,8 @@ export const AIRPORTS = [
       "city": "Washington",
       "country": "United States",
       "iata_code": "IAD",
-      "lat": 38.944533,
-      "lng": -77.455811
+      "lat": 38.95363651373208,
+      "lng": -77.44828266850212
     },
     {
       "name": "Baltimore Washington Intl",

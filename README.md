@@ -63,6 +63,7 @@ lng
 ## Events
 
 - PLACE_CHANGED
+- MAP_CIRCLE_CHANGED
 
 
 Table UX Event (`sys_ux_event`) is where all events are defined
@@ -70,37 +71,40 @@ Table UX Event (`sys_ux_event`) is where all events are defined
 - event_name
 
 ```js
+// Create the sys_ux_event
+var event_name = "AES_GMAP#MAP_CIRCLE_CHANGED";
+var event_desc = "Map Circle Changed"
+var gr = new GlideRecord('sys_ux_event');
+gr.initialize();
+gr.event_name = event_name;
+gr.label = event_desc;
+gr.description = "Fired when the user changes the circle on the map"
+gr.insert();
 
-
-// CREATE EVENT
-// var gr = new GlideRecord('sys_ux_event');
-// gr.initialize();
-// gr.label = "MYCOMPONENT#BUTTON_CLICKED";
-// gr.event_name = "MYCOMPONENT#BUTTON_CLICKED";
-// gr.description = "Fired when user clicks on the map"
-// gr.insert();
 
 function getRecord(table, name) {
   var record = new GlideRecord(table);
   if (record.get('name', name)) {
     return record;
+  } else {
+    gs.info('Record not found');
+    return null;
   }
 }
 
 // ADD EVENT TO THE LIST OF DISPATCHED EVENTS IN THE COMPONENT
 var component_name = "AES Google Map";
-var record = getRecord('sys_ux_macroponent', component_name);
-gs.info('Created by: ' + record.sys_created_by);
+var component = getRecord('sys_ux_macroponent', component_name);
+if (component) {
+  gs.info('Created by: ' + component.sys_created_by);
+  gs.info('Updated on: ' + component.sys_updated_on.getDisplayValue());
+} else {
+  gs.info('Component not found');
+}
 
-var event_sys_id = 'e685946e47f065103d2cb28a436d4350';
-
-//creates an array of current List field values
-var listArr = record.dispatched_events.toString().split(',');
-//add the new value to the List field values
-listArr.push(event_sys_id);
-record.dispatched_events = listArr.join(',');
-
-record.update();
+var event_list = ["AES_GMAP#MAP_CIRCLE_CHANGED"];
+component.dispatched_events = event_list.join(',');
+component.update();
 ```
 1. https://developer.servicenow.com/blog.do?p=/post/quebec-ui-builder-custom-component-events/
 2. https://github.com/ServiceNowNextExperience/uic-event-fixer

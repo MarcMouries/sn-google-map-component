@@ -6,8 +6,9 @@ import { you_are_here } from "./assets/you-are-here.svg";
 import { triangle } from "./assets/triangle.svg";
 import { svg_icon } from "./assets/svg-icon.svg";
 import { translate } from "./translate";
+import { createCircle, computeMarkerPosition, getCircleRadiusDescription } from "./googleMapUtils";
 
-import { computeMarkerPosition, getCircleRadiusDescription } from "./googleMapUtils";
+const circleOptions = {};
 
 export const loadGoogleApi = ({ action, state, dispatch, updateState }) => {
   console.log("📗 Map Component: Loading GoogleApi...");
@@ -142,20 +143,23 @@ export const handlePlaceChanged = (place, googleMap, updateState) => {
   const infowindow = createInfoWindow(place);
   infowindow.open(googleMap, marker);
 
-  const placeCircle = new google.maps.Circle({
-    strokeColor: "#FF0000",
-    strokeOpacity: 0.7,
-    strokeWeight: 2,
-    fillColor: "#FF0000",
-    fillOpacity: 0.2,
-    map: googleMap,
-    center: place.geometry.location, // radius of the circle, in meters
-    radius: 10000,
-    draggable: true,
-    editable: true,
-  });
+  const circleCenter = place.geometry.location;
+const circleRadius = 10000;
+  const placeCircle = createCircle(googleMap, circleCenter, circleRadius, circleOptions);
 
-  placeCircle.setRadius(18000); // TESTING
+  // const placeCircle = new google.maps.Circle({
+  //   strokeColor: "#FF0000",
+  //   strokeOpacity: 0.7,
+  //   strokeWeight: 2,
+  //   fillColor: "#FF0000",
+  //   fillOpacity: 0.2,
+  //   map: googleMap,
+  //   center: place.geometry.location, // radius of the circle, in meters
+  //   radius: 10000,
+  //   draggable: true,
+  //   editable: true,
+  // });
+
 
   var labelText = '<div id="iw-container">Text goes here</div>';
   var boxText = document.createElement("div");
@@ -370,6 +374,9 @@ export const setMarkers = (state, updateState, dispatch, googleMap) => {
     markers: markers,
     markerCluster: markerCluster,
   });
+
+
+
 
   class OverlayView extends google.maps.OverlayView {
     position = null;

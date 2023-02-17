@@ -67,9 +67,6 @@ export default (state, { updateState, dispatch }) => {
     return (
       <Fragment>
         <div className="map-container">
-          <button type="button" on-click={(event) => dispatch(customActions.ACTION_ON_CLICK, { table: "example" })}>
-            CLICK
-          </button>
           <div className="input-container">
             <label>Address</label>
             <input type="text" id="address-input" className="address-input" placeholder={translate("Enter an address")} ref={autoCompleteRef} on-change={(e) => handleInputChange(e, dispatch)} />

@@ -144,7 +144,7 @@ export const handlePlaceChanged = (place, googleMap, state, dispatch, updateStat
   infowindow.open(googleMap, marker);
 
   const circleCenter = place.geometry.location;
-  const placeCircle = createCircle(googleMap, circleCenter, state.properties.circleRadius, circleOptions);
+  const placeCircle = createCircle(googleMap, circleCenter, state.properties.circleRadius, {});
 
   let elm = document.createElement("div");
   elm.classList.add("overlay-content");

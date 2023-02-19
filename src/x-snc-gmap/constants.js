@@ -11,6 +11,7 @@ export const CENTER_ON = {
 
 export const COLOR = {
 	INITIAL_MARKER: "#0f4d92",
+	CIRCLE : "#0f4d92"
 };
 
 export const SVG_SQUARE =

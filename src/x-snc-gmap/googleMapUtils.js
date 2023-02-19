@@ -11,7 +11,7 @@ import { COLOR } from "./constants";
   strokeOpacity: 0.6,
   strokeWeight: 1,
   fillColor: COLOR.CIRCLE,
-  fillOpacity: 0.2,
+  fillOpacity: 0.1,
   draggable: true,
   editable: true,
 };

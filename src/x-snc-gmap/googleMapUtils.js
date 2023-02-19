@@ -4,11 +4,13 @@
  * Requires the use of the geometry library
  */
 
+import { COLOR } from "./constants";
+
  const defaultCircleOptions = {
-  strokeColor: "#FF0000",
-  strokeOpacity: 0.7,
-  strokeWeight: 2,
-  fillColor: "#FF0000",
+  strokeColor: COLOR.CIRCLE,
+  strokeOpacity: 0.6,
+  strokeWeight: 1,
+  fillColor: COLOR.CIRCLE,
   fillOpacity: 0.2,
   draggable: true,
   editable: true,

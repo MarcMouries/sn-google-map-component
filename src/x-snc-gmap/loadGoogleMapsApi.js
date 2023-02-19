@@ -1,19 +1,17 @@
 import loadGoogleMapsApi from "load-google-maps-api";
 import MarkerClusterer from "@google/markerclustererplus";
-import { customActions, tables, svg_you_are_here } from "./constants";
+import { customActions, COLOR } from "./constants";
 import { CENTER_ON } from "./constants";
 import { you_are_here } from "./assets/you-are-here.svg";
 import { triangle } from "./assets/triangle.svg";
 import { svg_icon } from "./assets/svg-icon.svg";
 import { translate } from "./translate";
-import { createCircle, computeMarkerPosition, getCircleRadiusDescription, getPlaceDetails } from "./googleMapUtils";
+import { createCircle, computeMarkerPosition, createInfoWindowFromObject} from "./googleMapUtils";
+import { getCircleRadiusDescription, getPlaceDetails,  } from "./googleMapUtils";
+import { SVG_SQUARE } from  "./constants";
+import { MapQuest } from  "./googleMapStyle";
 
-const SVG_SQUARE =
-  '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" > \
-  <path fill="{{background}}" d="M3.5 3.5h25v25h-25z" ></path> \
-</svg>';
 
-const INITIAL_MARKER_COLOR = "#0f4d92";
 
 const circleOptions = {};
 let radiusOverlay;
@@ -67,6 +65,7 @@ export const initializeMap = ({ state, updateState, dispatch }) => {
   /* CENTER ON USER's LOCATION BY DEFAULT */
   let mapOptions = {
     zoom: properties.initialZoom,
+    //mapTypeId: 'mystyle',
     center: new googleMapsApi.LatLng(state.currentUser.location.latitude, state.currentUser.location.longitude),
   };
 
@@ -76,6 +75,8 @@ export const initializeMap = ({ state, updateState, dispatch }) => {
   };
 
   let googleMap = new googleMapsApi.Map(mapElementRef.current, mapOptions);
+  googleMap.mapTypes.set('mystyle', new google.maps.StyledMapType(MapQuest, { name: 'My Style' }));
+
 
   if ((googleMapsApi, mapElementRef)) {
     async function init() {
@@ -138,12 +139,6 @@ export const handlePlaceChanged = (place, googleMap, state, dispatch, updateStat
   marker.setVisible(true);
   googleMap.setCenter(marker.getPosition());
 
-  //TODO show the marker
-  marker.addListener("click", () => {
-    //infoWindow.close();
-    //infoWindow.setContent(marker.getTitle());
-    //infoWindow.open(marker.getMap(), marker);
-  });
 
   const infowindow = createInfoWindow(place);
   infowindow.open(googleMap, marker);
@@ -175,20 +170,15 @@ export const handlePlaceChanged = (place, googleMap, state, dispatch, updateStat
 export const handleCircleChanged = (googleMap, placeCircle, state, dispatch, updateState) => {
   getRadiusOverlay().setContentText(getCircleRadiusDescription(placeCircle));
   getRadiusOverlay().setPosition(computeMarkerPosition(placeCircle, "bottom"));
-  console.log("🌎 handleCircleChanged dispatch ?????", dispatch);
-
-  //const { mapMarkers } = state.properties;
 
   let radius = placeCircle.getRadius(); // radius of the circle
   let center = placeCircle.getCenter();
   let markersInsideCircle = [];
-
-
   gmMmarkers.forEach(function (marker) {
     let position = marker.getPosition();
     let distance = google.maps.geometry.spherical.computeDistanceBetween(center, position);
     let insideCircle = distance <= radius;
-    const markerColor = insideCircle ? "green" : INITIAL_MARKER_COLOR;
+    const markerColor = insideCircle ? "green" : COLOR.INITIAL_MARKER;
     if (insideCircle) {
       let markerObject = {
         table: marker.table,
@@ -200,7 +190,6 @@ export const handleCircleChanged = (googleMap, placeCircle, state, dispatch, upd
     marker.setIcon(getMarkerIcon(markerColor));
   });
   console.log("🌎 handleCircleChanged markersInsideCircle", markersInsideCircle);
-  
   dispatch(customActions.MAP_CIRCLE_CHANGED, markersInsideCircle );
 };
 
@@ -214,12 +203,18 @@ function createtInfoWindowContent() {
   );
 }
 function createInfoWindow(place) {
+  console.log("🌎 createInfoWindow createInfoWindow createInfoWindow", place);
+  console.log("🌎 createInfoWindow createInfoWindow createInfoWindow", place);
+  console.log("🌎 createInfoWindow createInfoWindow createInfoWindow", place);
+
   const content = document.createElement("div");
   const name = document.createElement("div");
   const address = document.createElement("div");
   // name.textContent = place.name;
   name.innerHTML = `<b>${place.name}</b>`;
-  address.textContent = place.formatted_address;
+  //address.textContent = place.formatted_address;
+  address.innerHTML = place.adr_address;
+
   content.appendChild(name);
   content.appendChild(address);
   const infowindow = new google.maps.InfoWindow({
@@ -269,7 +264,7 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
       map: googleMap,
       table: item.table,
       sys_id: item.sys_id,
-      icon: getMarkerIcon(INITIAL_MARKER_COLOR),
+      icon: getMarkerIcon(COLOR.INITIAL_MARKER),
       title: item.name,
       label: {
         text: "✈",

@@ -18,9 +18,7 @@ export default {
         default: 19312.1,
         schema: {type: 'number'}
     },
-    displayFields :{
-        default: []
-    },
+
     initialZoom: {
         default: 10,
         schema: {type: 'number'}
@@ -36,6 +34,10 @@ export default {
         onChange(currentValue, previousValue, dispatch) {
             dispatch(customActions.INITIALIZE_MAP);
         }
+    },
+    mapMarkersFields :{
+        default: [],
+        schema: {type: 'array'}
     },
     place: {
         schema: {type: 'string'},

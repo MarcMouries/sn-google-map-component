@@ -194,3 +194,34 @@ export function createInfoWindow(place) {
   const infowindow = new google.maps.InfoWindow({ content: content });
   return infowindow;
 }
+
+/**
+ * Extract specific fields from an object based on a list of field names.
+ * Example:
+    const markerFields = ["name", "city", "state"];
+    const airport = {
+      iata_code: "DCA",
+      name: "Ronald Reagan Washington National Airport",
+      city: "Arlington",
+      state: "Virginia",
+      country: "United States",
+      lat: 38.852083,
+      lng: -77.037722,
+    };
+    const airportMarkerFields = extractFields(markerFields, airport);
+    console.log(airportMarkerFields);
+    // { name: "Ronald Reagan Washington National Airport", city: "Arlington", state: "Virginia" }
+ *
+ * @param {*} mapMarkersFields
+ * @param {*} object
+ * @returns object
+ */
+export function extractFields(mapMarkersFields, dataObject) {
+  const result = {};
+  mapMarkersFields.forEach(field => {
+    if (dataObject.hasOwnProperty(field)) {
+      result[field] = dataObject[field];
+    }
+  });
+  return result;
+}

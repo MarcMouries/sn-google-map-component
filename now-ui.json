@@ -27,12 +27,16 @@
 						"variant": "dropdown",
 						"choices": [
 							{
+								"label": "user's location",
+								"value": "CURRENT_USER"
+							},
+							{
 								"label": "bounds of the markers",
 								"value": "MAP_MARKERS"
 							},
 							{
-								"label": "user's location",
-								"value": "CURRENT_USER"
+								"label": "the specified place",
+								"value": "PLACE"
 							}
 						]
 					}
@@ -77,7 +81,6 @@
 					"name": "AES_GMAP#MAP_CIRCLE_CHANGED",
 					"payload": []
 				}
-
 			]
 		}
 	}

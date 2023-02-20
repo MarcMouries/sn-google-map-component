@@ -1,48 +1,52 @@
-import { AIRPORTS, DEFAULT_VALUES } from './defaultValues';
-import { CENTER_ON } from './constants';
+import { AIRPORTS, DEFAULT_VALUES } from "./defaultValues";
+import { CENTER_ON } from "./constants";
 
 export default {
+  center: {
+    default: { lat: 39.8097343, long: -98.5556199 } /* Center of continental USA */,
+  },
+  centerOn: {
+    default: CENTER_ON.ADDRESS,
+    onChange(currentValue, previousValue, dispatch) {
+      dispatch(customActions.INITIALIZE_MAP);
+    },
+  },
+  circleRadius: {
+    /* 16093.4 = 10 miles in meters */
+    /* 19312.1 = 12 miles in meters */
+    default: 19312.1,
+    schema: { type: "number" },
+  },
 
-    center: {
-        default: { lat: 39.8097343, long: -98.5556199 }, /* Center of continental USA */
+  initialZoom: {
+    default: 10,
+    schema: { type: "number" },
+  },
+  language: {
+    default: "en",
+    onChange(currentValue, previousValue, dispatch) {
+      dispatch(customActions.INITIALIZE_MAP);
     },
-    centerOn: {
-        default: CENTER_ON.ADDRESS,
-        onChange(currentValue, previousValue, dispatch) {
-            dispatch(customActions.INITIALIZE_MAP);
-        }
+  },
+  mapMarkers: {
+    default: [],//AIRPORTS,
+    onChange(currentValue, previousValue, dispatch) {
+      dispatch(customActions.INITIALIZE_MAP);
     },
-    circleRadius: {
-        /* 16093.4 = 10 miles in meters */
-        /* 19312.1 = 12 miles in meters */
-        default: 19312.1,
-        schema: {type: 'number'}
+  },
+  mapMarkersFields: {
+    default: [],
+    schema: {
+      type: "array",
+      items: {
+        type: "string",
+      },
     },
-
-    initialZoom: {
-        default: 10,
-        schema: {type: 'number'}
+  },
+  place: {
+    schema: { type: "string" },
+    onChange(currentValue, previousValue, dispatch) {
+      dispatch(customActions.SET_PLACE);
     },
-    language: {
-        default: "en",
-        onChange(currentValue, previousValue, dispatch) {
-            dispatch(customActions.INITIALIZE_MAP);
-        }
-    },
-    mapMarkers: {
-        default: AIRPORTS,
-        onChange(currentValue, previousValue, dispatch) {
-            dispatch(customActions.INITIALIZE_MAP);
-        }
-    },
-    mapMarkersFields :{
-        default: [],
-        schema: {type: 'array'}
-    },
-    place: {
-        schema: {type: 'string'},
-        onChange(currentValue, previousValue, dispatch) {
-            dispatch(customActions.SET_PLACE);
-        }
-    }
-}
+  },
+};

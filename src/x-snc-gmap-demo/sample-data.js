@@ -19,7 +19,7 @@ export const AIRPORTS = [
     },
     {
       iata_code: "BWI",
-      name: "Baltimore/Washington International Thurgood Marshal Airport",
+      name: "Baltimore/Washington International Thurgood Marshall Airport",
       city: "Baltimore",
       state: "Maryland",
       country: "United States",

@@ -1,7 +1,7 @@
 import { createCustomElement } from "@servicenow/ui-core";
 import snabbdom, { createRef } from "@seismic/snabbdom-renderer";
 import styles from './style.scss';
-
+import { AIRPORTS} from './sample-data'
 import "../x-snc-gmap";
 
 /**
@@ -19,6 +19,7 @@ const view = () => {
         initialZoom={initialZoom} 
         language="en"
         place="ServiceNow, Leesburg Pike, Vienna, VA"
+        mapMarkers={AIRPORTS}
         map-markers-fields={markerFields}
 >         </x-snc-gmap>
     </div>

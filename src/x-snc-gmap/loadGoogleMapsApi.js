@@ -6,8 +6,8 @@ import { you_are_here } from "./assets/you-are-here.svg";
 import { triangle } from "./assets/triangle.svg";
 import { svg_icon } from "./assets/svg-icon.svg";
 import { translate } from "./translate";
-import { createCircle, computeMarkerPosition, createInfoWindowFromObject} from "./googleMapUtils";
-import { getCircleRadiusDescription, getPlaceDetails,  } from "./googleMapUtils";
+import { createCircle, computeMarkerPosition, createInfoWindow, createInfoWindowFromObject} from "./googleMapUtils";
+import { extractFields, getCircleRadiusDescription, getPlaceDetails,  } from "./googleMapUtils";
 import { SVG_SQUARE } from  "./constants";
 import { MapQuest } from  "./googleMapStyle";
 
@@ -90,6 +90,16 @@ export const initializeMap = ({ state, updateState, dispatch }) => {
       initializeCircle(state, updateState, dispatch, googleMap);
 
       setMarkers(state, updateState, dispatch, googleMap);
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          console.log("user's location: " + "Latitude: " + position.coords.latitude + "<br>Longitude: " + position.coords.longitude);
+        });
+      } else {
+        console.log("Geolocation is not supported by this browser.");
+      }
+
+
     });
   } else {
     console.log("Cannot initialize google map");
@@ -118,17 +128,12 @@ export const initializeMap = ({ state, updateState, dispatch }) => {
     handlePlaceChanged(place, googleMap, state, dispatch, updateState);
   });
 
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition((position) => {
-      console.log("user's location: " + "Latitude: " + position.coords.latitude + "<br>Longitude: " + position.coords.longitude);
-    });
-  } else {
-    console.log("Geolocation is not supported by this browser.");
-  }
+
 };
 
 export const handlePlaceChanged = (place, googleMap, state, dispatch, updateState) => {
   console.log("🌎 updateNewPlace", place);
+  const { properties } = state;
 
   let marker = new google.maps.Marker({
     map: googleMap,
@@ -139,7 +144,7 @@ export const handlePlaceChanged = (place, googleMap, state, dispatch, updateStat
   marker.setVisible(true);
   googleMap.setCenter(marker.getPosition());
 
-
+  //TODO HERE
   const infowindow = createInfoWindow(place);
   infowindow.open(googleMap, marker);
 
@@ -179,7 +184,16 @@ export const handleCircleChanged = (googleMap, placeCircle, state, dispatch, upd
     let distance = google.maps.geometry.spherical.computeDistanceBetween(center, position);
     let insideCircle = distance <= radius;
     const markerColor = insideCircle ? "green" : COLOR.INITIAL_MARKER;
+
+    
+
+
+
     if (insideCircle) {
+
+      console.log("🌎 insideCircle ", marker.data);
+
+
       let markerObject = {
         table: marker.table,
         sys_id: marker.sys_id,
@@ -193,7 +207,7 @@ export const handleCircleChanged = (googleMap, placeCircle, state, dispatch, upd
   dispatch(customActions.MAP_CIRCLE_CHANGED, markersInsideCircle );
 };
 
-function createtInfoWindowContent() {
+function __createtInfoWindowContent() {
   return (
     <div id="infowindow-content">
       <span id="place-name" className="title"></span>
@@ -202,26 +216,10 @@ function createtInfoWindowContent() {
     </div>
   );
 }
-function createInfoWindow(place) {
-  console.log("🌎 createInfoWindow createInfoWindow createInfoWindow", place);
-  console.log("🌎 createInfoWindow createInfoWindow createInfoWindow", place);
-  console.log("🌎 createInfoWindow createInfoWindow createInfoWindow", place);
 
-  const content = document.createElement("div");
-  const name = document.createElement("div");
-  const address = document.createElement("div");
-  // name.textContent = place.name;
-  name.innerHTML = `<b>${place.name}</b>`;
-  //address.textContent = place.formatted_address;
-  address.innerHTML = place.adr_address;
-
-  content.appendChild(name);
-  content.appendChild(address);
-  const infowindow = new google.maps.InfoWindow({
-    content: content,
-  });
-  return infowindow;
-}
+const initializeCircle = (state, updateState, dispatch, googleMap) => {
+  console.log("initializeCircle");
+};
 
 function getRadiusOverlay() {
   if (radiusOverlay) return radiusOverlay;
@@ -233,9 +231,7 @@ function getRadiusOverlay() {
   return radiusOverlay;
 }
 
-const initializeCircle = (state, updateState, dispatch, googleMap) => {
-  console.log("initializeCircle");
-};
+
 
 function getMarkerIcon(color) {
   const svgSquare = encodeURIComponent(SVG_SQUARE.replace("{{background}}", color));
@@ -259,11 +255,17 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
   let markers = mapMarkers.map((item) => {
     //TODO add error check if item has lat & lng
 
+    //TODO HERE
+    // table: item.table,
+    // sys_id: item.sys_id,
+
+    const markerFields = extractFields(properties.mapMarkersFields, item);
+    console.log("🌎 HERE markerFields> ", markerFields);
+
     const marker = new google.maps.Marker({
       position: { lat: item.lat, lng: item.lng },
       map: googleMap,
-      table: item.table,
-      sys_id: item.sys_id,
+      data : markerFields,
       icon: getMarkerIcon(COLOR.INITIAL_MARKER),
       title: item.name,
       label: {
@@ -347,6 +349,11 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
     //map.mapTypes.set('styled_map', styledMapType);
     //map.setMapTypeId('styled_map');
     infowindow.open(googleMap, marker);
+
+
+    updateState({ circleRadius: 80000 });
+    console.log("setMarkers END", state);
+
   }
 
   let markerCluster = new MarkerClusterer(googleMap, markers, { imagePath: "https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m" });
@@ -355,6 +362,10 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
     markerCluster: markerCluster,
   });
 
+  /**
+   * Custom overlay for Google Maps JavaScript API v3 that allows users to add
+   * additional graphical content to the map beyond what is provided by default.
+   */
   class OverlayView extends google.maps.OverlayView {
     position = null;
     content = null;
@@ -379,7 +390,8 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
       const { offsetWidth, offsetHeight } = this.content;
       // center the content on the specified position
       const x = point.x - offsetWidth / 2;
-      const y = point.y - offsetHeight / 2;
+      const y = (point.y - offsetHeight / 2) - offsetHeight;
+      
       this.content.style.transform = `translate(${x}px, ${y}px)`;
     };
 

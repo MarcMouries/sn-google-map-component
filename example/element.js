@@ -10,7 +10,8 @@ el.innerHTML =`
               center-on="PLACE"
               initial-zoom=10
               language="en"
-              place="ServiceNow, Leesburg Pike, Vienna, VA">
+              place="ServiceNow, Leesburg Pike, Vienna, VA"
+              map-markers-fields="name, city, state">
        </x-snc-gmap>
 </div>`;
 

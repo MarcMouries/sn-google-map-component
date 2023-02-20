@@ -185,14 +185,9 @@ export const handleCircleChanged = (googleMap, placeCircle, state, dispatch, upd
     let insideCircle = distance <= radius;
     const markerColor = insideCircle ? "green" : COLOR.INITIAL_MARKER;
 
-    
-
-
-
     if (insideCircle) {
-
       console.log("🌎 insideCircle ", marker.data);
-
+//TODO
 
       let markerObject = {
         table: marker.table,
@@ -206,16 +201,6 @@ export const handleCircleChanged = (googleMap, placeCircle, state, dispatch, upd
   console.log("🌎 handleCircleChanged markersInsideCircle", markersInsideCircle);
   dispatch(customActions.MAP_CIRCLE_CHANGED, markersInsideCircle );
 };
-
-function __createtInfoWindowContent() {
-  return (
-    <div id="infowindow-content">
-      <span id="place-name" className="title"></span>
-      <br />
-      <span id="place-address"></span>
-    </div>
-  );
-}
 
 const initializeCircle = (state, updateState, dispatch, googleMap) => {
   console.log("initializeCircle");
@@ -274,11 +259,20 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
         fontSize: "28px",
       },
     });
-
     gmMmarkers.push(marker);
-
     bounds.extend(marker.position);
+
+    const infowindow = createInfoWindowFromObject(item.name, markerFields);
+
+
     marker.addListener("click", function () {
+      console.log("🌎 CLICK on maker", this);
+
+      infowindow.open({
+        anchor: marker,
+        googleMap,
+      });
+
       updateState({
         marker: marker,
       });
@@ -287,6 +281,8 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
         table: marker.table,
         encodedQuery: encodedQuery,
       });
+
+
     });
     return marker;
   });

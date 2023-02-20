@@ -15,13 +15,13 @@ const view = () => {
   return (
     <div id="example-container" className="example-container">
       <x-snc-gmap
-        centerOn="PLACE" 
-        initialZoom={initialZoom} 
-        language="en"
-        place="ServiceNow, Leesburg Pike, Vienna, VA"
-        mapMarkers={AIRPORTS}
-        map-markers-fields={markerFields}
->         </x-snc-gmap>
+         centerOn="PLACE" 
+         initialZoom={initialZoom} 
+         language="en"
+         place="ServiceNow, Leesburg Pike, Vienna, VA"
+         mapMarkers={AIRPORTS}
+         map-markers-fields={markerFields}>
+      </x-snc-gmap>
     </div>
   );
 };

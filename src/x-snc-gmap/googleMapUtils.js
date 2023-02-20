@@ -103,7 +103,7 @@ export function getPlaceDetails(placeDescription, googleMap) {
 }
 
 export function createInfoWindowFromObject(title, obj) {
-  console.log("🌎 createInfoWindowFromObject createInfoWindow createInfoWindow", place);
+  console.log("🌎 createInfoWindowFromObject createInfoWindow createInfoWindow", obj);
 
   var content = document.createElement("div");
 

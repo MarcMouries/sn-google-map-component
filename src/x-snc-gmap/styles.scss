@@ -132,7 +132,9 @@ body {
   margin: 1px;
   border-radius: 2px 2px 0 0; /* In accordance with the rounding of the default infowindow corners. */
 }
-
+.input-container {
+  display: none;
+}
 .overlay-content {
   background-color: rgba( #0f4d92, 0.6);
   border: 1px solid  #0f4d92;

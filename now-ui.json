@@ -59,6 +59,15 @@
 					"defaultValue": "[ { \"table\" : \"sys_user\"]}"
 				},
 				{
+					"name": "mapMarkersFields",
+					"description": "Array of properties from each mapMarker to display",
+					"fieldType": "array",
+					"label": "Map Marker Fields",
+					"readOnly": false,
+					"required": true,
+					"defaultValue": "[ \"name\", \"table\", \"sys_id\"]}"
+				},
+				{
 					"name": "place",
 					"description": "A place to focus on the map",
 					"fieldType": "string",

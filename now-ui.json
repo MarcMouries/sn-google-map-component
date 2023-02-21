@@ -65,7 +65,7 @@
 					"label": "Map Marker Fields",
 					"readOnly": false,
 					"required": true,
-					"defaultValue": "[ \"name\", \"table\", \"sys_id\"]}"
+					"defaultValue": "[ \"name\", \"table\", \"sys_id\"]"
 				},
 				{
 					"name": "place",

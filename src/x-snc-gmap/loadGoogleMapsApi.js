@@ -6,16 +6,15 @@ import { you_are_here } from "./assets/you-are-here.svg";
 import { triangle } from "./assets/triangle.svg";
 import { svg_icon } from "./assets/svg-icon.svg";
 import { translate } from "./translate";
-import { createCircle, computeMarkerPosition, createInfoWindow, createInfoWindowFromObject} from "./googleMapUtils";
-import { extractFields, getCircleRadiusDescription, getPlaceDetails,  } from "./googleMapUtils";
-import { SVG_SQUARE } from  "./constants";
-import { MapQuest } from  "./googleMapStyle";
-
-
+import { createCircle, computeMarkerPosition, createInfoWindow, createInfoWindowFromObject } from "./googleMapUtils";
+import { extractFields, getCircleRadiusDescription, getPlaceDetails } from "./googleMapUtils";
+import { SVG_SQUARE } from "./constants";
+import { MapQuest } from "./googleMapStyle";
 
 const circleOptions = {};
 let radiusOverlay;
 let gmMmarkers = [];
+let infowindow ;
 
 export const loadGoogleApi = ({ action, state, dispatch, updateState }) => {
   console.log("📗 Map Component: Loading GoogleApi...");
@@ -75,8 +74,7 @@ export const initializeMap = ({ state, updateState, dispatch }) => {
   };
 
   let googleMap = new googleMapsApi.Map(mapElementRef.current, mapOptions);
-  googleMap.mapTypes.set('mystyle', new google.maps.StyledMapType(MapQuest, { name: 'My Style' }));
-
+  googleMap.mapTypes.set("mystyle", new google.maps.StyledMapType(MapQuest, { name: "My Style" }));
 
   if ((googleMapsApi, mapElementRef)) {
     async function init() {
@@ -98,8 +96,6 @@ export const initializeMap = ({ state, updateState, dispatch }) => {
       } else {
         console.log("Geolocation is not supported by this browser.");
       }
-
-
     });
   } else {
     console.log("Cannot initialize google map");
@@ -127,8 +123,6 @@ export const initializeMap = ({ state, updateState, dispatch }) => {
     const place = addressSearch.getPlace();
     handlePlaceChanged(place, googleMap, state, dispatch, updateState);
   });
-
-
 };
 
 export const handlePlaceChanged = (place, googleMap, state, dispatch, updateState) => {
@@ -172,6 +166,24 @@ export const handlePlaceChanged = (place, googleMap, state, dispatch, updateStat
   });
 };
 
+/**
+ * Sort function that takes an array of objects and the name of the field to sort by,
+ * and it will sort the objects based on the field.
+ * @param {*} arr
+ * @param {*} field
+ * @returns
+ */
+function sortObjects(arr, field) {
+  arr.sort((a, b) => {
+    if (typeof a[field] === "string") {
+      return a[field].localeCompare(b[field]);
+    } else {
+      return a[field] - b[field];
+    }
+  });
+  return arr;
+}
+
 export const handleCircleChanged = (googleMap, placeCircle, state, dispatch, updateState) => {
   getRadiusOverlay().setContentText(getCircleRadiusDescription(placeCircle));
   getRadiusOverlay().setPosition(computeMarkerPosition(placeCircle, "bottom"));
@@ -181,25 +193,24 @@ export const handleCircleChanged = (googleMap, placeCircle, state, dispatch, upd
   let markersInsideCircle = [];
   gmMmarkers.forEach(function (marker) {
     let position = marker.getPosition();
-    let distance = google.maps.geometry.spherical.computeDistanceBetween(center, position);
-    let insideCircle = distance <= radius;
+    let distanceFromCenter = google.maps.geometry.spherical.computeDistanceBetween(center, position);
+    let insideCircle = distanceFromCenter <= radius;
     const markerColor = insideCircle ? "green" : COLOR.INITIAL_MARKER;
-
     if (insideCircle) {
       console.log("🌎 insideCircle ", marker.data);
-//TODO
-
       let markerObject = {
         table: marker.table,
         sys_id: marker.sys_id,
         name: marker.title,
+        distanceFromCenter: distanceFromCenter,
       };
       markersInsideCircle.push(markerObject);
     }
     marker.setIcon(getMarkerIcon(markerColor));
   });
-  console.log("🌎 handleCircleChanged markersInsideCircle", markersInsideCircle);
-  dispatch(customActions.MAP_CIRCLE_CHANGED, markersInsideCircle );
+  const sortedMarkersInsideCircle = sortObjects(markersInsideCircle, "distanceFromCenter");
+  console.log("🌎 handleCircleChanged markersInsideCircle", sortedMarkersInsideCircle);
+  dispatch(customActions.MAP_CIRCLE_CHANGED, markersInsideCircle);
 };
 
 const initializeCircle = (state, updateState, dispatch, googleMap) => {
@@ -215,8 +226,6 @@ function getRadiusOverlay() {
   radiusOverlay.setMap(googleMap);
   return radiusOverlay;
 }
-
-
 
 function getMarkerIcon(color) {
   const svgSquare = encodeURIComponent(SVG_SQUARE.replace("{{background}}", color));
@@ -250,7 +259,7 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
     const marker = new google.maps.Marker({
       position: { lat: item.lat, lng: item.lng },
       map: googleMap,
-      data : markerFields,
+      data: markerFields,
       icon: getMarkerIcon(COLOR.INITIAL_MARKER),
       title: item.name,
       label: {
@@ -262,27 +271,25 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
     gmMmarkers.push(marker);
     bounds.extend(marker.position);
 
-    const infowindow = createInfoWindowFromObject(item.name, markerFields);
-
-
     marker.addListener("click", function () {
       console.log("🌎 CLICK on maker", this);
-
+      infowindow.close();
+      infowindow = createInfoWindowFromObject(item.name, markerFields);
       infowindow.open({
         anchor: marker,
         googleMap,
       });
 
       updateState({
-        marker: marker,
+        currentMarker: marker,
       });
+
+      // NOT FETCHING DATA FROM THE BACK-END
       let encodedQuery = "sys_id=" + marker.sys_id;
       dispatch(customActions.FETCH_MARKER_DATA, {
         table: marker.table,
         encodedQuery: encodedQuery,
       });
-
-
     });
     return marker;
   });
@@ -346,10 +353,8 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
     //map.setMapTypeId('styled_map');
     infowindow.open(googleMap, marker);
 
-
     updateState({ circleRadius: 80000 });
     console.log("setMarkers END", state);
-
   }
 
   let markerCluster = new MarkerClusterer(googleMap, markers, { imagePath: "https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m" });
@@ -386,8 +391,8 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
       const { offsetWidth, offsetHeight } = this.content;
       // center the content on the specified position
       const x = point.x - offsetWidth / 2;
-      const y = (point.y - offsetHeight / 2) - offsetHeight;
-      
+      const y = point.y - offsetHeight / 2 - offsetHeight;
+
       this.content.style.transform = `translate(${x}px, ${y}px)`;
     };
 

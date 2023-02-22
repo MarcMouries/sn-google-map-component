@@ -3,6 +3,7 @@
  *
  * Requires the use of the geometry library
  */
+import { convertSnakeCaseToTitleCase } from "./stringUtils";
 
 import { COLOR } from "./constants";
 
@@ -115,8 +116,9 @@ export function createInfoWindowFromObject(title, obj) {
   // Iterate over each property of the object and add it to the content
   for (var prop in obj) {
     if (obj.hasOwnProperty(prop) && prop !== "name") {
-      var element = document.createElement("p");
-      element.innerHTML = "<strong>" + prop + ": </strong>" + obj[prop];
+      let element = document.createElement("p");
+      let property = convertSnakeCaseToTitleCase(prop);
+      element.innerHTML = "<strong>" + property + ": </strong>" + obj[prop];
       content.appendChild(element);
     }
   }

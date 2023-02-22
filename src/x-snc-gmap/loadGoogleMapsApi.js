@@ -166,6 +166,41 @@ export const handlePlaceChanged = (place, googleMap, state, dispatch, updateStat
   });
 };
 
+
+
+export const handleCircleChanged = (googleMap, placeCircle, state, dispatch, updateState) => {
+  console.log("🌎 handleCircleChanged: placeCircle= ", placeCircle);
+  const overlayPosition = computeMarkerPosition(placeCircle, "bottom");
+  console.log("🌎 handleCircleChanged: overlayPosition= ", overlayPosition);
+
+  getRadiusOverlay().setContentText(getCircleRadiusDescription(placeCircle));
+  getRadiusOverlay().setPosition(computeMarkerPosition(placeCircle, "bottom"));
+
+  let radius = placeCircle.getRadius(); // radius of the circle
+  let center = placeCircle.getCenter();
+  let markersInsideCircle = [];
+  gmMmarkers.forEach(function (marker) {
+    let position = marker.getPosition();
+    let distanceFromCenter = google.maps.geometry.spherical.computeDistanceBetween(center, position);
+    let insideCircle = distanceFromCenter <= radius;
+    const markerColor = insideCircle ? "green" : COLOR.INITIAL_MARKER;
+    if (insideCircle) {
+      console.log("🌎 data of marker insideCircle ", marker.data);
+      let markerObject = marker.data;
+      markerObject.distanceFromCenter = distanceFromCenter;
+      markersInsideCircle.push(markerObject);
+    }
+    marker.setIcon(getMarkerIcon(markerColor));
+  });
+  const sortedMarkersInsideCircle = sortObjects(markersInsideCircle, "distanceFromCenter");
+  console.log("🌎 handleCircleChanged markersInsideCircle", sortedMarkersInsideCircle);
+  dispatch(customActions.MAP_CIRCLE_CHANGED, markersInsideCircle);
+};
+
+const initializeCircle = (state, updateState, dispatch, googleMap) => {
+  console.log("initializeCircle");
+};
+
 /**
  * Sort function that takes an array of objects and the name of the field to sort by,
  * and it will sort the objects based on the field.
@@ -183,39 +218,6 @@ function sortObjects(arr, field) {
   });
   return arr;
 }
-
-export const handleCircleChanged = (googleMap, placeCircle, state, dispatch, updateState) => {
-  getRadiusOverlay().setContentText(getCircleRadiusDescription(placeCircle));
-  getRadiusOverlay().setPosition(computeMarkerPosition(placeCircle, "bottom"));
-
-  let radius = placeCircle.getRadius(); // radius of the circle
-  let center = placeCircle.getCenter();
-  let markersInsideCircle = [];
-  gmMmarkers.forEach(function (marker) {
-    let position = marker.getPosition();
-    let distanceFromCenter = google.maps.geometry.spherical.computeDistanceBetween(center, position);
-    let insideCircle = distanceFromCenter <= radius;
-    const markerColor = insideCircle ? "green" : COLOR.INITIAL_MARKER;
-    if (insideCircle) {
-      console.log("🌎 insideCircle ", marker.data);
-      let markerObject = {
-        table: marker.table,
-        sys_id: marker.sys_id,
-        name: marker.title,
-        distanceFromCenter: distanceFromCenter,
-      };
-      markersInsideCircle.push(markerObject);
-    }
-    marker.setIcon(getMarkerIcon(markerColor));
-  });
-  const sortedMarkersInsideCircle = sortObjects(markersInsideCircle, "distanceFromCenter");
-  console.log("🌎 handleCircleChanged markersInsideCircle", sortedMarkersInsideCircle);
-  dispatch(customActions.MAP_CIRCLE_CHANGED, markersInsideCircle);
-};
-
-const initializeCircle = (state, updateState, dispatch, googleMap) => {
-  console.log("initializeCircle");
-};
 
 function getRadiusOverlay() {
   if (radiusOverlay) return radiusOverlay;
@@ -254,12 +256,15 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
     // sys_id: item.sys_id,
 
     const markerFields = extractFields(properties.mapMarkersFields, item);
-    console.log("🌎 HERE markerFields> ", markerFields);
+    const markerCopy = Object.assign({}, item);
+
+    console.log("🌎 markerFields: ", markerFields);
+    console.log("🌎 markerCopy  : ", markerCopy);
 
     const marker = new google.maps.Marker({
       position: { lat: item.lat, lng: item.lng },
       map: googleMap,
-      data: markerFields,
+      data: markerCopy,
       icon: getMarkerIcon(COLOR.INITIAL_MARKER),
       title: item.name,
       label: {

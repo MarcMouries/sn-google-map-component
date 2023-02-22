@@ -171,29 +171,38 @@ export const handlePlaceChanged = (place, googleMap, state, dispatch, updateStat
 export const handleCircleChanged = (googleMap, placeCircle, state, dispatch, updateState) => {
   console.log("🌎 handleCircleChanged: placeCircle= ", placeCircle);
   const overlayPosition = computeMarkerPosition(placeCircle, "bottom");
-  console.log("🌎 handleCircleChanged: overlayPosition= ", overlayPosition);
+  console.log("   - handleCircleChanged: overlayPosition= ", overlayPosition);
 
   getRadiusOverlay().setContentText(getCircleRadiusDescription(placeCircle));
   getRadiusOverlay().setPosition(computeMarkerPosition(placeCircle, "bottom"));
 
-  let radius = placeCircle.getRadius(); // radius of the circle
+  let radius = placeCircle.getRadius();
   let center = placeCircle.getCenter();
   let markersInsideCircle = [];
+  let addedMarkerIds = new Set();
+
   gmMmarkers.forEach(function (marker) {
     let position = marker.getPosition();
     let distanceFromCenter = google.maps.geometry.spherical.computeDistanceBetween(center, position);
     let insideCircle = distanceFromCenter <= radius;
     const markerColor = insideCircle ? "green" : COLOR.INITIAL_MARKER;
     if (insideCircle) {
-      console.log("🌎 data of marker insideCircle ", marker.data);
+      console.log("   - marker insideCircle ", marker.data);
       let markerObject = marker.data;
       markerObject.distanceFromCenter = distanceFromCenter;
-      markersInsideCircle.push(markerObject);
+      if (!addedMarkerIds.has(markerObject.name)) {
+        addedMarkerIds.add(markerObject.name);
+        markersInsideCircle.push(markerObject);
+      }
     }
     marker.setIcon(getMarkerIcon(markerColor));
   });
+
+  console.log("   - handleCircleChanged markersInsideCircle", markersInsideCircle);
   const sortedMarkersInsideCircle = sortObjects(markersInsideCircle, "distanceFromCenter");
-  console.log("🌎 handleCircleChanged markersInsideCircle", sortedMarkersInsideCircle);
+  console.log("   - handleCircleChanged sortedMarkersInsideCircle", sortedMarkersInsideCircle);
+
+
   dispatch(customActions.MAP_CIRCLE_CHANGED, markersInsideCircle);
 };
 

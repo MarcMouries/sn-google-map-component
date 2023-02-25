@@ -4,7 +4,6 @@
  * Requires the use of the geometry library
  */
 import { convertSnakeCaseToTitleCase } from "./stringUtils";
-
 import { COLOR } from "./constants";
 
 const defaultCircleOptions = {
@@ -145,7 +144,7 @@ function formatAddress(address_components) {
 }
 
 export function createInfoWindow(place) {
-  console.log("🌎 createInfoWindow createInfoWindow createInfoWindow", place);
+  console.log("🌎 createInfoWindow", place);
 
   const content = document.createElement("div");
   const header = document.createElement("div");
@@ -223,3 +222,4 @@ export function extractFields(mapMarkersFields, dataObject) {
   });
   return result;
 }
+

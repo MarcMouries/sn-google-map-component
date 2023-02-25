@@ -2,14 +2,14 @@ import loadGoogleMapsApi from "load-google-maps-api";
 import MarkerClusterer from "@google/markerclustererplus";
 import { customActions, COLOR } from "./constants";
 import { CENTER_ON } from "./constants";
-import { you_are_here } from "./assets/you-are-here.svg";
-import { triangle } from "./assets/triangle.svg";
-import { svg_icon } from "./assets/svg-icon.svg";
 import { translate } from "./translate";
 import { createCircle, computeMarkerPosition, createInfoWindow, createInfoWindowFromObject } from "./googleMapUtils";
 import { extractFields, getCircleRadiusDescription, getPlaceDetails } from "./googleMapUtils";
 import { SVG_SQUARE } from "./constants";
 import { MapQuest } from "./googleMapStyle";
+
+import { svg_icon } from "./assets/svg-icon.svg";
+
 
 const circleOptions = {};
 let radiusOverlay;
@@ -307,7 +307,7 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
     });
     return marker;
   });
-
+/* 
   const svgMarker = {
     path: "M-1.547 12l6.563-6.609-1.406-1.406-5.156 5.203-2.063-2.109-1.406 1.406zM0 0q2.906 0 4.945 2.039t2.039 4.945q0 1.453-0.727 3.328t-1.758 3.516-2.039 3.070-1.711 2.273l-0.75 0.797q-0.281-0.328-0.75-0.867t-1.688-2.156-2.133-3.141-1.664-3.445-0.75-3.375q0-2.906 2.039-4.945t4.945-2.039z",
     fillColor: "blue",
@@ -317,7 +317,7 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
     scale: 2,
     anchor: new google.maps.Point(0, 20),
   };
-
+*/
   if (state.properties.centerOn == CENTER_ON.MAP_MARKERS) {
     googleMap.fitBounds(bounds);
   } else if (state.currentUser.location) {

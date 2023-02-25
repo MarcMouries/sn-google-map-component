@@ -7,8 +7,8 @@ import { createCircle, computeMarkerPosition, createInfoWindow, createInfoWindow
 import { extractFields, getCircleRadiusDescription, getPlaceDetails } from "./googleMapUtils";
 import { SVG_SQUARE } from "./constants";
 import { MapQuest } from "./googleMapStyle";
-
 import { svg_icon } from "./assets/svg-icon.svg";
+import { createRadiusOverlay } from './radiusOverlay'
 
 
 const circleOptions = {};
@@ -145,10 +145,10 @@ export const handlePlaceChanged = (place, googleMap, state, dispatch, updateStat
   const circleCenter = place.geometry.location;
   const placeCircle = createCircle(googleMap, circleCenter, state.properties.circleRadius, {});
 
-  let elm = document.createElement("div");
-  elm.classList.add("overlay-content");
-  radiusOverlay = new OverlayView(computeMarkerPosition(placeCircle, "bottom"), elm);
-  radiusOverlay.setMap(googleMap);
+
+  radiusOverlay = getRadiusOverlay(placeCircle, googleMap);
+//  createRadiusOverlay(computeMarkerPosition(placeCircle, "bottom"), elm);
+
   handleCircleChanged(googleMap, placeCircle, state, dispatch);
 
   // LISTENERS
@@ -160,12 +160,9 @@ export const handlePlaceChanged = (place, googleMap, state, dispatch, updateStat
 
   google.maps.event.addListener(placeCircle, "dragend", function (event) {
     //console.log("Circle dragend: " + placeCircle.getRadius());
-    // overlay.setContentText(getCircleRadiusDescription(placeCircle));
-    // overlay.setPosition(computeMarkerPosition(placeCircle, "bottom"));
     handleCircleChanged(googleMap, placeCircle, state, dispatch, updateState);
   });
 };
-
 
 
 export const handleCircleChanged = (googleMap, placeCircle, state, dispatch, updateState) => {
@@ -228,15 +225,20 @@ function sortObjects(arr, field) {
   return arr;
 }
 
-function getRadiusOverlay() {
+function getRadiusOverlay(placeCircle, googleMap) {
+  console.log(" 🌎 getRadiusOverlay");
+
   if (radiusOverlay) return radiusOverlay;
+  console.log(" 🌎 getRadiusOverlay - create it");
+
   // otherwise create it
   let elm = document.createElement("div");
   elm.classList.add("overlay-content");
-  radiusOverlay = new OverlayView(computeMarkerPosition(placeCircle, position), elm);
+  radiusOverlay = createRadiusOverlay(computeMarkerPosition(placeCircle, "bottom"), elm);
   radiusOverlay.setMap(googleMap);
   return radiusOverlay;
 }
+
 
 function getMarkerIcon(color) {
   const svgSquare = encodeURIComponent(SVG_SQUARE.replace("{{background}}", color));
@@ -377,67 +379,4 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
     markerCluster: markerCluster,
   });
 
-  /**
-   * Custom overlay for Google Maps JavaScript API v3 that allows users to add
-   * additional graphical content to the map beyond what is provided by default.
-   */
-  class OverlayView extends google.maps.OverlayView {
-    position = null;
-    content = null;
-
-    constructor(position, content) {
-      super(position, content);
-      position && (this.position = position);
-      content && (this.content = content);
-    }
-
-    onAdd = () => {
-      this.getPanes().floatPane.appendChild(this.content);
-    };
-    onRemove = () => {
-      if (this.content.parentElement) {
-        this.content.parentElement.removeChild(this.content);
-      }
-    };
-    draw = () => {
-      const projection = this.getProjection();
-      const point = projection.fromLatLngToDivPixel(this.position);
-      const { offsetWidth, offsetHeight } = this.content;
-      // center the content on the specified position
-      const x = point.x - offsetWidth / 2;
-      const y = point.y - offsetHeight / 2 - offsetHeight;
-
-      this.content.style.transform = `translate(${x}px, ${y}px)`;
-    };
-
-    // changes the node element
-    setContent = (newContent) => {
-      if (this.content.parentElement) {
-        this.content.parentElement.removeChild(this.content);
-      }
-      this.content = newContent;
-      this.onAdd();
-    };
-    // only changes the text
-    setContentText = (newContentText) => {
-      if (this.content) {
-        this.content.textContent = newContentText;
-        this.draw();
-      }
-    };
-    setPosition(newPosition) {
-      this.position = newPosition;
-      this.draw();
-    }
-  }
-
-  function createOverlay(placeCircle, googleMap, position = "top") {
-    let elm = document.createElement("div");
-    elm.classList.add("overlay-content");
-    let overlay = new OverlayView(computeMarkerPosition(placeCircle, position), elm);
-    overlay.setMap(googleMap);
-    return overlay;
-  }
-
-  window.OverlayView = OverlayView;
 };

@@ -65,9 +65,7 @@ const finishGoogleMapsMethodFetchSuccess = ({ action, state, dispatch, updateSta
 };
 
 const finishGoogleMapsMethodFetchFailure = ({ action, state, dispatch }) => {
-	console.log("❌ Error Loading GoogleMapsMethod: ", action);
-	console.log("❌ Error: ", action.payload.response);
-	console.log("❌ Error: ", action.payload.response.status);
+	console.log("❌ Error Loading GoogleMapsMethod: ", action.payload.response);
 	console.log("❌ Error: ", action.payload.response.statusText);
 	dispatch('PROPERTIES_SET', { error: FETCH_ERROR });
 };

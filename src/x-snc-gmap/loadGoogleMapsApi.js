@@ -2,14 +2,14 @@ import loadGoogleMapsApi from "load-google-maps-api";
 import MarkerClusterer from "@google/markerclustererplus";
 import { customActions, COLOR } from "./constants";
 import { CENTER_ON } from "./constants";
-import { you_are_here } from "./assets/you-are-here.svg";
-import { triangle } from "./assets/triangle.svg";
-import { svg_icon } from "./assets/svg-icon.svg";
 import { translate } from "./translate";
 import { createCircle, computeMarkerPosition, createInfoWindow, createInfoWindowFromObject } from "./googleMapUtils";
 import { extractFields, getCircleRadiusDescription, getPlaceDetails } from "./googleMapUtils";
 import { SVG_SQUARE } from "./constants";
 import { MapQuest } from "./googleMapStyle";
+import { svg_icon } from "./assets/svg-icon.svg";
+import { createRadiusOverlay } from './radiusOverlay'
+
 
 const circleOptions = {};
 let radiusOverlay;
@@ -145,10 +145,10 @@ export const handlePlaceChanged = (place, googleMap, state, dispatch, updateStat
   const circleCenter = place.geometry.location;
   const placeCircle = createCircle(googleMap, circleCenter, state.properties.circleRadius, {});
 
-  let elm = document.createElement("div");
-  elm.classList.add("overlay-content");
-  radiusOverlay = new OverlayView(computeMarkerPosition(placeCircle, "bottom"), elm);
-  radiusOverlay.setMap(googleMap);
+
+  radiusOverlay = getRadiusOverlay(placeCircle, googleMap);
+//  createRadiusOverlay(computeMarkerPosition(placeCircle, "bottom"), elm);
+
   handleCircleChanged(googleMap, placeCircle, state, dispatch);
 
   // LISTENERS
@@ -160,12 +160,9 @@ export const handlePlaceChanged = (place, googleMap, state, dispatch, updateStat
 
   google.maps.event.addListener(placeCircle, "dragend", function (event) {
     //console.log("Circle dragend: " + placeCircle.getRadius());
-    // overlay.setContentText(getCircleRadiusDescription(placeCircle));
-    // overlay.setPosition(computeMarkerPosition(placeCircle, "bottom"));
     handleCircleChanged(googleMap, placeCircle, state, dispatch, updateState);
   });
 };
-
 
 
 export const handleCircleChanged = (googleMap, placeCircle, state, dispatch, updateState) => {
@@ -228,15 +225,20 @@ function sortObjects(arr, field) {
   return arr;
 }
 
-function getRadiusOverlay() {
+function getRadiusOverlay(placeCircle, googleMap) {
+  console.log(" 🌎 getRadiusOverlay");
+
   if (radiusOverlay) return radiusOverlay;
+  console.log(" 🌎 getRadiusOverlay - create it");
+
   // otherwise create it
   let elm = document.createElement("div");
   elm.classList.add("overlay-content");
-  radiusOverlay = new OverlayView(computeMarkerPosition(placeCircle, position), elm);
+  radiusOverlay = createRadiusOverlay(computeMarkerPosition(placeCircle, "bottom"), elm);
   radiusOverlay.setMap(googleMap);
   return radiusOverlay;
 }
+
 
 function getMarkerIcon(color) {
   const svgSquare = encodeURIComponent(SVG_SQUARE.replace("{{background}}", color));
@@ -307,7 +309,7 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
     });
     return marker;
   });
-
+/* 
   const svgMarker = {
     path: "M-1.547 12l6.563-6.609-1.406-1.406-5.156 5.203-2.063-2.109-1.406 1.406zM0 0q2.906 0 4.945 2.039t2.039 4.945q0 1.453-0.727 3.328t-1.758 3.516-2.039 3.070-1.711 2.273l-0.75 0.797q-0.281-0.328-0.75-0.867t-1.688-2.156-2.133-3.141-1.664-3.445-0.75-3.375q0-2.906 2.039-4.945t4.945-2.039z",
     fillColor: "blue",
@@ -317,7 +319,7 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
     scale: 2,
     anchor: new google.maps.Point(0, 20),
   };
-
+*/
   if (state.properties.centerOn == CENTER_ON.MAP_MARKERS) {
     googleMap.fitBounds(bounds);
   } else if (state.currentUser.location) {
@@ -377,67 +379,4 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
     markerCluster: markerCluster,
   });
 
-  /**
-   * Custom overlay for Google Maps JavaScript API v3 that allows users to add
-   * additional graphical content to the map beyond what is provided by default.
-   */
-  class OverlayView extends google.maps.OverlayView {
-    position = null;
-    content = null;
-
-    constructor(position, content) {
-      super(position, content);
-      position && (this.position = position);
-      content && (this.content = content);
-    }
-
-    onAdd = () => {
-      this.getPanes().floatPane.appendChild(this.content);
-    };
-    onRemove = () => {
-      if (this.content.parentElement) {
-        this.content.parentElement.removeChild(this.content);
-      }
-    };
-    draw = () => {
-      const projection = this.getProjection();
-      const point = projection.fromLatLngToDivPixel(this.position);
-      const { offsetWidth, offsetHeight } = this.content;
-      // center the content on the specified position
-      const x = point.x - offsetWidth / 2;
-      const y = point.y - offsetHeight / 2 - offsetHeight;
-
-      this.content.style.transform = `translate(${x}px, ${y}px)`;
-    };
-
-    // changes the node element
-    setContent = (newContent) => {
-      if (this.content.parentElement) {
-        this.content.parentElement.removeChild(this.content);
-      }
-      this.content = newContent;
-      this.onAdd();
-    };
-    // only changes the text
-    setContentText = (newContentText) => {
-      if (this.content) {
-        this.content.textContent = newContentText;
-        this.draw();
-      }
-    };
-    setPosition(newPosition) {
-      this.position = newPosition;
-      this.draw();
-    }
-  }
-
-  function createOverlay(placeCircle, googleMap, position = "top") {
-    let elm = document.createElement("div");
-    elm.classList.add("overlay-content");
-    let overlay = new OverlayView(computeMarkerPosition(placeCircle, position), elm);
-    overlay.setMap(googleMap);
-    return overlay;
-  }
-
-  window.OverlayView = OverlayView;
 };

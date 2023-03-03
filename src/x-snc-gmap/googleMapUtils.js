@@ -4,7 +4,6 @@
  * Requires the use of the geometry library
  */
 import { convertSnakeCaseToTitleCase } from "./stringUtils";
-
 import { COLOR } from "./constants";
 
 const defaultCircleOptions = {
@@ -103,36 +102,7 @@ export function getPlaceDetails(placeDescription, googleMap) {
   });
 }
 
-export function createInfoWindowFromObject(title, obj) {
-  console.log("🌎 createInfoWindowFromObject createInfoWindow createInfoWindow", obj);
 
-  var content = document.createElement("div");
-
-  // Create a header with the value of the title parameter
-  var header = document.createElement("h3");
-  header.textContent = title;
-  content.appendChild(header);
-
-  // Iterate over each property of the object and add it to the content
-  for (var prop in obj) {
-    if (obj.hasOwnProperty(prop) && prop !== "name") {
-      let element = document.createElement("p");
-      let property = convertSnakeCaseToTitleCase(prop);
-      element.innerHTML = "<strong>" + property + ": </strong>" + obj[prop];
-      content.appendChild(element);
-    }
-  }
-
-  // Create a string with the HTML content for the InfoWindow
-  var contentString = content.outerHTML;
-
-  // Create a new InfoWindow with the content string
-  var infowindow = new google.maps.InfoWindow({
-    content: contentString,
-  });
-
-  return infowindow;
-}
 
 /**
  * Construct an address based on the google address_components that
@@ -174,26 +144,51 @@ function formatAddress(address_components) {
 }
 
 export function createInfoWindow(place) {
-  console.log("🌎 createInfoWindow createInfoWindow createInfoWindow", place);
+  console.log("🌎 createInfoWindow", place);
 
   const content = document.createElement("div");
-  const name = document.createElement("div");
+  const header = document.createElement("div");
   const addressDiv = document.createElement("div");
   // name.textContent = place.name;
-  name.innerHTML = `<b>${place.name}</b>`;
+  header.innerHTML = `<b>${place.name}</b>`;
 
-  const { address_components } = place;
   // Create a formatted address string using the address_components variable
   // using the format: 8045 Leesburg Pike STE 300, Vienna, VA 22182, USA
-  //const address = `${address_components[0].long_name} ${address_components[1].long_name}, ${address_components[2].long_name}, ${address_components[4].short_name} ${address_components[6].long_name}, ${address_components[5].long_name}`;
   const address = formatAddress(place.address_components);
   //address.textContent = place.formatted_address;
   //addressDiv.innerHTML = place.adr_address;
   addressDiv.innerHTML = address;
 
-  content.appendChild(name);
+  content.appendChild(header);
   content.appendChild(addressDiv);
   const infowindow = new google.maps.InfoWindow({ content: content });
+  return infowindow;
+}
+
+export function createInfoWindowFromObject(title, obj) {
+  console.log("🌎 createInfoWindowFromObject ", title, obj);
+
+  var content = document.createElement("div");
+
+  // Create a header with the value of the title parameter
+  const header = document.createElement("div");
+  header.innerHTML = `<b>${title}</b>`;
+  //header.textContent = title;
+  content.appendChild(header);
+
+  // Iterate over each property of the object and add it to the content
+  for (var prop in obj) {
+    if (obj.hasOwnProperty(prop) && prop !== "name") {
+      let element = document.createElement("p");
+      let property = convertSnakeCaseToTitleCase(prop);
+      element.innerHTML = "<strong>" + property + ": </strong>" + obj[prop];
+      content.appendChild(element);
+    }
+  }
+
+  var contentString = content.outerHTML;
+
+  const infowindow = new google.maps.InfoWindow({ content: contentString });
   return infowindow;
 }
 
@@ -227,3 +222,4 @@ export function extractFields(mapMarkersFields, dataObject) {
   });
   return result;
 }
+

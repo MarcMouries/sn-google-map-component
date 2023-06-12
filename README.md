@@ -28,8 +28,10 @@
 | Property                | Description                                    | Type      | Example     |
 | ----------------------- | ---------------------------------------------- | --------- | --------- |
 | `place`                 |                                                | string    |           |
-| `mapMarkers`        |                                                | string    |           |
-lng
+| `mapMarkers`            |                                                | string    |           |
+
+
+lat lng
 
 ## Versions
 

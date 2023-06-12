@@ -19,7 +19,7 @@ export default {
   },
 
   initialZoom: {
-    default: 10,
+    default: 9,
     schema: { type: "number" },
   },
   language: {

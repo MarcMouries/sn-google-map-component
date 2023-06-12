@@ -21,30 +21,7 @@ export default (state, { updateState, dispatch }) => {
   const minHeight = "100%";
   const height = "100%";
 
-  const currentDate = new Date();
-  const targetDate = new Date("March 1, 2023");
 
-  if (currentDate < targetDate) {
-   // console.log("Today is before February 1, 2023.");
-  } else {
-   // console.log("Today is February 1, 2023 or later.");
-  }
-
-  if (currentDate > targetDate) {
-
-    return (
-      <Fragment>
-        <div className="error-box">
-          <header></header>
-          <main className="message">
-            <h1 className="alert">Error!</h1>
-            <p></p>
-          </main>
-          <footer></footer>
-        </div>
-      </Fragment>
-    );
-  }
   if (state.hasError) {
     return (
       <Fragment>
@@ -59,11 +36,11 @@ export default (state, { updateState, dispatch }) => {
       </Fragment>
     );
   } else {
-  /*
-  else  if (state.isLoading){
-    return <now-loader></now-loader>;
-  }
-   */
+    /*
+    else  if (state.isLoading){
+      return <now-loader></now-loader>;
+    }
+     */
     return (
       <Fragment>
         <div className="map-container">

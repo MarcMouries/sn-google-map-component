@@ -162,7 +162,38 @@ export const handlePlaceChanged = (place, googleMap, state, dispatch, updateStat
     //console.log("Circle dragend: " + placeCircle.getRadius());
     handleCircleChanged(googleMap, placeCircle, state, dispatch, updateState);
   });
+
+  searchDistance(place, state);
 };
+
+
+const searchDistance = (place, state)  => {
+  console.log("SEARCH DISTANCE: ");
+  console.log("  - formatted_address: ", place.formatted_address);
+  console.log("  - state            : ", state);
+  let distanceMatrixService = new google.maps.DistanceMatrixService();
+
+
+  let origins = [place.formatted_address];
+  let destinations;
+
+  /*
+  distanceMatrixService.getDistanceMatrix(
+    {
+      origins: [origin1, origin2],
+      destinations: [destination],
+      travelMode: 'DRIVING',
+      transitOptions: TransitOptions,
+      drivingOptions: DrivingOptions,
+      unitSystem: UnitSystem,
+      avoidHighways: Boolean,
+      avoidTolls: Boolean,
+    }, callback);
+
+    */
+}
+
+
 
 
 export const handleCircleChanged = (googleMap, placeCircle, state, dispatch, updateState) => {
@@ -260,11 +291,7 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
   });
   let bounds = new googleMapsApi.LatLngBounds();
   let markers = mapMarkers.map((item) => {
-    //TODO add error check if item has lat & lng
-
-    //TODO HERE
-    // table: item.table,
-    // sys_id: item.sys_id,
+    //@TODO add error check if item does not have lat & lng
 
     const markerFields = extractFields(properties.mapMarkersFields, item);
     const markerCopy = Object.assign({}, item);

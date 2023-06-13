@@ -9,12 +9,13 @@ import { SVG_SQUARE } from "./constants";
 import { MapQuest } from "./googleMapStyle";
 import { svg_icon } from "./assets/svg-icon.svg";
 import { createRadiusOverlay } from './radiusOverlay'
+import { Logger } from './logger';
 
 
 const circleOptions = {};
 let radiusOverlay;
 let gmMmarkers = [];
-let infowindow ;
+let infowindow;
 
 export const loadGoogleApi = ({ action, state, dispatch, updateState }) => {
   console.log("📗 Map Component: Loading GoogleApi...");
@@ -147,7 +148,7 @@ export const handlePlaceChanged = (place, googleMap, state, dispatch, updateStat
 
 
   radiusOverlay = getRadiusOverlay(placeCircle, googleMap);
-//  createRadiusOverlay(computeMarkerPosition(placeCircle, "bottom"), elm);
+  //  createRadiusOverlay(computeMarkerPosition(placeCircle, "bottom"), elm);
 
   handleCircleChanged(googleMap, placeCircle, state, dispatch);
 
@@ -167,15 +168,24 @@ export const handlePlaceChanged = (place, googleMap, state, dispatch, updateStat
 };
 
 
-const searchDistance = (place, state)  => {
-  console.log("SEARCH DISTANCE: ");
-  console.log("  - formatted_address: ", place.formatted_address);
-  console.log("  - state            : ", state);
+const searchDistance = (place, state) => {
+  Logger.log('SEARCH DISTANCE:');
+  Logger.log("  - formatted_address: ", place.formatted_address);
+  Logger.log("  - state            : ", state);
+
+
+  const { googleMapsApi, properties: { mapMarkers, mapMarkersFields } } = state;
+  Logger.log("  - mapMarkers       : ", mapMarkers);
+
+  let destinations = [];
+  mapMarkers.forEach((marker) => {
+    //destinations[i] = marker; //markers[i].position;
+    console.log("  - marker            : ", marker);
+  });
+
   let distanceMatrixService = new google.maps.DistanceMatrixService();
 
-
   let origins = [place.formatted_address];
-  let destinations;
 
   /*
   distanceMatrixService.getDistanceMatrix(
@@ -281,9 +291,7 @@ function getMarkerIcon(color) {
 const setMarkers = (state, updateState, dispatch, googleMap) => {
   console.log(" 🌎 setMarkers");
 
-  const { googleMapsApi } = state;
-  const { properties } = state;
-  const { mapMarkers } = properties;
+  const { googleMapsApi, properties: { mapMarkers, mapMarkersFields } } = state;
 
   if (state.markerCluster) state.markerCluster.setMap(null);
   state.markers.forEach((marker) => {
@@ -293,13 +301,13 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
   let markers = mapMarkers.map((item) => {
     //@TODO add error check if item does not have lat & lng
 
-    const markerFields = extractFields(properties.mapMarkersFields, item);
+    const markerFields = extractFields(mapMarkersFields, item);
     const markerCopy = Object.assign({}, item);
 
     console.log("🌎 markerFields: ", markerFields);
     console.log("🌎 markerCopy  : ", markerCopy);
 
-    const marker = new google.maps.Marker({
+    const googleMarker = new google.maps.Marker({
       position: { lat: item.lat, lng: item.lng },
       map: googleMap,
       data: markerCopy,
@@ -311,42 +319,42 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
         fontSize: "28px",
       },
     });
-    gmMmarkers.push(marker);
-    bounds.extend(marker.position);
+    gmMmarkers.push(googleMarker);
+    bounds.extend(googleMarker.position);
 
-    marker.addListener("click", function () {
+    googleMarker.infowindow = createInfoWindowFromObject(item.name, markerFields);
+
+
+    googleMarker.addListener("click", function () {
       console.log("🌎 CLICK on maker", this);
-      infowindow.close();
-      infowindow = createInfoWindowFromObject(item.name, markerFields);
-      infowindow.open({
-        anchor: marker,
-        googleMap,
-      });
 
-      updateState({
-        currentMarker: marker,
-      });
-
+      if (this.infowindow.getMap()) { 
+        this.infowindow.close();
+      }
+      else {
+        this.infowindow.open({ anchor: googleMarker, googleMap });
+        updateState({ currentMarker: googleMarker });
+      }
       // NOT FETCHING DATA FROM THE BACK-END
-      let encodedQuery = "sys_id=" + marker.sys_id;
+      let encodedQuery = "sys_id=" + googleMarker.sys_id;
       dispatch(customActions.FETCH_MARKER_DATA, {
-        table: marker.table,
+        table: googleMarker.table,
         encodedQuery: encodedQuery,
       });
     });
-    return marker;
+    return googleMarker;
   });
-/* 
-  const svgMarker = {
-    path: "M-1.547 12l6.563-6.609-1.406-1.406-5.156 5.203-2.063-2.109-1.406 1.406zM0 0q2.906 0 4.945 2.039t2.039 4.945q0 1.453-0.727 3.328t-1.758 3.516-2.039 3.070-1.711 2.273l-0.75 0.797q-0.281-0.328-0.75-0.867t-1.688-2.156-2.133-3.141-1.664-3.445-0.75-3.375q0-2.906 2.039-4.945t4.945-2.039z",
-    fillColor: "blue",
-    fillOpacity: 0.6,
-    strokeWeight: 0,
-    rotation: 0,
-    scale: 2,
-    anchor: new google.maps.Point(0, 20),
-  };
-*/
+  /* 
+    const svgMarker = {
+      path: "M-1.547 12l6.563-6.609-1.406-1.406-5.156 5.203-2.063-2.109-1.406 1.406zM0 0q2.906 0 4.945 2.039t2.039 4.945q0 1.453-0.727 3.328t-1.758 3.516-2.039 3.070-1.711 2.273l-0.75 0.797q-0.281-0.328-0.75-0.867t-1.688-2.156-2.133-3.141-1.664-3.445-0.75-3.375q0-2.906 2.039-4.945t4.945-2.039z",
+      fillColor: "blue",
+      fillOpacity: 0.6,
+      strokeWeight: 0,
+      rotation: 0,
+      scale: 2,
+      anchor: new google.maps.Point(0, 20),
+    };
+  */
   if (state.properties.centerOn == CENTER_ON.MAP_MARKERS) {
     googleMap.fitBounds(bounds);
   } else if (state.currentUser.location) {

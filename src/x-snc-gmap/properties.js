@@ -29,9 +29,10 @@ export default {
     },
   },
   mapMarkers: {
-    default: [],//AIRPORTS,
+    default: [],
     onChange(currentValue, previousValue, dispatch) {
-      dispatch(customActions.INITIALIZE_MAP);
+      // dispatch(customActions.INITIALIZE_MAP);
+      console.log(`%c[TODO] implement mapMarkers onChange()`, '🐦;background: lightblue; color: #444; padding: 3px; border-radius: 5px;');
     },
   },
   mapMarkersFields: {

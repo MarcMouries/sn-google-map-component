@@ -76,6 +76,12 @@ body {
   }
 }
 
+/* remove the down arrow on infow windows */
+.gm-style-iw-tc {  display: none; }
+
+.info-distance {
+  _border: 1px solid red;
+}
 
 .error-box {
 	min-height: 100%;

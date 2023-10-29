@@ -1,0 +1,9 @@
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    place-content: center;
+    font-family: sans-serif;
+    background-color: #e9f2fd;
+    padding: 1rem;
+}

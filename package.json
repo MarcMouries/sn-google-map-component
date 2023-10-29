@@ -1,6 +1,6 @@
 {
 	"name": "x-snc-gmap",
-	"version": "0.0.1",
+	"version": "0.0.4",
 	"private": false,
 	"description": "Google Map component for AES",
 	"keywords": [

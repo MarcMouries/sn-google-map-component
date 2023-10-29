@@ -79,13 +79,12 @@ export const initializeMap = ({ state, updateState, dispatch }) => {
 
   if ((googleMapsApi, mapElementRef)) {
     async function init() {
-      updateState({
-        googleMapsRef: googleMap,
-      });
+      updateState({ googleMapsRef: googleMap });
     }
     init().then(() => {
-      // call second function here
-      //if  enable circle
+      //TODO 
+      console.log(`%c[TODO] Add property to enable circle or not`, 'background: orange; color: #444; padding: 3px; border-radius: 5px;');
+
       initializeCircle(state, updateState, dispatch, googleMap);
 
       setMarkers(state, updateState, dispatch, googleMap);
@@ -101,6 +100,8 @@ export const initializeMap = ({ state, updateState, dispatch }) => {
   } else {
     console.log("Cannot initialize google map");
   }
+
+ // updateState({ googleMap: googleMap });
 
   const autoCompleteOptions = {
     fields: ["address_components", "geometry", "icon", "name"], // Set the fields to include in the prediction results
@@ -130,27 +131,28 @@ export const handlePlaceChanged = (place, googleMap, state, dispatch, updateStat
   console.log("🌎 updateNewPlace", place);
   const { properties } = state;
 
-  let marker = new google.maps.Marker({
+  let placeMarker = new google.maps.Marker({
     map: googleMap,
     draggable: true,
     animation: google.maps.Animation.BOUNCE,
     position: place.geometry.location,
   });
-  marker.setVisible(true);
-  googleMap.setCenter(marker.getPosition());
+  placeMarker.setVisible(true);
+  googleMap.setCenter(placeMarker.getPosition());
 
-  //TODO HERE
-  const infowindow = createInfoWindow(place);
-  infowindow.open(googleMap, marker);
+  //TODO - enable placeMarker or not
+  //const infowindow = createInfoWindow(place);
+  //infowindow.open(googleMap, placeMarker);
 
   const circleCenter = place.geometry.location;
   const placeCircle = createCircle(googleMap, circleCenter, state.properties.circleRadius, {});
 
 
   radiusOverlay = getRadiusOverlay(placeCircle, googleMap);
-  //  createRadiusOverlay(computeMarkerPosition(placeCircle, "bottom"), elm);
 
   handleCircleChanged(googleMap, placeCircle, state, dispatch);
+
+
 
   // LISTENERS
   google.maps.event.addListener(placeCircle, "radius_changed", function (event) {
@@ -164,6 +166,8 @@ export const handlePlaceChanged = (place, googleMap, state, dispatch, updateStat
     handleCircleChanged(googleMap, placeCircle, state, dispatch, updateState);
   });
 
+  Logger.log("  - googleMap            : ", googleMap);
+
   searchDistance(place, state);
 };
 
@@ -173,34 +177,71 @@ const searchDistance = (place, state) => {
   Logger.log("  - formatted_address: ", place.formatted_address);
   Logger.log("  - state            : ", state);
 
-
-  const { googleMapsApi, properties: { mapMarkers, mapMarkersFields } } = state;
+  const { googleMap, properties: { mapMarkers, mapMarkersFields } } = state;
   Logger.log("  - mapMarkers       : ", mapMarkers);
 
+  let origins = [place.formatted_address];
   let destinations = [];
   mapMarkers.forEach((marker) => {
-    //destinations[i] = marker; //markers[i].position;
-    console.log("  - marker            : ", marker);
+    destinations.push(marker.position);
   });
+  Logger.log("  - destinations       : ", destinations);
 
   let distanceMatrixService = new google.maps.DistanceMatrixService();
-
-  let origins = [place.formatted_address];
-
-  /*
   distanceMatrixService.getDistanceMatrix(
     {
-      origins: [origin1, origin2],
-      destinations: [destination],
+      origins: origins,
+      destinations: destinations,
       travelMode: 'DRIVING',
-      transitOptions: TransitOptions,
-      drivingOptions: DrivingOptions,
-      unitSystem: UnitSystem,
-      avoidHighways: Boolean,
-      avoidTolls: Boolean,
-    }, callback);
+      unitSystem: google.maps.UnitSystem.IMPERIAL,
+    }, function (response, status) {
+      if (status !== google.maps.DistanceMatrixStatus.OK) {
+        console.log("ERROR distanceMatrixService with origins", origins); //TODO check if orginis are set
+      } else {
+       displayMarkersWithDrivingTime(response, googleMap);
+      }
+    });
+}
 
-    */
+const displayMarkersWithDrivingTime = (response, googleMap) => {
+  Logger.log('SHOW DISTANCE:');
+  Logger.log("  - response       : ", response);
+
+  var origins = response.originAddresses;
+  var destinations = response.destinationAddresses;
+  for (var i = 0; i < origins.length; i++) {
+    var results = response.rows[i].elements; // each row corresponds to an origin
+    for (var j = 0; j < results.length; j++) {
+      var element = results[j];
+      if (element.status === "OK") {
+        let element = results[j];
+        let distance = element.distance.text;
+        let duration = element.duration.text;
+        let origin = origins[i];
+        let destination = destinations[j];
+
+        Logger.log(`#${j} ${duration} away ${distance}`);
+        Logger.log("  - origin       : ", origin);
+        Logger.log("  - destination  : ", destination);
+
+        let marker = gmMmarkers[j];
+        let content = duration + ' away, ' + distance;
+        var infowindow = new google.maps.InfoWindow({
+          /*content: duration + ' away, ' + distance,*/
+          content: '<div class="info-distance" id="infowindowContent">' + content + '</div>',
+          pixelOffset: new google.maps.Size(0, 90) // pixel down the marker
+
+        });
+        infowindow.open(googleMap, marker);     
+        
+        marker.infowindow.open({ anchor: marker, googleMap });
+
+        //Logger.log("  - gmMmarkers  : ", gmMmarkers);
+        //Logger.log("  - MARKER  : " + marker.title);
+
+      }
+    }
+  }
 }
 
 
@@ -308,15 +349,15 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
     console.log("🌎 markerCopy  : ", markerCopy);
 
     const googleMarker = new google.maps.Marker({
-      position: { lat: item.lat, lng: item.lng },
+      position: item.position,
       map: googleMap,
-      data: markerCopy,
+      data: markerFields, //markerCopy,
       icon: getMarkerIcon(COLOR.INITIAL_MARKER),
       title: item.name,
       label: {
-        text: "✈",
+        text: "$",  // ✈  // aircraft icon
         color: "#ffffff",
-        fontSize: "28px",
+        fontSize: "22px",
       },
     });
     gmMmarkers.push(googleMarker);
@@ -328,7 +369,7 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
     googleMarker.addListener("click", function () {
       console.log("🌎 CLICK on maker", this);
 
-      if (this.infowindow.getMap()) { 
+      if (this.infowindow.getMap()) {
         this.infowindow.close();
       }
       else {
@@ -368,7 +409,7 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
       sys_id: state.currentUser.sys_id,
       label: {
         //text: "\ue539", // codepoint from https://fonts.google.com/icons
-        text: "✈", // airplane
+        text: "U",
         //fontFamily: "Material Icons",
         color: "#ffffff",
         fontSize: "18px",
@@ -409,6 +450,7 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
   }
 
   let markerCluster = new MarkerClusterer(googleMap, markers, { imagePath: "https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m" });
+  
   updateState({
     markers: markers,
     markerCluster: markerCluster,

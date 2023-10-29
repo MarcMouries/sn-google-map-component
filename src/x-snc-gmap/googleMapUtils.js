@@ -180,8 +180,9 @@ export function createInfoWindowFromObject(title, obj) {
   for (var prop in obj) {
     if (obj.hasOwnProperty(prop) && prop !== "name") {
       let element = document.createElement("p");
-      let property = convertSnakeCaseToTitleCase(prop);
-      element.innerHTML = "<strong>" + property + ": </strong>" + obj[prop];
+      let propertyTitle = convertSnakeCaseToTitleCase(prop);
+      let propertyValue = obj[prop];
+      element.innerHTML = "<strong>" + propertyTitle + ": </strong>" + propertyValue;
       content.appendChild(element);
     }
   }

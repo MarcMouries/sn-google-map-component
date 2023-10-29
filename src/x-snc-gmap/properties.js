@@ -31,8 +31,8 @@ export default {
   mapMarkers: {
     default: [],
     onChange(currentValue, previousValue, dispatch) {
-      // dispatch(customActions.INITIALIZE_MAP);
-      console.log(`%c[TODO] implement mapMarkers onChange()`, '🐦;background: lightblue; color: #444; padding: 3px; border-radius: 5px;');
+      dispatch(customActions.INITIALIZE_MAP);
+      console.log(`%c[TODO] implement mapMarkers onChange()`, 'background: orange; color: #444; padding: 3px; border-radius: 5px;');
     },
   },
   mapMarkersFields: {

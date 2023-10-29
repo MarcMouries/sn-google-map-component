@@ -1,5 +1,7 @@
 import { AIRPORTS, DEFAULT_VALUES } from "./defaultValues";
 import { CENTER_ON } from "./constants";
+import { customActions } from "./constants"
+
 
 export default {
   center: {
@@ -32,7 +34,7 @@ export default {
     default: [],
     onChange(currentValue, previousValue, dispatch) {
       dispatch(customActions.INITIALIZE_MAP);
-      console.log(`%c[TODO] implement mapMarkers onChange()`, 'background: orange; color: #444; padding: 3px; border-radius: 5px;');
+      console.log(`%c mapMarkers onChange()`, 'background: orange; color: #444; padding: 3px; border-radius: 5px;');
     },
   },
   mapMarkersFields: {

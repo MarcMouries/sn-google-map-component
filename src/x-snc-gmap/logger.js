@@ -5,7 +5,7 @@ export const Logger = {
         color:white;
         padding: 8px;
         font-family: Courier;
-        font-size: 16px; 
+        font-size: 12px; 
         font-weight: 600;
     `,
 

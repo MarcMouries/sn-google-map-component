@@ -8,6 +8,12 @@
 
 ## Versions
 
+- 0.5
+  1. Tested on ServiceNow Vancouver release
+  2. Prints the component's version to the console for ensuring that the correct version of the component is being used.
+  3. [TODO] Add property to enable circle or not
+
+
 - 0.4
     - **Localization:** Map can be localized by setting the language property using the [BCP 47 code](https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry) of the target language. Example: Chinese (zh), English (en), French (fr), German (de),  Italian (it), Japanese (ja), Portuguese (pt), Spanish (es)
 

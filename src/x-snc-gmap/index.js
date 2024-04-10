@@ -6,8 +6,10 @@ import properties from "./properties";
 import { DEFAULT_VALUES } from "./defaultValues";
 import { actionHandlers } from "./actionHandlers";
 import { customActions } from "./constants";
+import { name, version, author } from '../../package.json';
 
 //console.log = function() {}
+
 
 createCustomElement("x-snc-gmap", {
   renderer: { type: snabbdom },
@@ -27,7 +29,10 @@ createCustomElement("x-snc-gmap", {
   },
 
   actionHandlers: {
-    ...actionHandlers,
+    [actionTypes.COMPONENT_RENDER_REQUESTED]: ({ state, updateState }) => {
+      printComponentInfo(state, updateState);
+    },
+    ...actionHandlers
   },
   actions: {
     [customActions.MAP_CIRCLE_CHANGED]: {
@@ -37,3 +42,14 @@ createCustomElement("x-snc-gmap", {
     },
   },
 });
+
+function printComponentInfo(state, updateState) {
+  if (!state.versionShowed) {
+    const logStyle = 'background: #333; color: #FFF; border-radius: 4px; font-size: 14px; padding: 5px; ';
+    console.log(
+      `%c🌎 Map Component                       \nName    : ${name}                   \nVersion : ${version}                        \nAuthor  : ${author.email}  `,
+      logStyle
+    );
+    updateState({ versionShowed: true });
+  }
+}

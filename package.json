@@ -1,6 +1,10 @@
 {
 	"name": "x-snc-gmap",
 	"version": "0.0.4",
+	"author" : {
+		"name": "Marc Mouries",
+		"email": "marc.mouries@servicenow.com"
+	},
 	"private": false,
 	"description": "Google Map component for AES",
 	"keywords": [
@@ -16,24 +20,22 @@
 	"module": "src/index.js",
 	"dependencies": {
 		"@google/markerclustererplus": "latest",
-		"@servicenow/cli-archetype": "latest",
-		"@servicenow/cli-component-archetype": "latest",
-		"@servicenow/library-translate": "latest",
-		"@servicenow/now-input": "^19.8.2-ecd",
-		"@servicenow/now-loader": "^19.8.2-ecd",
-		"@servicenow/now-select": "^19.8.2-ecd",
-		"@servicenow/sass-kit": "latest",
-		"@servicenow/sass-theme": "latest",
-		"@servicenow/ui-core": "latest",
-		"@servicenow/ui-effect-graphql": "latest",
-		"@servicenow/ui-effect-http": "latest",
-		"@servicenow/ui-renderer-snabbdom": "latest",
+		"@servicenow/cli-archetype": "vancouver",
+		"@servicenow/cli-component-archetype": "vancouver",
+		"@servicenow/now-loader": "19.8.2-ecd",
+		"@servicenow/sass-kit": "19.8.2-ecd",
+		"@servicenow/sass-theme": "19.8.2-ecd",
+		"@servicenow/ui-core": "vancouver",
+		"@servicenow/ui-effect-graphql": "vancouver",
+		"@servicenow/ui-effect-http": "vancouver",
+		"@servicenow/ui-renderer-snabbdom": "vancouver",
+		"amb-client-js": "file:amb-client-js-20.0.3.tgz",
 		"chalk": "^1.1.3",
 		"load-google-maps-api": "^2.0.2",
 		"sn-translate": "latest"
 	},
 	"devDependencies": {
-		"@servicenow/cli-archetype-dev": "latest",
-		"@servicenow/cli-component-archetype-dev": "latest"
+		"@servicenow/cli-archetype-dev": "vancouver",
+		"@servicenow/cli-component-archetype-dev": "vancouver"
 	}
 }

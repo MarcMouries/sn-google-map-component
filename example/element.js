@@ -3,13 +3,10 @@ import '../src/x-snc-gmap-demo'
 import './styles.css'; 
 
 const el = document.createElement('DIV');
+el.style.width = '100%';
 document.body.appendChild(el);
 
-el.innerHTML =`
-<div id="example-container"
-       style='width: 800px; height: 800px;'>
-       <x-snc-gmap-demo></x-snc-gmap-demo>
-</div>`;
+el.innerHTML =`<x-snc-gmap-demo></x-snc-gmap-demo>`;
 
 // Add CSS file
 const link = document.createElement('link');

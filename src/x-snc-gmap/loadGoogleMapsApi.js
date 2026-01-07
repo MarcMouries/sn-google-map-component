@@ -14,7 +14,7 @@ import { Logger } from './logger';
 
 const circleOptions = {};
 let radiusOverlay;
-let gmMmarkers = [];
+let gmMarkers = [];
 let infowindow;
 
 export const loadGoogleApi = ({ action, state, dispatch, updateState }) => {
@@ -157,8 +157,12 @@ export const handlePlaceChanged = (place, googleMap, state, dispatch, updateStat
   // LISTENERS
   google.maps.event.addListener(placeCircle, "radius_changed", function (event) {
     //console.log("Circle radius_changed: " + placeCircle.getRadius());
-    //updateState({ circleRadius: circleRadiusDesc });
     handleCircleChanged(googleMap, placeCircle, state, dispatch, updateState);
+  });
+
+  // Update overlay position while dragging (real-time)
+  google.maps.event.addListener(placeCircle, "center_changed", function (event) {
+    updateOverlayPosition(placeCircle);
   });
 
   google.maps.event.addListener(placeCircle, "dragend", function (event) {
@@ -224,7 +228,7 @@ const displayMarkersWithDrivingTime = (response, googleMap) => {
         Logger.log("  - origin       : ", origin);
         Logger.log("  - destination  : ", destination);
 
-        let marker = gmMmarkers[j];
+        let marker = gmMarkers[j];
         let content = duration + ' away, ' + distance;
         var infowindow = new google.maps.InfoWindow({
           /*content: duration + ' away, ' + distance,*/
@@ -236,7 +240,7 @@ const displayMarkersWithDrivingTime = (response, googleMap) => {
         
         marker.infowindow.open({ anchor: marker, googleMap });
 
-        //Logger.log("  - gmMmarkers  : ", gmMmarkers);
+        //Logger.log("  - gmMarkers  : ", gmMarkers);
         //Logger.log("  - MARKER  : " + marker.title);
 
       }
@@ -260,7 +264,7 @@ export const handleCircleChanged = (googleMap, placeCircle, state, dispatch, upd
   let markersInsideCircle = [];
   let addedMarkerIds = new Set();
 
-  gmMmarkers.forEach(function (marker) {
+  gmMarkers.forEach(function (marker) {
     let position = marker.getPosition();
     let distanceFromCenter = google.maps.geometry.spherical.computeDistanceBetween(center, position);
     let insideCircle = distanceFromCenter <= radius;
@@ -308,10 +312,8 @@ function sortObjects(arr, field) {
 }
 
 function getRadiusOverlay(placeCircle, googleMap) {
-  console.log(" 🌎 getRadiusOverlay");
-
   if (radiusOverlay) return radiusOverlay;
-  console.log(" 🌎 getRadiusOverlay - create it");
+  console.log(" 🌎 getRadiusOverlay - creating new overlay");
 
   // otherwise create it
   let elm = document.createElement("div");
@@ -319,6 +321,15 @@ function getRadiusOverlay(placeCircle, googleMap) {
   radiusOverlay = createRadiusOverlay(computeMarkerPosition(placeCircle, "bottom"), elm);
   radiusOverlay.setMap(googleMap);
   return radiusOverlay;
+}
+
+/**
+ * Update the overlay position to follow the circle during drag
+ */
+function updateOverlayPosition(placeCircle) {
+  if (radiusOverlay) {
+    radiusOverlay.setPosition(computeMarkerPosition(placeCircle, "bottom"));
+  }
 }
 
 
@@ -334,13 +345,35 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
 
   const { googleMapsApi, properties: { mapMarkers, mapMarkersFields } } = state;
 
+  // Clear existing markers from the map
   if (state.markerCluster) state.markerCluster.setMap(null);
   state.markers.forEach((marker) => {
     marker.setMap(null);
   });
+
+  // Clear the module-level gmMarkers array
+  gmMarkers.forEach((marker) => {
+    marker.setMap(null);
+  });
+  gmMarkers = [];
+
   let bounds = new googleMapsApi.LatLngBounds();
   let markers = mapMarkers.map((item) => {
-    //@TODO add error check if item does not have lat & lng
+    // Handle different marker data formats:
+    // - item.position = { lat, lng }
+    // - or item.lat and item.lng as separate properties
+    // - or item.lat and item.long as separate properties
+    let markerPosition;
+    if (item.position) {
+      markerPosition = item.position;
+    } else if (item.lat !== undefined && item.lng !== undefined) {
+      markerPosition = { lat: item.lat, lng: item.lng };
+    } else if (item.lat !== undefined && item.long !== undefined) {
+      markerPosition = { lat: item.lat, lng: item.long };
+    } else {
+      console.warn("🌎 Marker missing position data:", item);
+      return null;
+    }
 
     const markerFields = extractFields(mapMarkersFields, item);
     const markerCopy = Object.assign({}, item);
@@ -349,7 +382,7 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
     console.log("🌎 markerCopy  : ", markerCopy);
 
     const googleMarker = new google.maps.Marker({
-      position: item.position,
+      position: markerPosition,
       map: googleMap,
       data: markerFields, //markerCopy,
       icon: getMarkerIcon(COLOR.INITIAL_MARKER),
@@ -360,7 +393,7 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
         fontSize: "22px",
       },
     });
-    gmMmarkers.push(googleMarker);
+    gmMarkers.push(googleMarker);
     bounds.extend(googleMarker.position);
 
     googleMarker.infowindow = createInfoWindowFromObject(item.name, markerFields);

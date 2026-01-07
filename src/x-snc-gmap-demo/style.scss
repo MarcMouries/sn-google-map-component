@@ -1,10 +1,202 @@
 @import '@servicenow/sass-kit/host';
 
+// ServiceNow brand colors
+$sn-green: #62d84e;
+$sn-dark-bg: #0d2b3e;
+$sn-darker-bg: #061f2d;
+
+:host {
+    display: block;
+    width: 100%;
+    min-height: 100vh;
+}
 
 .example-container {
-    width: 800px;
-    height: 800px;
+    width: 100%;
+    min-height: 100vh;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, $sn-darker-bg 0%, $sn-dark-bg 50%, darken($sn-green, 40%) 100%);
+    box-sizing: border-box;
 
+    header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 2rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+}
+
+.title-section {
+    h1 {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: white;
+
+        .accent {
+            color: $sn-green;
+        }
+    }
+
+    .subtitle {
+        margin: 0.25rem 0 0 0;
+        font-size: 0.95rem;
+        color: rgba(white, 0.7);
+    }
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    label {
+        font-weight: 600;
+        color: white;
+    }
+
+    select {
+        padding: 0.6rem 1rem;
+        font-size: 1rem;
+        border-radius: 6px;
+        border: 1px solid rgba(white, 0.2);
+        background-color: rgba(white, 0.1);
+        color: white;
+        cursor: pointer;
+        min-width: 200px;
+
+        &:hover {
+            background-color: rgba(white, 0.15);
+        }
+
+        &:focus {
+            outline: 2px solid $sn-green;
+            outline-offset: 2px;
+        }
+
+        option {
+            background-color: $sn-dark-bg;
+            color: white;
+        }
+    }
+}
+
+.main-content {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.map-container {
+    flex: 1;
+    min-width: 500px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+
+    x-snc-gmap {
+        display: block;
+        height: 80vh;
+        min-height: 500px;
+    }
+}
+
+.event-log {
+    width: 320px;
+    flex-shrink: 0;
+    padding: 1.25rem;
+    background-color: rgba(white, 0.05);
+    border: 1px solid rgba(white, 0.1);
+    border-radius: 8px;
+    height: fit-content;
+    max-height: 80vh;
+    overflow-y: auto;
+    color: white;
+
+    h3 {
+        margin-top: 0;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-bottom: 1px solid rgba(white, 0.15);
+        padding-bottom: 0.75rem;
+        color: $sn-green;
+    }
+
+    p {
+        margin: 0.4rem 0;
+        font-size: 0.9rem;
+        color: rgba(white, 0.85);
+
+        strong {
+            color: white;
+        }
+    }
+}
+
+.circle-event {
+    margin-top: 1rem;
     padding: 1rem;
+    background-color: rgba($sn-green, 0.15);
+    border: 1px solid rgba($sn-green, 0.4);
+    border-radius: 6px;
 
+    p {
+        margin: 0 0 0.5rem 0;
+        color: $sn-green;
+
+        strong {
+            color: $sn-green;
+        }
+    }
+
+    ul {
+        margin: 0;
+        padding-left: 1.25rem;
+        max-height: 350px;
+        overflow-y: auto;
+
+        li {
+            margin: 0.4rem 0;
+            font-size: 0.85rem;
+            color: rgba(white, 0.8);
+
+            strong {
+                color: white;
+            }
+        }
+    }
+
+    &.empty {
+        background-color: rgba(#ff9800, 0.15);
+        border-color: rgba(#ff9800, 0.4);
+
+        p {
+            margin: 0;
+            color: #ffb74d;
+        }
+    }
+}
+
+// Scrollbar styling for dark theme
+.event-log::-webkit-scrollbar,
+.circle-event ul::-webkit-scrollbar {
+    width: 6px;
+}
+
+.event-log::-webkit-scrollbar-track,
+.circle-event ul::-webkit-scrollbar-track {
+    background: rgba(white, 0.05);
+    border-radius: 3px;
+}
+
+.event-log::-webkit-scrollbar-thumb,
+.circle-event ul::-webkit-scrollbar-thumb {
+    background: rgba(white, 0.2);
+    border-radius: 3px;
+
+    &:hover {
+        background: rgba(white, 0.3);
+    }
 }

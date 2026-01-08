@@ -52,4 +52,11 @@ export default {
       dispatch(customActions.SET_PLACE);
     },
   },
+  showCircle: {
+    default: true,
+    schema: { type: "boolean" },
+    onChange(currentValue, previousValue, dispatch) {
+      dispatch(customActions.TOGGLE_CIRCLE, { visible: currentValue });
+    },
+  },
 };

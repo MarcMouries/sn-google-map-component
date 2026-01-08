@@ -14,6 +14,8 @@ import { Logger } from './logger';
 
 const circleOptions = {};
 let radiusOverlay;
+let placeCircleRef; // Reference to the circle for toggling visibility
+let googleMapRef; // Reference to the map for toggling
 let gmMarkers = [];
 let infowindow;
 
@@ -82,9 +84,6 @@ export const initializeMap = ({ state, updateState, dispatch }) => {
       updateState({ googleMapsRef: googleMap });
     }
     init().then(() => {
-      //TODO 
-      console.log(`%c[TODO] Add property to enable circle or not`, 'background: orange; color: #444; padding: 3px; border-radius: 5px;');
-
       initializeCircle(state, updateState, dispatch, googleMap);
 
       setMarkers(state, updateState, dispatch, googleMap);
@@ -147,8 +146,18 @@ export const handlePlaceChanged = (place, googleMap, state, dispatch, updateStat
   const circleCenter = place.geometry.location;
   const placeCircle = createCircle(googleMap, circleCenter, state.properties.circleRadius, {});
 
+  // Store references for toggling visibility
+  placeCircleRef = placeCircle;
+  googleMapRef = googleMap;
 
   radiusOverlay = getRadiusOverlay(placeCircle, googleMap);
+
+  // Check if circle should be visible based on showCircle property
+  const showCircle = state.properties.showCircle !== false; // Default to true
+  if (!showCircle) {
+    placeCircle.setMap(null);
+    radiusOverlay.setMap(null);
+  }
 
   handleCircleChanged(googleMap, placeCircle, state, dispatch);
 
@@ -332,6 +341,18 @@ function updateOverlayPosition(placeCircle) {
   }
 }
 
+/**
+ * Toggle the visibility of the circle overlay
+ * @param {boolean} visible - Whether the circle should be visible
+ */
+export const toggleCircleVisibility = (visible) => {
+  if (placeCircleRef) {
+    placeCircleRef.setMap(visible ? googleMapRef : null);
+  }
+  if (radiusOverlay) {
+    radiusOverlay.setMap(visible ? googleMapRef : null);
+  }
+};
 
 function getMarkerIcon(color) {
   const svgSquare = encodeURIComponent(SVG_SQUARE.replace("{{background}}", color));
@@ -384,14 +405,9 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
     const googleMarker = new google.maps.Marker({
       position: markerPosition,
       map: googleMap,
-      data: markerFields, //markerCopy,
+      data: markerFields,
       icon: getMarkerIcon(COLOR.INITIAL_MARKER),
       title: item.name,
-      label: {
-        text: "$",  // ✈  // aircraft icon
-        color: "#ffffff",
-        fontSize: "22px",
-      },
     });
     gmMarkers.push(googleMarker);
     bounds.extend(googleMarker.position);

@@ -2,6 +2,7 @@ import { createGraphQLEffect } from '@seismic/effect-graphql';
 import { glideRecordQuery } from "../query"
 import { customActions } from '../constants';
 import {t} from 'sn-translate';
+import { Logger } from '../logger';
 
 const FETCH_ERROR = {
 	name: t('Error fetching Google Maps API Key'),
@@ -25,20 +26,21 @@ const requestGoogleMapsApiKey = createGraphQLEffect(
 
 
 const startGoogleMapsApiKeyFetch = ({ action, state, dispatch }) => {
-	console.log("📗 Map Component: Fetching Google Maps API key...");
-	console.log("📗 Map Component: Fetching Google Maps API key...", state);
-	console.log("📗 Map Component: Fetching Google Maps API key...", action);
-	console.log("📗 Map Component: Fetching Google Maps API key...", action.payload);
+	Logger.info("🚀 Fetching Google Maps API key from ServiceNow...");
+	Logger.debug("  state:", state);
+	Logger.debug("  action:", action);
+	Logger.debug("  payload:", action.payload);
 };
 
 const finishGoogleMapsApiKeyFetchSuccess = ({ action, state, dispatch, updateState }) => {
 	const { payload, meta } = action;
-	console.log("📗 Map Component: Google Maps API Key Fetch Success", payload);
+	Logger.info("🚀 Google Maps API Key Fetch Success");
+	Logger.debug("  payload:", payload);
 	if (payload.errors.length) {
-		console.error(action);
-		console.error(payload);
-		console.error(payload.data);
-		console.error(meta);
+		Logger.error("API Key fetch error - action:", action);
+		Logger.error("  payload:", payload);
+		Logger.error("  payload.data:", payload.data);
+		Logger.error("  meta:", meta);
 		dispatch('PROPERTIES_SET', { error: FETCH_ERROR });
 		return;
 	}
@@ -46,23 +48,23 @@ const finishGoogleMapsApiKeyFetchSuccess = ({ action, state, dispatch, updateSta
 	const result = (payload["data"]["GlideRecord_Query"][table]["_results"][0]||{});
 	let googleMapApiKey = payload.data.GlideRecord_Query.sys_properties._results[0].value.value;
 
-	console.log("    - google.maps.key = ", googleMapApiKey);
+	Logger.debug("    - google.maps.key = ", googleMapApiKey);
 
 	if (!googleMapApiKey) {
-		console.error('No Google API Key found.');
+		Logger.error('🗺️ No Google API Key found.');
 		updateState({ hasError: true, error: "No Google API Key found." });
 		dispatch('PROPERTIES_SET', { error: NO_API_KEY_ERROR });
 		return;
 	}
 	dispatch(customActions.GOOGLE_API_LOAD_REQUESTED,
 	{
-		googleApiKey: googleMapApiKey 
+		googleApiKey: googleMapApiKey
 	});
 };
 
 const finishGoogleMapsApiKeyFetchFailure = ({ action, state, dispatch }) => {
-	console.log("❌ Error Loading GoogleMapsApiKey: ", action.payload.response);
-	console.log("❌ Error: ", action.payload.response.statusText);
+	Logger.error("❌ Error Loading GoogleMapsApiKey: ", action.payload.response);
+	Logger.error("❌ Error: ", action.payload.response.statusText);
 	dispatch('PROPERTIES_SET', { error: FETCH_ERROR });
 };
 

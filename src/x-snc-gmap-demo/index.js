@@ -3,6 +3,7 @@ import snabbdom, { createRef } from "@seismic/snabbdom-renderer";
 import styles from './style.scss';
 import "../x-snc-gmap";
 import { CENTER_ON, customActions } from "../x-snc-gmap/constants";
+import { Logger } from "../x-snc-gmap/logger";
 import { AIRPORTS } from './sample-data/AIRPORTS'
 import { MONEY_ORDERS } from './sample-data/MONEY_ORDERS'
 import { DC_BOUNDARY_STONES } from './sample-data/DC_BOUNDARY_STONES'
@@ -216,12 +217,12 @@ createCustomElement("x-snc-gmap-demo", {
   actionHandlers: {
     [MARKER_TYPE_CHANGED]: (coeffects) => {
       const { action: { payload }, updateState } = coeffects;
-      console.log("MARKER_TYPE_CHANGED: ", payload);
+      Logger.action("🎯 MARKER_TYPE_CHANGED", payload);
       updateState({ markerType: payload.selectedValue });
     },
     [SHOW_CIRCLE_CHANGED]: (coeffects) => {
       const { action: { payload }, updateState } = coeffects;
-      console.log("SHOW_CIRCLE_CHANGED: ", payload);
+      Logger.action("⭕ SHOW_CIRCLE_CHANGED", payload);
       // Clear circle event data when hiding the circle
       if (!payload.showCircle) {
         updateState({ showCircle: payload.showCircle, circleEvent: null });
@@ -231,21 +232,21 @@ createCustomElement("x-snc-gmap-demo", {
     },
     [ADDRESS_CHANGED]: (coeffects) => {
       const { action: { payload }, updateState } = coeffects;
-      console.log("ADDRESS_CHANGED: ", payload);
+      Logger.action("📍 ADDRESS_CHANGED", payload);
       updateState({ address: payload.address });
     },
     [UNIT_CHANGED]: (coeffects) => {
       const { action: { payload }, updateState } = coeffects;
-      console.log("UNIT_CHANGED: ", payload);
+      Logger.action("📏 UNIT_CHANGED", payload);
       updateState({ radiusUnit: payload.radiusUnit });
     },
     [customActions.MAP_CIRCLE_CHANGED]: (coeffects) => {
       const { action: { payload }, updateState } = coeffects;
-      console.log("MAP_CIRCLE_CHANGED event received:", payload);
+      Logger.action("⭕ MAP_CIRCLE_CHANGED", payload);
       updateState({ circleEvent: payload });
     },
     ["NOW_SELECT#SELECTED_ITEM_SET"]: (coeffects, newValue) => {
-      console.log("in NOW_SELECT#SELECTED_ITEM_SET: ", newValue);
+      Logger.action("🔽 NOW_SELECT#SELECTED_ITEM_SET", newValue);
       coeffects.updateState({ markerType: newValue });
     },
   }

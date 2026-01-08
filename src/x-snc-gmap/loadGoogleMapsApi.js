@@ -593,6 +593,7 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
     //map.setMapTypeId('styled_map');
     infowindow.open(googleMap, marker);
 
+    // Set default circle radius when centering on user location (80km)
     updateState({ circleRadius: 80000 });
   }
 

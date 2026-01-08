@@ -2,11 +2,12 @@ import { Fragment } from "@seismic/snabbdom-renderer";
 import { stateConstants } from "./constants";
 import { customActions } from "./constants";
 import { translate } from "./translate";
+import { Logger } from './logger';
 
 const handleInputChange = (e, dispatch) => {
   const fieldValue = e.target.value;
   const data = e.data;
-  console.log("handleInput: fieldValue ", fieldValue);
+  Logger.debug("handleInput: fieldValue ", fieldValue);
   //debounceDispatch(() => {
   dispatch(({ properties: { name } }) => {
     return { type: "NOW_INPUT#INPUT", payload: { name, data, fieldValue } };
@@ -15,7 +16,7 @@ const handleInputChange = (e, dispatch) => {
 };
 
 export default (state, { updateState, dispatch }) => {
-  console.log("Map Component: state ", state);
+  Logger.debug("🗺️ Map Component: state ", state);
   const { mapElementRef, autoCompleteRef } = state;
   const { properties } = state;
   const minHeight = "100%";

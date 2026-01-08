@@ -1,6 +1,7 @@
 import { AIRPORTS, DEFAULT_VALUES } from "./defaultValues";
 import { CENTER_ON } from "./constants";
-import { customActions } from "./constants"
+import { customActions } from "./constants";
+import { Logger } from './logger';
 
 
 export default {
@@ -44,7 +45,7 @@ export default {
     onChange(currentValue, previousValue, dispatch) {
       // Use UPDATE_MARKERS to preserve circle overlay and other map state
       dispatch(customActions.UPDATE_MARKERS);
-      console.log(`%c mapMarkers onChange()`, 'background: orange; color: #444; padding: 3px; border-radius: 5px;');
+      Logger.debug("📍 mapMarkers onChange()");
     },
   },
   mapMarkersFields: {

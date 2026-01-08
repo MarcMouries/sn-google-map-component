@@ -1,8 +1,9 @@
 import { createHttpEffect } from '@servicenow/ui-effect-http';
 
 import { customActions } from "./constants"
+import { Logger } from './logger';
 import { googleApiKeyActionHandlers } from './actions/LoadGoogleApiKeyActions';
-import { googleMapMethodActionHandlers } from './actions/LoadGoogleApiMethodActions';
+import { googleMapCredentialTypeActionHandlers } from './actions/LoadGoogleApiMethodActions';
 
 import { actionTypes } from "@servicenow/ui-core";
 const { COMPONENT_BOOTSTRAPPED } = actionTypes;
@@ -13,9 +14,9 @@ import { createGraphQLEffect } from "@servicenow/ui-effect-graphql";
 import { glideRecordQuery } from "./query"
 
 
-const requestGoogleMapMethod = (coeffects) => {
+const requestGoogleMapCredentialType = (coeffects) => {
      const { action, state, updateState, dispatch } = coeffects;
-     console.log("🚀 requestGoogleMapMethod", action.payload);
+     Logger.action("🚀 requestGoogleMapCredentialType", action.payload);
      dispatch(customActions.GMAP_API_METHOD_FETCH_REQUESTED,
           {
                encodedQuery: `name=google.maps.method`,
@@ -26,7 +27,7 @@ const requestGoogleMapMethod = (coeffects) => {
 
 const requestGoogleMapAPIKey = (coeffects) => {
      const { action, state, updateState, dispatch } = coeffects;
-     console.log("🚀 requestGoogleMapAPIKey", action.payload);
+     Logger.action("🚀 requestGoogleMapAPIKey", action.payload);
      dispatch(customActions.GOOGLE_MAPS_API_KEY_FETCH_REQUESTED,
           {
                encodedQuery: `name=google.maps.key`,
@@ -48,8 +49,8 @@ export const actionHandlers = {
 //     [actionTypes.COMPONENT_BOOTSTRAPPED]: requestGoogleMapAPIKey,
 //     ...googleApiKeyActionHandlers,
 
-     [actionTypes.COMPONENT_BOOTSTRAPPED]: requestGoogleMapMethod,
-     ...googleMapMethodActionHandlers,
+     [actionTypes.COMPONENT_BOOTSTRAPPED]: requestGoogleMapCredentialType,
+     ...googleMapCredentialTypeActionHandlers,
      ...googleApiKeyActionHandlers,
 
      [customActions.GOOGLE_API_LOAD_REQUESTED]: loadGoogleApi,
@@ -62,7 +63,7 @@ export const actionHandlers = {
 
      [customActions.TOGGLE_CIRCLE]: ({ action }) => {
           const { visible } = action.payload;
-          console.log('📗 Action: TOGGLE_CIRCLE, visible:', visible);
+          Logger.action('📗 TOGGLE_CIRCLE', { visible });
           toggleCircleVisibility(visible);
      },
 
@@ -79,17 +80,17 @@ export const actionHandlers = {
      ),
 
      [customActions.CURRENT_USER_FETCH_STARTED]: ({ updateState }) => {
-          console.log('📗 Action: CURRENT_USER_FETCH_STARTED');
+          Logger.action('📗 CURRENT_USER_FETCH_STARTED');
           updateState({ isLoading: true });
      },
 
      [customActions.CURRENT_USER_FETCH_SUCCEEDED]: ({ action, dispatch, updateState }) => {
-          console.log('📗 Action: CURRENT_USER_FETCH_SUCCEEDED');
+          Logger.action('📗 CURRENT_USER_FETCH_SUCCEEDED');
           const { user_sys_id: userSysId } = action.payload.result;
-          console.log("  result = ", action.payload.result);
+          Logger.debug("  result = ", action.payload.result);
 
           let currentUser = { "SysId" : userSysId}
-          console.log("  currentUser = ", currentUser);
+          Logger.debug("  currentUser = ", currentUser);
           updateState({ "currentUser" : currentUser });
 
           dispatch(customActions.USER_LOCATION_FETCH_REQUESTED, {
@@ -117,28 +118,27 @@ export const actionHandlers = {
      },
      */
      [customActions.USER_LOCATION_FETCH_STARTED]: () => {
-          console.log('USER_LOCATION_FETCH_STARTED');
+          Logger.action('📗 USER_LOCATION_FETCH_STARTED');
      },
 
      [customActions.USER_LOCATION_FETCH_SUCCEEDED]: ({ action, dispatch, updateState, state }) => {
-          console.log('📗 Action: USER_LOCATION_FETCH_SUCCEEDED');
+          Logger.action('📗 USER_LOCATION_FETCH_SUCCEEDED');
           const { payload, meta } = action;
-          //console.log("   meta - variables: ", meta["options"]["variables"]);
 
           if (payload.errors.length) {
-               console.error(payload.errors[0]);
-               console.error(payload.data);
+               Logger.error(payload.errors[0]);
+               Logger.error(payload.data);
                dispatch('PROPERTIES_SET', { error: FETCH_ERROR });
                return;
           }
 
           const result = payload.data.GlideRecord_Query.sys_user._results[0];
-          console.log("    result = ", result);
+          Logger.debug("    result = ", result);
 
           let currentUser = state.currentUser;
           currentUser.name = result.name.displayValue;
 
-          console.log("  currentUser = ", currentUser);
+          Logger.debug("  currentUser = ", currentUser);
           updateState({ "currentUser" : currentUser });
 
           if (result.location) {
@@ -167,10 +167,10 @@ export const actionHandlers = {
 					},
 				} = payload;
 
-                    console.log('📗 Action: FETCH_MARKER_DATA_SUCCESS');
+                    Logger.action('📗 FETCH_MARKER_DATA_SUCCESS');
 				const result = payload.data.GlideRecord_Query.sys_user._results[0];
-				console.log("    - result = ", result);
-				console.log("    - payload = ", payload);
+				Logger.debug("    - result = ", result);
+				Logger.debug("    - payload = ", payload);
 
 				// Marker with Link
 				/*const infowindow = new google.maps.InfoWindow({

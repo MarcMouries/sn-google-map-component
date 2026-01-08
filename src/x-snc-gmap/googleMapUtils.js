@@ -5,6 +5,7 @@
  */
 import { convertSnakeCaseToTitleCase } from "./stringUtils";
 import { COLOR } from "./constants";
+import { Logger } from './logger';
 
 const defaultCircleOptions = {
   strokeColor: COLOR.CIRCLE,
@@ -162,7 +163,7 @@ function formatAddress(address_components) {
 }
 
 export function createInfoWindow(place) {
-  console.log("🌎 createInfoWindow", place);
+  Logger.debug("🌎 createInfoWindow", place);
 
   const content = document.createElement("div");
   const header = document.createElement("div");
@@ -207,7 +208,7 @@ function formatNumber(num) {
 }
 
 export function createInfoWindowFromObject(title, obj) {
-  console.log("🌎 createInfoWindowFromObject ", title, obj);
+  Logger.debug("🌎 createInfoWindowFromObject", title, obj);
 
   // Styles for the info window - compact design
   const styles = {

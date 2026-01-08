@@ -7,6 +7,7 @@ import { DEFAULT_VALUES } from "./defaultValues";
 import { actionHandlers } from "./actionHandlers";
 import { customActions } from "./constants";
 import { name, version, author } from '../../package.json';
+import { Logger } from './logger';
 
 //console.log = function() {}
 
@@ -45,11 +46,7 @@ createCustomElement("x-snc-gmap", {
 
 function printComponentInfo(state, updateState) {
   if (!state.versionShowed) {
-    const logStyle = 'background: #333; color: #FFF; border-radius: 4px; font-size: 14px; padding: 5px; ';
-    console.log(
-      `%c🌎 Map Component                       \nName    : ${name}                   \nVersion : ${version}                        \nAuthor  : ${author.email}  `,
-      logStyle
-    );
+    Logger.info(`🌎 Map Component - ${name} v${version} by ${author.email}`);
     updateState({ versionShowed: true });
   }
 }

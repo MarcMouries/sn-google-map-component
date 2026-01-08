@@ -11,7 +11,21 @@ export const CENTER_ON = {
 
 export const COLOR = {
 	INITIAL_MARKER: "#0f4d92",
-	CIRCLE : "#0f4d92"
+	MARKER_INSIDE_CIRCLE: "green",
+	CIRCLE: "#0f4d92"
+};
+
+/**
+ * Marker style configuration
+ * Centralized for easy migration to AdvancedMarkerElement
+ */
+export const MARKER_STYLE = {
+	size: 32,
+	labelColor: "#ffffff",
+	labelFontSize: "16px",
+	borderColor: "#ffffff",
+	borderWidth: 2,
+	shadowColor: "rgba(0,0,0,0.3)"
 };
 
 export const SVG_SQUARE =
@@ -54,7 +68,10 @@ export const customActions = {
 	ADDRESS_GEO_CODING_SUCCEEDED : 'ADDRESS_GEO_CODING_SUCCEEDED',
 
 	INITIALIZE_MAP: 'AES_GMAP#INITIALIZE_MAP',
+	UPDATE_MARKERS: 'AES_GMAP#UPDATE_MARKERS',
+	UPDATE_CIRCLE_LABEL: 'AES_GMAP#UPDATE_CIRCLE_LABEL',
 	MARKER_CLICKED: 'AES_GMAP#MARKER_CLICKED',
+	SET_PLACE: 'AES_GMAP#SET_PLACE',
 	TOGGLE_CIRCLE: 'AES_GMAP#TOGGLE_CIRCLE',
 
 	FETCH_MARKER_DATA: 'AES_GMAP#AGENT_DATA_FETCH_REQUESTED',

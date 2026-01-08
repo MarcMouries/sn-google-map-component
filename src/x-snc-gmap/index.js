@@ -27,6 +27,10 @@ createCustomElement("x-snc-gmap", {
     markers: [],
     markerCluster: null,
     marker: null,
+    // Google Maps marker references (moved from module-level to prevent memory leaks)
+    gmMarkers: [],
+    radiusOverlay: null,
+    placeCircleRef: null,
   },
 
   actionHandlers: {

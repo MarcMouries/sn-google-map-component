@@ -61,10 +61,10 @@ export const actionHandlers = {
 
      [customActions.UPDATE_CIRCLE_LABEL]: updateCircleLabel,
 
-     [customActions.TOGGLE_CIRCLE]: ({ action }) => {
+     [customActions.TOGGLE_CIRCLE]: ({ action, state }) => {
           const { visible } = action.payload;
           Logger.action('📗 TOGGLE_CIRCLE', { visible });
-          toggleCircleVisibility(visible);
+          toggleCircleVisibility(visible, state);
      },
 
      [customActions.SET_PLACE]: setPlace,

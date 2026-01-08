@@ -3,7 +3,7 @@ import MarkerClusterer from "@google/markerclustererplus";
 import { customActions, COLOR, MARKER_STYLE } from "./constants";
 import { CENTER_ON } from "./constants";
 import { translate } from "./translate";
-import { createCircle, computeMarkerPosition, createInfoWindow, convertRadiusToMeters } from "./googleMapUtils";
+import { createCircle, computeMarkerPosition, convertRadiusToMeters } from "./googleMapUtils";
 import { extractFields, getCircleRadiusDescription, getPlaceDetails } from "./googleMapUtils";
 import { createCustomInfoBox } from "./customInfoBox";
 import { SVG_SQUARE } from "./constants";
@@ -13,12 +13,28 @@ import { createRadiusOverlay } from './radiusOverlay'
 import { Logger } from './logger';
 
 
-const circleOptions = {};
-let radiusOverlay;
-let placeCircleRef; // Reference to the circle for toggling visibility
-let googleMapRef; // Reference to the map for toggling
-let gmMarkers = [];
-let infowindow;
+// Note: gmMarkers, radiusOverlay, placeCircleRef are now stored in component state
+// to prevent memory leaks across component lifecycles. See initialState in index.js.
+let googleMapRef; // Reference to the map for toggling (kept module-level for event listeners)
+
+/**
+ * Debounce utility - delays function execution until after wait ms have elapsed
+ * since the last time it was invoked. Useful for circle drag/resize events.
+ * @param {Function} func - The function to debounce
+ * @param {number} wait - Milliseconds to wait before executing
+ * @returns {Function} - Debounced function
+ */
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
 
 export const loadGoogleApi = ({ action, state, dispatch, updateState }) => {
   Logger.info("Loading Google Maps API...");
@@ -147,37 +163,38 @@ export const handlePlaceChanged = (place, googleMap, state, dispatch, updateStat
   const radiusInMeters = convertRadiusToMeters(state.properties.circleRadius, state.properties.distanceUnit);
   const placeCircle = createCircle(googleMap, circleCenter, radiusInMeters, {});
 
-  // Store references for toggling visibility
-  placeCircleRef = placeCircle;
+  // Store references for toggling visibility (in state to prevent memory leaks)
   googleMapRef = googleMap;
-
-  radiusOverlay = getRadiusOverlay(placeCircle, googleMap);
+  const newRadiusOverlay = getRadiusOverlay(placeCircle, googleMap, state);
+  updateState({ placeCircleRef: placeCircle, radiusOverlay: newRadiusOverlay });
 
   // Check if circle should be visible based on showCircle property
   const showCircle = state.properties.showCircle !== false; // Default to true
   if (!showCircle) {
     placeCircle.setMap(null);
-    radiusOverlay.setMap(null);
+    newRadiusOverlay.setMap(null);
   }
 
   handleCircleChanged(googleMap, placeCircle, state, dispatch);
 
-
+  // Create debounced version of handleCircleChanged (150ms delay)
+  // This prevents excessive processing during rapid drag/resize operations
+  const debouncedCircleChanged = debounce(() => {
+    handleCircleChanged(googleMap, placeCircle, state, dispatch, updateState);
+  }, 150);
 
   // LISTENERS
-  google.maps.event.addListener(placeCircle, "radius_changed", function (event) {
-    //console.log("Circle radius_changed: " + placeCircle.getRadius());
-    handleCircleChanged(googleMap, placeCircle, state, dispatch, updateState);
+  google.maps.event.addListener(placeCircle, "radius_changed", function () {
+    debouncedCircleChanged();
   });
 
-  // Update overlay position while dragging (real-time)
-  google.maps.event.addListener(placeCircle, "center_changed", function (event) {
-    updateOverlayPosition(placeCircle);
+  // Update overlay position while dragging (real-time, no debounce needed)
+  google.maps.event.addListener(placeCircle, "center_changed", function () {
+    updateOverlayPosition(placeCircle, newRadiusOverlay);
   });
 
-  google.maps.event.addListener(placeCircle, "dragend", function (event) {
-    //console.log("Circle dragend: " + placeCircle.getRadius());
-    handleCircleChanged(googleMap, placeCircle, state, dispatch, updateState);
+  google.maps.event.addListener(placeCircle, "dragend", function () {
+    debouncedCircleChanged();
   });
 
   Logger.log("  - googleMap            : ", googleMap);
@@ -191,7 +208,7 @@ const searchDistance = (place, state) => {
   Logger.log("  - formatted_address: ", place.formatted_address);
   Logger.log("  - state            : ", state);
 
-  const { googleMap, properties: { mapMarkers, mapMarkersFields } } = state;
+  const { googleMap, gmMarkers, properties: { mapMarkers, mapMarkersFields } } = state;
   Logger.log("  - mapMarkers       : ", mapMarkers);
 
   // Guard: Skip distance calculation if no markers exist
@@ -218,12 +235,12 @@ const searchDistance = (place, state) => {
       if (status !== google.maps.DistanceMatrixStatus.OK) {
         Logger.error("Distance Matrix Service error with origins:", origins); //TODO check if orginis are set
       } else {
-       displayMarkersWithDrivingTime(response, googleMap);
+       displayMarkersWithDrivingTime(response, googleMap, gmMarkers);
       }
     });
 }
 
-const displayMarkersWithDrivingTime = (response, googleMap) => {
+const displayMarkersWithDrivingTime = (response, googleMap, gmMarkers) => {
   Logger.log('SHOW DISTANCE:');
   Logger.log("  - response       : ", response);
 
@@ -267,7 +284,7 @@ export const handleCircleChanged = (googleMap, placeCircle, state, dispatch, upd
   Logger.debug("Circle changed");
 
   const radiusUnit = state.properties?.distanceUnit;
-  const overlay = getRadiusOverlay(placeCircle, googleMap);
+  const overlay = getRadiusOverlay(placeCircle, googleMap, state);
   if (overlay) {
     overlay.setContentText(getCircleRadiusDescription(placeCircle, radiusUnit));
     overlay.setPosition(computeMarkerPosition(placeCircle, "bottom"));
@@ -278,6 +295,7 @@ export const handleCircleChanged = (googleMap, placeCircle, state, dispatch, upd
   let markersInsideCircle = [];
   let addedMarkerIds = new Set();
 
+  const gmMarkers = state.gmMarkers || [];
   gmMarkers.forEach(function (marker) {
     let position = marker.getPosition();
     let distanceFromCenter = google.maps.geometry.spherical.computeDistanceBetween(center, position);
@@ -324,10 +342,11 @@ function sortObjects(arr, field) {
   return arr;
 }
 
-function getRadiusOverlay(placeCircle, googleMap) {
-  // Check if overlay exists and is still attached to the map
-  if (radiusOverlay && radiusOverlay.getMap()) {
-    return radiusOverlay;
+function getRadiusOverlay(placeCircle, googleMap, state) {
+  // Check if overlay exists in state and is still attached to the map
+  const existingOverlay = state.radiusOverlay;
+  if (existingOverlay && existingOverlay.getMap()) {
+    return existingOverlay;
   }
 
   Logger.debug("Creating new radius overlay");
@@ -335,15 +354,15 @@ function getRadiusOverlay(placeCircle, googleMap) {
   // Create new overlay
   let elm = document.createElement("div");
   elm.classList.add("overlay-content");
-  radiusOverlay = createRadiusOverlay(computeMarkerPosition(placeCircle, "bottom"), elm);
-  radiusOverlay.setMap(googleMap);
-  return radiusOverlay;
+  const newOverlay = createRadiusOverlay(computeMarkerPosition(placeCircle, "bottom"), elm);
+  newOverlay.setMap(googleMap);
+  return newOverlay;
 }
 
 /**
  * Update the overlay position to follow the circle during drag
  */
-function updateOverlayPosition(placeCircle) {
+function updateOverlayPosition(placeCircle, radiusOverlay) {
   if (radiusOverlay) {
     radiusOverlay.setPosition(computeMarkerPosition(placeCircle, "bottom"));
   }
@@ -352,8 +371,10 @@ function updateOverlayPosition(placeCircle) {
 /**
  * Toggle the visibility of the circle overlay
  * @param {boolean} visible - Whether the circle should be visible
+ * @param {object} state - Component state containing placeCircleRef and radiusOverlay
  */
-export const toggleCircleVisibility = (visible) => {
+export const toggleCircleVisibility = (visible, state) => {
+  const { placeCircleRef, radiusOverlay } = state;
   if (placeCircleRef) {
     placeCircleRef.setMap(visible ? googleMapRef : null);
   }
@@ -369,6 +390,7 @@ export const updateCircleLabel = ({ state }) => {
   const radiusUnit = state.properties?.distanceUnit;
   Logger.action("UPDATE_CIRCLE_LABEL", { unit: radiusUnit });
 
+  const { radiusOverlay, placeCircleRef } = state;
   if (radiusOverlay && placeCircleRef) {
     radiusOverlay.setContentText(getCircleRadiusDescription(placeCircleRef, radiusUnit));
   }
@@ -456,11 +478,12 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
     marker.setMap(null);
   });
 
-  // Clear the module-level gmMarkers array
-  gmMarkers.forEach((marker) => {
+  // Clear the gmMarkers array from state
+  const existingGmMarkers = state.gmMarkers || [];
+  existingGmMarkers.forEach((marker) => {
     marker.setMap(null);
   });
-  gmMarkers = [];
+  const newGmMarkers = [];
 
   let bounds = new googleMapsApi.LatLngBounds();
   let markers = mapMarkers.map((item) => {
@@ -504,7 +527,7 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
 
     const googleMarker = new google.maps.Marker(markerOptions);
     googleMarker.originalColor = markerColor; // Store original color for circle toggle
-    gmMarkers.push(googleMarker);
+    newGmMarkers.push(googleMarker);
     bounds.extend(googleMarker.position);
 
     // Store data for custom info box
@@ -602,6 +625,7 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
   updateState({
     markers: markers,
     markerCluster: markerCluster,
+    gmMarkers: newGmMarkers,
   });
 
 };

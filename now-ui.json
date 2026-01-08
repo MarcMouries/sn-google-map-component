@@ -35,8 +35,8 @@
 								"value": "MAP_MARKERS"
 							},
 							{
-								"label": "the specified place",
-								"value": "PLACE"
+								"label": "the specified address",
+								"value": "ADDRESS"
 							}
 						]
 					}
@@ -75,6 +75,33 @@
 					"readOnly": false,
 					"required": false,
 					"defaultValue": ""
+				},
+				{
+					"name": "showCircle",
+					"description": "Show or hide the radius circle overlay on the map",
+					"fieldType": "boolean",
+					"label": "Show Circle Overlay",
+					"readOnly": false,
+					"required": false,
+					"defaultValue": true
+				},
+				{
+					"name": "circleRadius",
+					"description": "Radius of the circle overlay in meters (19312.1 = 12 miles)",
+					"fieldType": "number",
+					"label": "Circle Radius (meters)",
+					"readOnly": false,
+					"required": false,
+					"defaultValue": 19312.1
+				},
+				{
+					"name": "language",
+					"description": "Language code for map labels and UI (e.g., 'en', 'fr', 'es')",
+					"fieldType": "string",
+					"label": "Language",
+					"readOnly": false,
+					"required": false,
+					"defaultValue": "en"
 				}
 			],
 			"actions": [

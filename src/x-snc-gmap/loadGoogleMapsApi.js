@@ -1,6 +1,6 @@
 import loadGoogleMapsApi from "load-google-maps-api";
 import MarkerClusterer from "@google/markerclustererplus";
-import { customActions, COLOR } from "./constants";
+import { customActions, COLOR, MARKER_STYLE } from "./constants";
 import { CENTER_ON } from "./constants";
 import { translate } from "./translate";
 import { createCircle, computeMarkerPosition, createInfoWindow, createInfoWindowFromObject } from "./googleMapUtils";
@@ -26,9 +26,10 @@ export const loadGoogleApi = ({ action, state, dispatch, updateState }) => {
   const { properties } = state;
 
   // Google Map Libraries
-  // - places  :
-  // - geometry:
-  // - drawing :
+  // - places  : Place Autocomplete, Place Details
+  // - geometry: Spherical geometry utilities (distance calculations)
+  // - drawing : Drawing tools on the map
+  // - marker  : AdvancedMarkerElement (new marker API, requires v3.53.2+)
 
   let GOOGLE_MAPS_API_OPTIONS = {};
   if (state.googleMapMethod == "key") {
@@ -37,7 +38,7 @@ export const loadGoogleApi = ({ action, state, dispatch, updateState }) => {
     GOOGLE_MAPS_API_OPTIONS.client = action.payload.googleApiKey;
   }
 
-  GOOGLE_MAPS_API_OPTIONS.libraries = ["places,drawing,geometry"];
+  GOOGLE_MAPS_API_OPTIONS.libraries = ["places,drawing,geometry,marker"];
 
   GOOGLE_MAPS_API_OPTIONS.language = properties.language;
 
@@ -193,6 +194,12 @@ const searchDistance = (place, state) => {
   const { googleMap, properties: { mapMarkers, mapMarkersFields } } = state;
   Logger.log("  - mapMarkers       : ", mapMarkers);
 
+  // Guard: Skip distance calculation if no markers exist
+  if (!mapMarkers || mapMarkers.length === 0) {
+    Logger.log("  - No markers to calculate distance to, skipping");
+    return;
+  }
+
   let origins = [place.formatted_address];
   let destinations = [];
   mapMarkers.forEach((marker) => {
@@ -277,7 +284,7 @@ export const handleCircleChanged = (googleMap, placeCircle, state, dispatch, upd
     let position = marker.getPosition();
     let distanceFromCenter = google.maps.geometry.spherical.computeDistanceBetween(center, position);
     let insideCircle = distanceFromCenter <= radius;
-    const markerColor = insideCircle ? "green" : COLOR.INITIAL_MARKER;
+    const markerColor = insideCircle ? COLOR.MARKER_INSIDE_CIRCLE : COLOR.INITIAL_MARKER;
     if (insideCircle) {
       console.log("   - marker insideCircle ", marker.data);
       let markerObject = marker.data;
@@ -354,11 +361,73 @@ export const toggleCircleVisibility = (visible) => {
   }
 };
 
+/**
+ * Handler for SET_PLACE action - updates the map to a new place/address
+ * Called when the place property changes
+ */
+export const setPlace = ({ state, dispatch, updateState }) => {
+  const { googleMapsRef, properties } = state;
+  const placeString = properties.place;
+
+  console.log('📗 Action: SET_PLACE, address:', placeString);
+
+  if (!placeString || !googleMapsRef) {
+    console.warn('SET_PLACE: Missing place or googleMapsRef');
+    return;
+  }
+
+  getPlaceDetails(placeString, googleMapsRef)
+    .then((place) => {
+      console.log('📗 SET_PLACE: Place details retrieved', place);
+      handlePlaceChanged(place, googleMapsRef, state, dispatch, updateState);
+    })
+    .catch((error) => {
+      console.error(`SET_PLACE: Error retrieving place data: ${error}`);
+    });
+};
+
 function getMarkerIcon(color) {
   const svgSquare = encodeURIComponent(SVG_SQUARE.replace("{{background}}", color));
   return {
     url: "data:image/svg+xml;utf-8, " + svgSquare,
   };
+}
+
+/**
+ * Creates a DOM element for marker content.
+ * This is a preparatory function for migrating to AdvancedMarkerElement.
+ * Currently used for reference; will replace icon-based markers in future.
+ * @param {string} label - The text/emoji to display on the marker
+ * @param {string} backgroundColor - Background color of the marker
+ * @returns {HTMLElement} - DOM element for marker content
+ */
+function createMarkerContent(label, backgroundColor = COLOR.INITIAL_MARKER) {
+  const markerElement = document.createElement('div');
+  markerElement.className = 'custom-marker';
+  markerElement.style.cssText = `
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: ${MARKER_STYLE.size}px;
+    height: ${MARKER_STYLE.size}px;
+    background-color: ${backgroundColor};
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    border: ${MARKER_STYLE.borderWidth}px solid ${MARKER_STYLE.borderColor};
+    box-shadow: 0 2px 6px ${MARKER_STYLE.shadowColor};
+  `;
+
+  const labelElement = document.createElement('span');
+  labelElement.style.cssText = `
+    transform: rotate(45deg);
+    color: ${MARKER_STYLE.labelColor};
+    font-size: ${MARKER_STYLE.labelFontSize};
+    font-weight: bold;
+  `;
+  labelElement.textContent = label || '';
+
+  markerElement.appendChild(labelElement);
+  return markerElement;
 }
 
 const setMarkers = (state, updateState, dispatch, googleMap) => {
@@ -402,13 +471,24 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
     console.log("🌎 markerFields: ", markerFields);
     console.log("🌎 markerCopy  : ", markerCopy);
 
-    const googleMarker = new google.maps.Marker({
+    const markerOptions = {
       position: markerPosition,
       map: googleMap,
       data: markerFields,
       icon: getMarkerIcon(COLOR.INITIAL_MARKER),
       title: item.name,
-    });
+    };
+
+    // Add label if provided in the marker data
+    if (item.markerLabel) {
+      markerOptions.label = {
+        text: item.markerLabel,
+        color: MARKER_STYLE.labelColor,
+        fontSize: MARKER_STYLE.labelFontSize,
+      };
+    }
+
+    const googleMarker = new google.maps.Marker(markerOptions);
     gmMarkers.push(googleMarker);
     bounds.extend(googleMarker.position);
 

@@ -3,8 +3,9 @@ import MarkerClusterer from "@google/markerclustererplus";
 import { customActions, COLOR, MARKER_STYLE } from "./constants";
 import { CENTER_ON } from "./constants";
 import { translate } from "./translate";
-import { createCircle, computeMarkerPosition, createInfoWindow, createInfoWindowFromObject } from "./googleMapUtils";
+import { createCircle, computeMarkerPosition, createInfoWindow, convertRadiusToMeters } from "./googleMapUtils";
 import { extractFields, getCircleRadiusDescription, getPlaceDetails } from "./googleMapUtils";
+import { createCustomInfoBox } from "./customInfoBox";
 import { SVG_SQUARE } from "./constants";
 import { MapQuest } from "./googleMapStyle";
 import { svg_icon } from "./assets/svg-icon.svg";
@@ -145,7 +146,8 @@ export const handlePlaceChanged = (place, googleMap, state, dispatch, updateStat
   //infowindow.open(googleMap, placeMarker);
 
   const circleCenter = place.geometry.location;
-  const placeCircle = createCircle(googleMap, circleCenter, state.properties.circleRadius, {});
+  const radiusInMeters = convertRadiusToMeters(state.properties.circleRadius, state.properties.distanceUnit);
+  const placeCircle = createCircle(googleMap, circleCenter, radiusInMeters, {});
 
   // Store references for toggling visibility
   placeCircleRef = placeCircle;
@@ -247,14 +249,10 @@ const displayMarkersWithDrivingTime = (response, googleMap) => {
         let marker = gmMarkers[j];
         let content = duration + ' away, ' + distance;
         var infowindow = new google.maps.InfoWindow({
-          /*content: duration + ' away, ' + distance,*/
           content: '<div class="info-distance" id="infowindowContent">' + content + '</div>',
           pixelOffset: new google.maps.Size(0, 90) // pixel down the marker
-
         });
-        infowindow.open(googleMap, marker);     
-        
-        marker.infowindow.open({ anchor: marker, googleMap });
+        infowindow.open(googleMap, marker);
 
         //Logger.log("  - gmMarkers  : ", gmMarkers);
         //Logger.log("  - MARKER  : " + marker.title);
@@ -272,8 +270,12 @@ export const handleCircleChanged = (googleMap, placeCircle, state, dispatch, upd
   const overlayPosition = computeMarkerPosition(placeCircle, "bottom");
   console.log("   - handleCircleChanged: overlayPosition= ", overlayPosition);
 
-  getRadiusOverlay().setContentText(getCircleRadiusDescription(placeCircle));
-  getRadiusOverlay().setPosition(computeMarkerPosition(placeCircle, "bottom"));
+  const radiusUnit = state.properties?.distanceUnit;
+  const overlay = getRadiusOverlay(placeCircle, googleMap);
+  if (overlay) {
+    overlay.setContentText(getCircleRadiusDescription(placeCircle, radiusUnit));
+    overlay.setPosition(computeMarkerPosition(placeCircle, "bottom"));
+  }
 
   let radius = placeCircle.getRadius();
   let center = placeCircle.getCenter();
@@ -284,7 +286,8 @@ export const handleCircleChanged = (googleMap, placeCircle, state, dispatch, upd
     let position = marker.getPosition();
     let distanceFromCenter = google.maps.geometry.spherical.computeDistanceBetween(center, position);
     let insideCircle = distanceFromCenter <= radius;
-    const markerColor = insideCircle ? COLOR.MARKER_INSIDE_CIRCLE : COLOR.INITIAL_MARKER;
+    // Use highlight color for markers inside circle, restore original color for those outside
+    const markerColor = insideCircle ? COLOR.MARKER_INSIDE_CIRCLE : (marker.originalColor || COLOR.INITIAL_MARKER);
     if (insideCircle) {
       console.log("   - marker insideCircle ", marker.data);
       let markerObject = marker.data;
@@ -328,10 +331,14 @@ function sortObjects(arr, field) {
 }
 
 function getRadiusOverlay(placeCircle, googleMap) {
-  if (radiusOverlay) return radiusOverlay;
+  // Check if overlay exists and is still attached to the map
+  if (radiusOverlay && radiusOverlay.getMap()) {
+    return radiusOverlay;
+  }
+
   console.log(" 🌎 getRadiusOverlay - creating new overlay");
 
-  // otherwise create it
+  // Create new overlay
   let elm = document.createElement("div");
   elm.classList.add("overlay-content");
   radiusOverlay = createRadiusOverlay(computeMarkerPosition(placeCircle, "bottom"), elm);
@@ -358,6 +365,18 @@ export const toggleCircleVisibility = (visible) => {
   }
   if (radiusOverlay) {
     radiusOverlay.setMap(visible ? googleMapRef : null);
+  }
+};
+
+/**
+ * Update the circle overlay label when the unit changes
+ */
+export const updateCircleLabel = ({ state }) => {
+  const radiusUnit = state.properties?.distanceUnit;
+  console.log('📗 Action: UPDATE_CIRCLE_LABEL, unit:', radiusUnit);
+
+  if (radiusOverlay && placeCircleRef) {
+    radiusOverlay.setContentText(getCircleRadiusDescription(placeCircleRef, radiusUnit));
   }
 };
 
@@ -390,6 +409,8 @@ function getMarkerIcon(color) {
   const svgSquare = encodeURIComponent(SVG_SQUARE.replace("{{background}}", color));
   return {
     url: "data:image/svg+xml;utf-8, " + svgSquare,
+    scaledSize: new google.maps.Size(32, 32),
+    labelOrigin: new google.maps.Point(16, 16), // Center of 32x32 icon
   };
 }
 
@@ -471,11 +492,14 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
     console.log("🌎 markerFields: ", markerFields);
     console.log("🌎 markerCopy  : ", markerCopy);
 
+    // Use per-marker color if provided, otherwise use default
+    const markerColor = item.markerColor || COLOR.INITIAL_MARKER;
+
     const markerOptions = {
       position: markerPosition,
       map: googleMap,
       data: markerFields,
-      icon: getMarkerIcon(COLOR.INITIAL_MARKER),
+      icon: getMarkerIcon(markerColor),
       title: item.name,
     };
 
@@ -489,28 +513,33 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
     }
 
     const googleMarker = new google.maps.Marker(markerOptions);
+    googleMarker.originalColor = markerColor; // Store original color for circle toggle
     gmMarkers.push(googleMarker);
     bounds.extend(googleMarker.position);
 
-    googleMarker.infowindow = createInfoWindowFromObject(item.name, markerFields);
-
+    // Store data for custom info box
+    googleMarker.markerData = { title: item.name, fields: markerFields };
 
     googleMarker.addListener("click", function () {
-      console.log("🌎 CLICK on maker", this);
+      console.log("🌎 CLICK on marker", this);
 
-      if (this.infowindow.getMap()) {
-        this.infowindow.close();
+      // Create custom info box at marker position
+      createCustomInfoBox(
+        this.markerData.title,
+        this.markerData.fields,
+        this.getPosition(),
+        googleMap
+      );
+      updateState({ currentMarker: googleMarker });
+
+      // Only fetch additional data if marker has sys_id (ServiceNow record)
+      if (googleMarker.sys_id && googleMarker.table) {
+        let encodedQuery = "sys_id=" + googleMarker.sys_id;
+        dispatch(customActions.FETCH_MARKER_DATA, {
+          table: googleMarker.table,
+          encodedQuery: encodedQuery,
+        });
       }
-      else {
-        this.infowindow.open({ anchor: googleMarker, googleMap });
-        updateState({ currentMarker: googleMarker });
-      }
-      // NOT FETCHING DATA FROM THE BACK-END
-      let encodedQuery = "sys_id=" + googleMarker.sys_id;
-      dispatch(customActions.FETCH_MARKER_DATA, {
-        table: googleMarker.table,
-        encodedQuery: encodedQuery,
-      });
     });
     return googleMarker;
   });
@@ -579,10 +608,39 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
   }
 
   let markerCluster = new MarkerClusterer(googleMap, markers, { imagePath: "https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m" });
-  
+
   updateState({
     markers: markers,
     markerCluster: markerCluster,
   });
 
+};
+
+/**
+ * Updates markers on the existing map without reinitializing
+ * This preserves the circle overlay and other map state
+ */
+export const updateMarkers = ({ state, updateState, dispatch }) => {
+  console.log(" 🌎 updateMarkers - using existing map");
+  const { googleMapsRef, googleMapsApi, properties } = state;
+
+  if (!googleMapsRef) {
+    console.warn("updateMarkers: No map reference found, cannot update markers");
+    return;
+  }
+
+  setMarkers(state, updateState, dispatch, googleMapsRef);
+
+  // Only fit bounds to markers when centerOn is set to MAP_MARKERS
+  const { mapMarkers, centerOn } = properties;
+  if (centerOn === CENTER_ON.MAP_MARKERS && mapMarkers && mapMarkers.length > 0) {
+    const bounds = new googleMapsApi.LatLngBounds();
+    mapMarkers.forEach((item) => {
+      let pos = item.position || (item.lat !== undefined ? { lat: item.lat, lng: item.lng || item.long } : null);
+      if (pos) {
+        bounds.extend(pos);
+      }
+    });
+    googleMapsRef.fitBounds(bounds);
+  }
 };

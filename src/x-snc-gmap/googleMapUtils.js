@@ -57,6 +57,20 @@ export function computeMarkerPosition(circle, position) {
 }
 
 /**
+ * Convert radius from miles or kilometers to meters
+ * @param {number} radius - Radius value
+ * @param {string} unit - "miles" or "kilometers"
+ * @returns {number} - Radius in meters
+ */
+export function convertRadiusToMeters(radius, unit) {
+  if (unit === "kilometers") {
+    return radius * 1000;
+  }
+  // Default to miles: 1 mile = 1609.34 meters
+  return radius * 1609.34;
+}
+
+/**
  * This function takes in a circle object and calculates the radius in miles and/or kilometers,
  * and returns a string that represents the radius based on the specified unit.
  * @param {*} circle - Google Maps Circle object
@@ -169,31 +183,178 @@ export function createInfoWindow(place) {
   return infowindow;
 }
 
+/**
+ * Format a date string to a more readable format
+ * Input: "2025-07-09" -> Output: "Jul 9, 2025"
+ */
+function formatDate(dateString) {
+  if (!dateString) return '';
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  } catch (e) {
+    return dateString;
+  }
+}
+
+/**
+ * Format number with commas for thousands
+ * Input: 39000 -> Output: "39,000"
+ */
+function formatNumber(num) {
+  if (num === undefined || num === null) return '';
+  return num.toLocaleString();
+}
+
 export function createInfoWindowFromObject(title, obj) {
   console.log("🌎 createInfoWindowFromObject ", title, obj);
 
-  var content = document.createElement("div");
+  // Styles for the info window - compact design
+  const styles = {
+    container: `
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-width: 200px;
+      max-width: 300px;
+      margin: -12px -12px -12px -12px;
+    `,
+    header: `
+      background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+      color: white;
+      padding: 10px 40px 10px 12px;
+      font-size: 13px;
+      font-weight: 600;
+    `,
+    body: `
+      padding: 10px 12px;
+    `,
+    headline: `
+      font-size: 12px;
+      color: #c53030;
+      margin: 0 0 8px 0;
+      padding: 0 24px 8px 0;
+      border-bottom: 1px solid #e2e8f0;
+      line-height: 1.4;
+    `,
+    statsRow: `
+      display: flex;
+      gap: 12px;
+      margin-bottom: 8px;
+    `,
+    stat: `
+      text-align: center;
+      flex: 1;
+    `,
+    statValue: `
+      font-size: 16px;
+      font-weight: 700;
+      color: #2d3748;
+    `,
+    statLabel: `
+      font-size: 9px;
+      color: #718096;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    `,
+    field: `
+      font-size: 11px;
+      color: #4a5568;
+      margin: 3px 0;
+      line-height: 1.3;
+    `,
+    fieldLabel: `
+      color: #718096;
+      font-weight: 500;
+    `,
+    status: `
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 500;
+    `,
+    statusActive: `
+      background: #fed7d7;
+      color: #c53030;
+    `,
+    statusEnded: `
+      background: #c6f6d5;
+      color: #276749;
+    `,
+    date: `
+      font-size: 10px;
+      color: #a0aec0;
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px solid #e2e8f0;
+    `
+  };
 
-  // Create a header with the value of the title parameter
-  const header = document.createElement("div");
-  header.innerHTML = `<b>${title}</b>`;
-  //header.textContent = title;
-  content.appendChild(header);
+  // Build HTML content
+  let html = `<div style="${styles.container}">`;
 
-  // Iterate over each property of the object and add it to the content
-  for (var prop in obj) {
-    if (obj.hasOwnProperty(prop) && prop !== "name") {
-      let element = document.createElement("p");
-      let propertyTitle = convertSnakeCaseToTitleCase(prop);
+  // Header with title
+  html += `<div style="${styles.header}">${title}</div>`;
+
+  // Body
+  html += `<div style="${styles.body}">`;
+
+  // Headline (if exists) - show prominently at top
+  if (obj.headline) {
+    html += `<div style="${styles.headline}">${obj.headline}</div>`;
+  }
+
+  // Stats row for cases/deaths (if exists)
+  if (obj.cases !== undefined || obj.deaths !== undefined) {
+    html += `<div style="${styles.statsRow}">`;
+    if (obj.cases !== undefined) {
+      html += `<div style="${styles.stat}">
+        <div style="${styles.statValue}">${formatNumber(obj.cases)}</div>
+        <div style="${styles.statLabel}">Cases</div>
+      </div>`;
+    }
+    if (obj.deaths !== undefined) {
+      html += `<div style="${styles.stat}">
+        <div style="${styles.statValue}">${formatNumber(obj.deaths)}</div>
+        <div style="${styles.statLabel}">Deaths</div>
+      </div>`;
+    }
+    html += `</div>`;
+  }
+
+  // Other fields
+  const skipFields = ['name', 'headline', 'cases', 'deaths', 'date_reported', 'date_ended', 'markerColor', 'position'];
+
+  for (const prop in obj) {
+    if (obj.hasOwnProperty(prop) && !skipFields.includes(prop)) {
+      const propertyTitle = convertSnakeCaseToTitleCase(prop);
       let propertyValue = obj[prop];
-      element.innerHTML = "<strong>" + propertyTitle + ": </strong>" + propertyValue;
-      content.appendChild(element);
+
+      // Special handling for status field
+      if (prop === 'status') {
+        const statusStyle = propertyValue === 'Active'
+          ? styles.status + styles.statusActive
+          : styles.status + styles.statusEnded;
+        propertyValue = `<span style="${statusStyle}">${propertyValue}</span>`;
+      }
+
+      html += `<div style="${styles.field}">
+        <span style="${styles.fieldLabel}">${propertyTitle}:</span> ${propertyValue}
+      </div>`;
     }
   }
 
-  var contentString = content.outerHTML;
+  // Date at bottom
+  if (obj.date_reported) {
+    html += `<div style="${styles.date}">Reported: ${formatDate(obj.date_reported)}`;
+    if (obj.date_ended) {
+      html += ` • Ended: ${formatDate(obj.date_ended)}`;
+    }
+    html += `</div>`;
+  }
 
-  const infowindow = new google.maps.InfoWindow({ content: contentString });
+  html += `</div></div>`;
+
+  const infowindow = new google.maps.InfoWindow({ content: html });
   return infowindow;
 }
 

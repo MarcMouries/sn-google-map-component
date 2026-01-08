@@ -6,34 +6,44 @@ import { customActions } from "./constants"
 export default {
   center: {
     default: { lat: 39.8097343, long: -98.5556199 } /* Center of continental USA */,
+    schema: { type: "object" },
   },
   centerOn: {
     default: CENTER_ON.ADDRESS,
+    schema: { type: "string" },
     onChange(currentValue, previousValue, dispatch) {
       dispatch(customActions.INITIALIZE_MAP);
     },
   },
   circleRadius: {
-    /* 16093.4 = 10 miles in meters */
-    /* 19312.1 = 12 miles in meters */
-    default: 19312.1,
+    // Value in the unit specified by distanceUnit (miles or kilometers)
+    default: 10,
     schema: { type: "number" },
   },
-
+  distanceUnit: {
+    default: "miles",
+    schema: { type: "string" },
+    onChange(currentValue, previousValue, dispatch) {
+      dispatch(customActions.UPDATE_CIRCLE_LABEL);
+    },
+  },
   initialZoom: {
     default: 9,
     schema: { type: "number" },
   },
   language: {
     default: "en",
+    schema: { type: "string" },
     onChange(currentValue, previousValue, dispatch) {
       dispatch(customActions.INITIALIZE_MAP);
     },
   },
   mapMarkers: {
     default: [],
+    schema: { type: "array" },
     onChange(currentValue, previousValue, dispatch) {
-      dispatch(customActions.INITIALIZE_MAP);
+      // Use UPDATE_MARKERS to preserve circle overlay and other map state
+      dispatch(customActions.UPDATE_MARKERS);
       console.log(`%c mapMarkers onChange()`, 'background: orange; color: #444; padding: 3px; border-radius: 5px;');
     },
   },

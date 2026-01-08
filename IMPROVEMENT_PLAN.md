@@ -11,9 +11,9 @@
 
 ### Performance Improvements
 
-- [ ] **Fix module-level variables** - `radiusOverlay`, `gmMarkers`, `infowindow` in loadGoogleMapsApi.js can cause memory leaks. Move to component state.
+- [x] **Fix module-level variables** - `radiusOverlay`, `gmMarkers`, `placeCircleRef` moved to component state to prevent memory leaks.
 
-- [ ] **Add debounce to circle events** - Circle drag/resize events fire rapidly, causing excessive processing.
+- [x] **Add debounce to circle events** - Added 150ms debounce to `radius_changed` and `dragend` events to reduce CPU usage during drag operations.
 
 - [ ] **Memoize marker icon generation** - Cache SVG icons by color to avoid repeated string operations.
 
@@ -117,6 +117,6 @@
 
 - [ ] Review `updateState({ circleRadius: 80000 });` in setMarkers (hardcoded override, now commented)
 - [ ] Remove unused `markerCopy` variable in setMarkers
-- [ ] Remove unused `circleOptions` variable
-- [ ] Remove unused `infowindow` module variable
-- [ ] Remove unused `createInfoWindow` import
+- [x] ~~Remove unused `circleOptions` variable~~ (already removed)
+- [x] ~~Remove unused `infowindow` module variable~~ (already removed)
+- [x] ~~Remove unused `createInfoWindow` import~~ (removed)

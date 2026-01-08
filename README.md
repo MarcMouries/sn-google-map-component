@@ -175,16 +175,26 @@ gr.insert();
 
 ### 0.0.6
 
+**Performance & Memory Management**
+- **Fixed Memory Leaks**: Moved `gmMarkers`, `radiusOverlay`, and `placeCircleRef` from module-level variables to component state. Previously, these variables persisted across component mount/unmount cycles, causing memory accumulation. Now they are properly cleaned up when the component unmounts.
+
+**Developer Experience**
+- **Logger Utility**: New centralized logging with log levels (DEBUG, INFO, WARN, ERROR). Auto-detects development mode (localhost) to show debug output. Use `Logger.debug()`, `Logger.info()`, `Logger.warn()`, `Logger.error()`, and `Logger.action()` for tracking dispatched actions.
+- **Renamed API Methods**: Renamed `googleMapMethodActionHandlers` to `googleMapCredentialTypeActionHandlers` for clarity
+
 **Component Improvements**
 - **Styled Info Windows**: Redesigned marker info popups with styled header, formatted statistics (cases/deaths), status badges, and date formatting
 - **Custom Marker Colors**: Markers now support per-marker colors via the `markerColor` property for category-based visualization
 - **Distance Unit**: New `distanceUnit` property allows choosing between miles or kilometers for distance displays
 - **SET_PLACE Action**: Programmatically update the map location by dispatching SET_PLACE with a new address
 - **Distance Matrix Fix**: Resolved error that occurred when calculating driving distances with an empty marker set
+- **Circle Visibility**: New `showCircle` property to toggle circle overlay visibility
 
 **Demo & Documentation**
 - WHO Disease Outbreaks sample dataset from WHO Disease Outbreak News
 - Address input field to change map location dynamically
+- Distance Unit radio buttons (Miles/Kilometers)
+- Show Circle Overlay checkbox
 - USE_CASES.md with fraud detection, audit planning, and disease outbreak tracking examples
 
 ### 0.0.5 - Zurich Migration

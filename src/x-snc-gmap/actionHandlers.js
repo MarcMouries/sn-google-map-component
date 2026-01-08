@@ -6,7 +6,7 @@ import { googleMapMethodActionHandlers } from './actions/LoadGoogleApiMethodActi
 
 import { actionTypes } from "@servicenow/ui-core";
 const { COMPONENT_BOOTSTRAPPED } = actionTypes;
-import { loadGoogleApi, initializeMap, toggleCircleVisibility } from './loadGoogleMapsApi';
+import { loadGoogleApi, initializeMap, updateMarkers, updateCircleLabel, toggleCircleVisibility, setPlace } from './loadGoogleMapsApi';
 import { URL_CURRENT_USER } from "./constants";
 import { queryMarkerData, fetchTaskDataEffect, queryCurrentUserLocation } from "./dataProvider";
 import { createGraphQLEffect } from "@servicenow/ui-effect-graphql";
@@ -56,11 +56,17 @@ export const actionHandlers = {
 
      [customActions.INITIALIZE_MAP]: initializeMap,
 
+     [customActions.UPDATE_MARKERS]: updateMarkers,
+
+     [customActions.UPDATE_CIRCLE_LABEL]: updateCircleLabel,
+
      [customActions.TOGGLE_CIRCLE]: ({ action }) => {
           const { visible } = action.payload;
           console.log('📗 Action: TOGGLE_CIRCLE, visible:', visible);
           toggleCircleVisibility(visible);
      },
+
+     [customActions.SET_PLACE]: setPlace,
 
      [customActions.CURRENT_USER_FETCH_REQUESTED]: createHttpEffect(
           URL_CURRENT_USER,

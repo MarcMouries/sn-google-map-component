@@ -57,20 +57,24 @@ export function computeMarkerPosition(circle, position) {
 }
 
 /**
- * This function takes in a circle object and calculates the radius in miles and kilometers,
- * and returns a string that represents the radius in miles and kilometers with the following format:
- * radius in miles> Mi / <radius in kilometers> Km.
- * @param {*} circle
- * @returns string
+ * This function takes in a circle object and calculates the radius in miles and/or kilometers,
+ * and returns a string that represents the radius based on the specified unit.
+ * @param {*} circle - Google Maps Circle object
+ * @param {string} unit - Display unit: "miles", "kilometers", or undefined for both
+ * @returns string - Formatted radius description
  */
-export function getCircleRadiusDescription(circle) {
+export function getCircleRadiusDescription(circle, unit) {
   let radiusInMeters = circle.getRadius();
-  let radiusInMiles = radiusInMeters * 0.000621371;
-  let radiusInKm = radiusInMeters / 1000;
-  radiusInMiles = radiusInMiles.toFixed(2);
-  radiusInKm = radiusInKm.toFixed(2);
-  let circleRadiusDesc = `${radiusInMiles} Mi / ${radiusInKm} Km`;
-  return circleRadiusDesc;
+  let radiusInMiles = (radiusInMeters * 0.000621371).toFixed(2);
+  let radiusInKm = (radiusInMeters / 1000).toFixed(2);
+
+  if (unit === "miles") {
+    return `${radiusInMiles} Miles`;
+  } else if (unit === "kilometers") {
+    return `${radiusInKm} Km`;
+  }
+  // Default: show both (backward compatible)
+  return `${radiusInMiles} Mi / ${radiusInKm} Km`;
 }
 
 /**

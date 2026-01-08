@@ -21,8 +21,8 @@ let gmMarkers = [];
 let infowindow;
 
 export const loadGoogleApi = ({ action, state, dispatch, updateState }) => {
-  console.log("📗 Map Component: Loading GoogleApi...");
-  console.log(" - Map Component: googleMapMethod = ", state.googleMapMethod);
+  Logger.info("Loading Google Maps API...");
+  Logger.debug("googleMapMethod:", state.googleMapMethod);
 
   const { properties } = state;
 
@@ -45,20 +45,18 @@ export const loadGoogleApi = ({ action, state, dispatch, updateState }) => {
 
   loadGoogleMapsApi(GOOGLE_MAPS_API_OPTIONS)
     .then((googleMapsApi) => {
-      console.log("    - Map API loaded");
+      Logger.info("Google Maps API loaded");
       updateState({ googleMapsApi });
-      //		dispatch(customActions.INITIALIZE_MAP);  // BEFORE
-      dispatch(customActions.CURRENT_USER_FETCH_REQUESTED); // NOW
+      dispatch(customActions.CURRENT_USER_FETCH_REQUESTED);
     })
     .catch((error) => {
-      console.error(error);
-      console.log("Map Component: Cannot load google maps API");
+      Logger.error("Cannot load Google Maps API:", error);
     });
 };
 
 export const initializeMap = ({ state, updateState, dispatch }) => {
   const { googleMapsApi, mapElementRef, autoCompleteRef, radiusInputRef, properties } = state;
-  console.log(" 🌎 Map Component: initializeMap", state);
+  Logger.info("Initializing map");
   updateState({ isLoading: false });
 
   // let mapOptions = {
@@ -92,14 +90,14 @@ export const initializeMap = ({ state, updateState, dispatch }) => {
 
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((position) => {
-          console.log("user's location: " + "Latitude: " + position.coords.latitude + "<br>Longitude: " + position.coords.longitude);
+          Logger.debug("User location - Lat:", position.coords.latitude, "Lng:", position.coords.longitude);
         });
       } else {
-        console.log("Geolocation is not supported by this browser.");
+        Logger.warn("Geolocation is not supported by this browser");
       }
     });
   } else {
-    console.log("Cannot initialize google map");
+    Logger.error("Cannot initialize Google Map - missing googleMapsApi or mapElementRef");
   }
 
  // updateState({ googleMap: googleMap });
@@ -119,7 +117,7 @@ export const initializeMap = ({ state, updateState, dispatch }) => {
       addressSearch.set("place", place);
     })
     .catch((error) => {
-      console.error(`Error retrieving place data: ${error}`);
+      Logger.error("Error retrieving place data:", error);
     });
 
   addressSearch.addListener("place_changed", () => {
@@ -129,7 +127,7 @@ export const initializeMap = ({ state, updateState, dispatch }) => {
 };
 
 export const handlePlaceChanged = (place, googleMap, state, dispatch, updateState) => {
-  console.log("🌎 updateNewPlace", place);
+  Logger.debug("Place changed:", place.name);
   const { properties } = state;
 
   let placeMarker = new google.maps.Marker({
@@ -218,7 +216,7 @@ const searchDistance = (place, state) => {
       unitSystem: google.maps.UnitSystem.IMPERIAL,
     }, function (response, status) {
       if (status !== google.maps.DistanceMatrixStatus.OK) {
-        console.log("ERROR distanceMatrixService with origins", origins); //TODO check if orginis are set
+        Logger.error("Distance Matrix Service error with origins:", origins); //TODO check if orginis are set
       } else {
        displayMarkersWithDrivingTime(response, googleMap);
       }
@@ -266,9 +264,7 @@ const displayMarkersWithDrivingTime = (response, googleMap) => {
 
 
 export const handleCircleChanged = (googleMap, placeCircle, state, dispatch, updateState) => {
-  console.log("🌎 handleCircleChanged: placeCircle= ", placeCircle);
-  const overlayPosition = computeMarkerPosition(placeCircle, "bottom");
-  console.log("   - handleCircleChanged: overlayPosition= ", overlayPosition);
+  Logger.debug("Circle changed");
 
   const radiusUnit = state.properties?.distanceUnit;
   const overlay = getRadiusOverlay(placeCircle, googleMap);
@@ -289,7 +285,6 @@ export const handleCircleChanged = (googleMap, placeCircle, state, dispatch, upd
     // Use highlight color for markers inside circle, restore original color for those outside
     const markerColor = insideCircle ? COLOR.MARKER_INSIDE_CIRCLE : (marker.originalColor || COLOR.INITIAL_MARKER);
     if (insideCircle) {
-      console.log("   - marker insideCircle ", marker.data);
       let markerObject = marker.data;
       markerObject.distanceFromCenter = distanceFromCenter;
       if (!addedMarkerIds.has(markerObject.name)) {
@@ -300,16 +295,15 @@ export const handleCircleChanged = (googleMap, placeCircle, state, dispatch, upd
     marker.setIcon(getMarkerIcon(markerColor));
   });
 
-  console.log("   - handleCircleChanged markersInsideCircle", markersInsideCircle);
   const sortedMarkersInsideCircle = sortObjects(markersInsideCircle, "distanceFromCenter");
-  console.log("   - handleCircleChanged sortedMarkersInsideCircle", sortedMarkersInsideCircle);
+  Logger.debug("Markers inside circle:", sortedMarkersInsideCircle.length);
 
 
   dispatch(customActions.MAP_CIRCLE_CHANGED, markersInsideCircle);
 };
 
 const initializeCircle = (state, updateState, dispatch, googleMap) => {
-  console.log("initializeCircle");
+  Logger.debug("Initializing circle");
 };
 
 /**
@@ -336,7 +330,7 @@ function getRadiusOverlay(placeCircle, googleMap) {
     return radiusOverlay;
   }
 
-  console.log(" 🌎 getRadiusOverlay - creating new overlay");
+  Logger.debug("Creating new radius overlay");
 
   // Create new overlay
   let elm = document.createElement("div");
@@ -373,7 +367,7 @@ export const toggleCircleVisibility = (visible) => {
  */
 export const updateCircleLabel = ({ state }) => {
   const radiusUnit = state.properties?.distanceUnit;
-  console.log('📗 Action: UPDATE_CIRCLE_LABEL, unit:', radiusUnit);
+  Logger.action("UPDATE_CIRCLE_LABEL", { unit: radiusUnit });
 
   if (radiusOverlay && placeCircleRef) {
     radiusOverlay.setContentText(getCircleRadiusDescription(placeCircleRef, radiusUnit));
@@ -388,20 +382,20 @@ export const setPlace = ({ state, dispatch, updateState }) => {
   const { googleMapsRef, properties } = state;
   const placeString = properties.place;
 
-  console.log('📗 Action: SET_PLACE, address:', placeString);
+  Logger.action("SET_PLACE", { address: placeString });
 
   if (!placeString || !googleMapsRef) {
-    console.warn('SET_PLACE: Missing place or googleMapsRef');
+    Logger.warn("SET_PLACE: Missing place or googleMapsRef");
     return;
   }
 
   getPlaceDetails(placeString, googleMapsRef)
     .then((place) => {
-      console.log('📗 SET_PLACE: Place details retrieved', place);
+      Logger.debug("Place details retrieved:", place.name);
       handlePlaceChanged(place, googleMapsRef, state, dispatch, updateState);
     })
     .catch((error) => {
-      console.error(`SET_PLACE: Error retrieving place data: ${error}`);
+      Logger.error("SET_PLACE: Error retrieving place data:", error);
     });
 };
 
@@ -452,7 +446,7 @@ function createMarkerContent(label, backgroundColor = COLOR.INITIAL_MARKER) {
 }
 
 const setMarkers = (state, updateState, dispatch, googleMap) => {
-  console.log(" 🌎 setMarkers");
+  Logger.debug("Setting markers");
 
   const { googleMapsApi, properties: { mapMarkers, mapMarkersFields } } = state;
 
@@ -482,15 +476,11 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
     } else if (item.lat !== undefined && item.long !== undefined) {
       markerPosition = { lat: item.lat, lng: item.long };
     } else {
-      console.warn("🌎 Marker missing position data:", item);
+      Logger.warn("Marker missing position data:", item);
       return null;
     }
 
     const markerFields = extractFields(mapMarkersFields, item);
-    const markerCopy = Object.assign({}, item);
-
-    console.log("🌎 markerFields: ", markerFields);
-    console.log("🌎 markerCopy  : ", markerCopy);
 
     // Use per-marker color if provided, otherwise use default
     const markerColor = item.markerColor || COLOR.INITIAL_MARKER;
@@ -521,7 +511,7 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
     googleMarker.markerData = { title: item.name, fields: markerFields };
 
     googleMarker.addListener("click", function () {
-      console.log("🌎 CLICK on marker", this);
+      Logger.debug("Marker clicked:", this.markerData?.title);
 
       // Create custom info box at marker position
       createCustomInfoBox(
@@ -604,7 +594,6 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
     infowindow.open(googleMap, marker);
 
     updateState({ circleRadius: 80000 });
-    console.log("setMarkers END", state);
   }
 
   let markerCluster = new MarkerClusterer(googleMap, markers, { imagePath: "https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m" });
@@ -621,11 +610,11 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
  * This preserves the circle overlay and other map state
  */
 export const updateMarkers = ({ state, updateState, dispatch }) => {
-  console.log(" 🌎 updateMarkers - using existing map");
+  Logger.debug("Updating markers on existing map");
   const { googleMapsRef, googleMapsApi, properties } = state;
 
   if (!googleMapsRef) {
-    console.warn("updateMarkers: No map reference found, cannot update markers");
+    Logger.warn("updateMarkers: No map reference found");
     return;
   }
 

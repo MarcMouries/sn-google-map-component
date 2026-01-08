@@ -6,9 +6,12 @@ import { CENTER_ON, customActions } from "../x-snc-gmap/constants";
 import { AIRPORTS } from './sample-data/AIRPORTS'
 import { MONEY_ORDERS } from './sample-data/MONEY_ORDERS'
 import { DC_BOUNDARY_STONES } from './sample-data/DC_BOUNDARY_STONES'
+import { WHO_DISEASE_OUTBREAKS, WHO_OUTBREAK_FIELDS } from './sample-data/WHO_DISEASE_OUTBREAKS'
 
 const MARKER_TYPE_CHANGED = 'MARKER_TYPE_CHANGED';
 const SHOW_CIRCLE_CHANGED = 'SHOW_CIRCLE_CHANGED';
+const ADDRESS_CHANGED = 'ADDRESS_CHANGED';
+const UNIT_CHANGED = 'UNIT_CHANGED';
 
 /**
  * Used to test the component with properties as it's not possible to do in the element.js file
@@ -41,6 +44,12 @@ const markerMap = {
     fields: ["_date_time", "_amount", "_postOffice", "_location", "_sender", "_recipient"],
     markerLabel: '$' // Dollar sign for money orders
   },
+  'WHO_OUTBREAKS': {
+    label: 'WHO Disease Outbreaks (2024-2025)',
+    markers: WHO_DISEASE_OUTBREAKS,
+    fields: WHO_OUTBREAK_FIELDS,
+    markerLabel: '⚠' // Warning symbol for disease outbreaks
+  },
 };
 
 // "_date_time as Date & Time"
@@ -57,7 +66,7 @@ const processedMarkerMap = Object.fromEntries(
 );
 
 const view = (state, { dispatch }) => {
-  const { markerType, circleEvent, showCircle } = state;
+  const { markerType, circleEvent, showCircle, address, radiusUnit } = state;
   const currentData = processedMarkerMap[markerType] || processedMarkerMap[''];
   const markers = currentData.processedMarkers;
   const markerFields = currentData.fields;
@@ -69,6 +78,14 @@ const view = (state, { dispatch }) => {
 
   const handleCircleToggle = (e) => {
     dispatch(SHOW_CIRCLE_CHANGED, { showCircle: e.target.checked });
+  }
+
+  const handleAddressChange = (e) => {
+    dispatch(ADDRESS_CHANGED, { address: e.target.value });
+  }
+
+  const handleUnitChange = (e) => {
+    dispatch(UNIT_CHANGED, { radiusUnit: e.target.value });
   }
 
   return (
@@ -98,16 +115,27 @@ const view = (state, { dispatch }) => {
             centerOn={CENTER_ON.MAP_MARKERS}
             initialZoom={initialZoom}
             language="en"
-            place="Washington, DC"
+            place={address}
             mapMarkers={markers}
             mapMarkersFields={markerFields}
-            showCircle={showCircle}>
+            showCircle={showCircle}
+            distanceUnit={radiusUnit}>
           </x-snc-gmap>
         </div>
 
         <div className="sidebar-panel">
           <div className="properties-section">
             <h3>Properties</h3>
+            <div className="input-control">
+              <label for="address-input">Address:</label>
+              <input
+                id="address-input"
+                type="text"
+                value={address}
+                onchange={handleAddressChange}
+                placeholder="Enter an address or place"
+              />
+            </div>
             <p><strong>Dataset:</strong> {currentData.label}</p>
             <p><strong>Marker Count:</strong> {markers.length}</p>
             <div className="checkbox-control">
@@ -118,6 +146,29 @@ const view = (state, { dispatch }) => {
                   onchange={handleCircleToggle}
                 />
                 <span>Show Circle Overlay</span>
+              </label>
+            </div>
+            <div className="radio-control">
+              <span className="radio-label">Distance Unit:</span>
+              <label>
+                <input
+                  type="radio"
+                  name="distance-unit"
+                  value="miles"
+                  checked={radiusUnit === 'miles'}
+                  onchange={handleUnitChange}
+                />
+                Miles
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="distance-unit"
+                  value="kilometers"
+                  checked={radiusUnit === 'kilometers'}
+                  onchange={handleUnitChange}
+                />
+                Kilometers
               </label>
             </div>
           </div>
@@ -157,6 +208,8 @@ createCustomElement("x-snc-gmap-demo", {
     markerType: '', // Start with no markers selected
     circleEvent: null,
     showCircle: true, // Circle overlay visible by default
+    address: 'Washington, DC', // Default address
+    radiusUnit: 'miles', // Default unit for circle radius
   },
   view,
   styles,
@@ -175,6 +228,16 @@ createCustomElement("x-snc-gmap-demo", {
       } else {
         updateState({ showCircle: payload.showCircle });
       }
+    },
+    [ADDRESS_CHANGED]: (coeffects) => {
+      const { action: { payload }, updateState } = coeffects;
+      console.log("ADDRESS_CHANGED: ", payload);
+      updateState({ address: payload.address });
+    },
+    [UNIT_CHANGED]: (coeffects) => {
+      const { action: { payload }, updateState } = coeffects;
+      console.log("UNIT_CHANGED: ", payload);
+      updateState({ radiusUnit: payload.radiusUnit });
     },
     [customActions.MAP_CIRCLE_CHANGED]: (coeffects) => {
       const { action: { payload }, updateState } = coeffects;

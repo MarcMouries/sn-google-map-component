@@ -16,6 +16,15 @@ export const COLOR = {
 };
 
 /**
+ * Default circle configuration
+ * Used when centering on user location
+ */
+export const CIRCLE_DEFAULTS = {
+	RADIUS_METERS: 80000,  // 80km / ~50 miles
+	UNIT: "kilometers"
+};
+
+/**
  * Marker style configuration
  * Centralized for easy migration to AdvancedMarkerElement
  */

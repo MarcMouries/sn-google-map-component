@@ -6,7 +6,7 @@ import properties from "./properties";
 import { DEFAULT_VALUES } from "./defaultValues";
 import { actionHandlers } from "./actionHandlers";
 import { customActions } from "./constants";
-import { name, version, author } from '../../package.json';
+import packageJson from '../../package.json';
 import { Logger } from './logger';
 
 //console.log = function() {}
@@ -50,7 +50,7 @@ createCustomElement("x-snc-gmap", {
 
 function printComponentInfo(state, updateState) {
   if (!state.versionShowed) {
-    Logger.info(`🌎 Map Component - ${name} v${version} by ${author.email}`);
+    Logger.info(`🌎 Map Component - ${packageJson.name} v${packageJson.version} by ${packageJson.author.email}`);
     updateState({ versionShowed: true });
   }
 }

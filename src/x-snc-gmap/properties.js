@@ -28,6 +28,16 @@ export default {
       dispatch(customActions.UPDATE_CIRCLE_LABEL);
     },
   },
+  infoTemplate: {
+    // Custom HTML template for info windows with {{field}} placeholders
+    // Example: "<div><h3>{{name}}</h3><p>{{description}}</p></div>"
+    default: "",
+    schema: { type: "string" },
+    onChange(currentValue, previousValue, dispatch) {
+      // Update module-level template variable (no marker recreation needed)
+      dispatch(customActions.UPDATE_INFO_TEMPLATE);
+    },
+  },
   initialZoom: {
     default: 9,
     schema: { type: "number" },

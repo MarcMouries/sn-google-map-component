@@ -103,7 +103,7 @@ $sn-darker-bg: #061f2d;
 }
 
 .sidebar-panel {
-    width: 320px;
+    width: 400px;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
@@ -206,6 +206,36 @@ $sn-darker-bg: #061f2d;
 
         span {
             user-select: none;
+        }
+    }
+}
+
+.template-preview {
+    margin-top: 0.75rem;
+
+    label {
+        display: block;
+        font-size: 0.9rem;
+        color: rgba(white, 0.85);
+        margin-bottom: 0.5rem;
+    }
+
+    textarea {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.7rem;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        line-height: 1.4;
+        border-radius: 4px;
+        border: 1px solid rgba(white, 0.2);
+        background-color: rgba(white, 0.1);
+        color: white;
+        resize: vertical;
+        box-sizing: border-box;
+
+        &:focus {
+            outline: 2px solid $sn-green;
+            outline-offset: 1px;
         }
     }
 }

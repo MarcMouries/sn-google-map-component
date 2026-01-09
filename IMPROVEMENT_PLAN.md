@@ -9,6 +9,10 @@
 
 ## Pending Tasks
 
+### Bug Fixes
+
+- [x] **Ghost circle labels** - Fixed duplicate labels when moving/dropping the circle. The overlay reference was captured in stale closure state. Now the overlay is passed directly to all event handlers instead of calling `getRadiusOverlay` with stale state.
+
 ### Performance Improvements
 
 - [x] **Fix module-level variables** - `radiusOverlay`, `gmMarkers`, `placeCircleRef` moved to component state to prevent memory leaks.
@@ -25,15 +29,15 @@
 
 | New File | Responsibility |
 |----------|----------------|
-| `mapInitialization.js` | Map setup and configuration |
-| `markerManager.js` | Marker CRUD operations |
-| `circleManager.js` | Circle overlay logic |
-| `distanceService.js` | Distance calculations |
+| `mapInitialization.js`    | Map setup and configuration |
+| `markerManager.js`        | Marker CRUD operations |
+| `circleOverlayManager.js` | Circle overlay logic |
+| `distanceService.js`      | Distance calculations |
 
 ### New Features
 
 **High Priority**
-- [ ] Marker info customization - HTML templates for info windows
+- [x] Marker info customization - HTML templates for info windows (v0.0.7)
 - [ ] Directions integration - Route from user to marker
 - [ ] Marker filtering - Filter by property values
 
@@ -56,6 +60,14 @@
 ---
 
 ## Done ✅
+
+### Version 0.0.7
+
+**Info Window Customization**
+- [x] Added `infoTemplate` property for custom HTML templates
+- [x] Template supports `{{field}}` placeholders for dynamic values
+- [x] Template formatters: `{{field:number}}`, `{{field:date}}`, `{{field:currency}}`, `{{field:uppercase}}`, `{{field:lowercase}}`
+- [x] Falls back to default styled info box when no template provided
 
 ### Version 0.0.6
 
@@ -115,8 +127,8 @@
 
 ## Code Cleanup Needed
 
-- [ ] Review `updateState({ circleRadius: 80000 });` in setMarkers (hardcoded override, now commented)
-- [ ] Remove unused `markerCopy` variable in setMarkers
+- [x] ~~Review `updateState({ circleRadius: 80000 });` in setMarkers~~ (replaced with `CIRCLE_DEFAULTS.RADIUS_METERS` constant)
+- [x] ~~Remove unused `markerCopy` variable in setMarkers~~ (already removed)
 - [x] ~~Remove unused `circleOptions` variable~~ (already removed)
 - [x] ~~Remove unused `infowindow` module variable~~ (already removed)
 - [x] ~~Remove unused `createInfoWindow` import~~ (removed)

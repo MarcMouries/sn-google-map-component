@@ -12,7 +12,34 @@ import { WHO_DISEASE_OUTBREAKS, WHO_OUTBREAK_FIELDS } from './sample-data/WHO_DI
 const MARKER_TYPE_CHANGED = 'MARKER_TYPE_CHANGED';
 const SHOW_CIRCLE_CHANGED = 'SHOW_CIRCLE_CHANGED';
 const ADDRESS_CHANGED = 'ADDRESS_CHANGED';
-const UNIT_CHANGED = 'UNIT_CHANGED';
+const DISTANCE_UNIT_CHANGED = 'DISTANCE_UNIT_CHANGED';
+const TEMPLATE_TOGGLE_CHANGED = 'TEMPLATE_TOGGLE_CHANGED';
+
+// Sample custom template for testing infoTemplate feature
+const CUSTOM_INFO_TEMPLATE = `
+<div class="info-box-header">{{name}}</div>
+<div class="info-box-body">
+  <div class="info-box-headline">{{headline}}</div>
+  <div class="info-box-stats">
+    <div class="info-box-stat">
+      <div class="stat-value">{{cases:number}}</div>
+      <div class="stat-label">Cases</div>
+    </div>
+    <div class="info-box-stat">
+      <div class="stat-value">{{deaths:number}}</div>
+      <div class="stat-label">Deaths</div>
+    </div>
+  </div>
+  <div class="info-box-field">
+    <span class="field-label">Category:</span> {{category}}
+  </div>
+  <div class="info-box-field">
+    <span class="field-label">Status:</span>
+    <span class="info-box-status {{status:lowercase}}">{{status:uppercase}}</span>
+  </div>
+  <div class="info-box-date">Reported: {{date_reported:date}}</div>
+</div>
+`;
 
 /**
  * Used to test the component with properties as it's not possible to do in the element.js file
@@ -67,7 +94,7 @@ const processedMarkerMap = Object.fromEntries(
 );
 
 const view = (state, { dispatch }) => {
-  const { markerType, circleEvent, showCircle, address, radiusUnit } = state;
+  const { markerType, circleEvent, showCircle, address, distanceUnit, useCustomTemplate } = state;
   const currentData = processedMarkerMap[markerType] || processedMarkerMap[''];
   const markers = currentData.processedMarkers;
   const markerFields = currentData.fields;
@@ -86,7 +113,11 @@ const view = (state, { dispatch }) => {
   }
 
   const handleUnitChange = (e) => {
-    dispatch(UNIT_CHANGED, { radiusUnit: e.target.value });
+    dispatch(DISTANCE_UNIT_CHANGED, { distanceUnit: e.target.value });
+  }
+
+  const handleTemplateToggle = (e) => {
+    dispatch(TEMPLATE_TOGGLE_CHANGED, { useCustomTemplate: e.target.checked });
   }
 
   return (
@@ -120,7 +151,8 @@ const view = (state, { dispatch }) => {
             mapMarkers={markers}
             mapMarkersFields={markerFields}
             showCircle={showCircle}
-            distanceUnit={radiusUnit}>
+            distanceUnit={distanceUnit}
+            infoTemplate={useCustomTemplate ? CUSTOM_INFO_TEMPLATE : ''}>
           </x-snc-gmap>
         </div>
 
@@ -149,6 +181,26 @@ const view = (state, { dispatch }) => {
                 <span>Show Circle Overlay</span>
               </label>
             </div>
+            <div className="checkbox-control">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={useCustomTemplate}
+                  onchange={handleTemplateToggle}
+                />
+                <span>Use Custom Info Template</span>
+              </label>
+            </div>
+            {useCustomTemplate && (
+              <div className="template-preview">
+                <label>Template:</label>
+                <textarea
+                  readonly
+                  rows="8"
+                  value={CUSTOM_INFO_TEMPLATE.trim()}
+                />
+              </div>
+            )}
             <div className="radio-control">
               <span className="radio-label">Distance Unit:</span>
               <label>
@@ -156,7 +208,7 @@ const view = (state, { dispatch }) => {
                   type="radio"
                   name="distance-unit"
                   value="miles"
-                  checked={radiusUnit === 'miles'}
+                  checked={distanceUnit === 'miles'}
                   onchange={handleUnitChange}
                 />
                 Miles
@@ -166,7 +218,7 @@ const view = (state, { dispatch }) => {
                   type="radio"
                   name="distance-unit"
                   value="kilometers"
-                  checked={radiusUnit === 'kilometers'}
+                  checked={distanceUnit === 'kilometers'}
                   onchange={handleUnitChange}
                 />
                 Kilometers
@@ -210,7 +262,8 @@ createCustomElement("x-snc-gmap-demo", {
     circleEvent: null,
     showCircle: true, // Circle overlay visible by default
     address: 'Washington, DC', // Default address
-    radiusUnit: 'miles', // Default unit for circle radius
+    distanceUnit: 'miles', // Default unit for distances
+    useCustomTemplate: false, // Custom info template disabled by default
   },
   view,
   styles,
@@ -235,10 +288,15 @@ createCustomElement("x-snc-gmap-demo", {
       Logger.action("📍 ADDRESS_CHANGED", payload);
       updateState({ address: payload.address });
     },
-    [UNIT_CHANGED]: (coeffects) => {
+    [DISTANCE_UNIT_CHANGED]: (coeffects) => {
       const { action: { payload }, updateState } = coeffects;
-      Logger.action("📏 UNIT_CHANGED", payload);
-      updateState({ radiusUnit: payload.radiusUnit });
+      Logger.action("📏 DISTANCE_UNIT_CHANGED", payload);
+      updateState({ distanceUnit: payload.distanceUnit });
+    },
+    [TEMPLATE_TOGGLE_CHANGED]: (coeffects) => {
+      const { action: { payload }, updateState } = coeffects;
+      Logger.action("📝 TEMPLATE_TOGGLE_CHANGED", payload);
+      updateState({ useCustomTemplate: payload.useCustomTemplate });
     },
     [customActions.MAP_CIRCLE_CHANGED]: (coeffects) => {
       const { action: { payload }, updateState } = coeffects;

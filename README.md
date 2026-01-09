@@ -102,6 +102,7 @@ The component will be deployed to your ServiceNow instance and available in UI B
 | `place`            | Initial place to center the map                  | string   | `"Washington, DC"`       |
 | `mapMarkers`       | Array of marker objects with position data       | array    | See below                |
 | `mapMarkersFields` | Fields to display in marker info popup           | array    | `["name", "description"]`|
+| `infoTemplate`     | Custom HTML template for info popups             | string   | See below                |
 | `language`         | Map language (BCP 47 code)                       | string   | `"en"`, `"fr"`, `"de"`   |
 | `initialZoom`      | Initial zoom level (1-20)                        | number   | `10`                     |
 | `centerOn`         | How to center the map                            | string   | `"MAP_MARKERS"`, `"ADDRESS"`, `"CURRENT_USER"` |
@@ -143,6 +144,33 @@ Example configuration in UI Builder:
 
 Only fields listed in `mapMarkersFields` will appear in the info window. The `name` field is always used as the header.
 
+### Custom Info Templates
+
+Use the `infoTemplate` property to define custom HTML for marker info popups. Use `{{field}}` placeholders that will be replaced with marker data.
+
+```html
+<div class="my-popup">
+  <h3>{{name}}</h3>
+  <p>{{description}}</p>
+  <div class="stats">
+    Cases: {{cases:number}} | Deaths: {{deaths:number}}
+  </div>
+  <small>Reported: {{date_reported:date}}</small>
+</div>
+```
+
+**Available Formatters:**
+| Formatter | Description | Example |
+|-----------|-------------|---------|
+| `{{field}}` | Raw value | `{{name}}` → "Outbreak A" |
+| `{{field:number}}` | Formatted with commas | `{{cases:number}}` → "39,000" |
+| `{{field:date}}` | Formatted date | `{{date:date}}` → "Jul 9, 2025" |
+| `{{field:currency}}` | Dollar format | `{{amount:currency}}` → "$1,500" |
+| `{{field:uppercase}}` | Uppercase text | `{{status:uppercase}}` → "ACTIVE" |
+| `{{field:lowercase}}` | Lowercase text | `{{status:lowercase}}` → "active" |
+
+If no `infoTemplate` is provided, the component uses the default styled info box.
+
 ## Events
 
 | Event Name           | Description                                    | Payload                     |
@@ -173,7 +201,14 @@ gr.insert();
 
 ## Version History
 
-### 0.0.6
+### 0.7
+
+**Info Window Customization**
+- **Custom HTML Templates**: New `infoTemplate` property allows defining custom HTML for marker info popups using `{{field}}` placeholders
+- **Template Formatters**: Support for value formatting with `{{field:number}}`, `{{field:date}}`, `{{field:currency}}`, `{{field:uppercase}}`, `{{field:lowercase}}`
+- Falls back to default styled info box when no template is provided
+
+### 0.6
 
 **Performance & Memory Management**
 - **Fixed Memory Leaks**: Moved `gmMarkers`, `radiusOverlay`, and `placeCircleRef` from module-level variables to component state. Previously, these variables persisted across component mount/unmount cycles, causing memory accumulation. Now they are properly cleaned up when the component unmounts.
@@ -197,7 +232,7 @@ gr.insert();
 - Show Circle Overlay checkbox
 - USE_CASES.md with fraud detection, audit planning, and disease outbreak tracking examples
 
-### 0.0.5 - Zurich Migration
+### 0.5 - Zurich Migration
 - Migrated to ServiceNow Zurich release compatibility
 - Updated Node.js requirement to >= 18.0.0
 - Improved demo page with dark theme styling

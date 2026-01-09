@@ -1,12 +1,13 @@
 {
 	"name": "x-snc-gmap",
-	"version": "0.0.6",
+	"title": "Location Intelligence Map",
+	"description": "Interactive Google Maps component for ServiceNow Next Experience with marker clustering, radius filtering, custom info templates, and distance calculations",
+	"version": "0.7.0",
 	"author": {
 		"name": "Marc Mouries",
 		"email": "marc.mouries@servicenow.com"
 	},
 	"private": false,
-	"description": "Google Map component for ServiceNow Next Experience",
 	"keywords": [
 		"ServiceNow",
 		"Now Experience UI Component",

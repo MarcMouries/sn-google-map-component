@@ -2,11 +2,55 @@
  * Custom InfoBox Overlay
  * A simple, fully customizable info popup that replaces Google's InfoWindow
  * Based on Google Maps OverlayView for complete DOM control
+ *
+ * Supports custom HTML templates with {{field}} placeholders:
+ * - {{fieldName}} - replaced with the field value
+ * - {{fieldName:format}} - applies formatting (number, date, currency)
  */
 
 import { convertSnakeCaseToTitleCase } from "./stringUtils";
 
 let currentOpenInfoBox = null;
+
+/**
+ * Process a template string by replacing {{field}} placeholders with values
+ * Supports formatters: {{field:number}}, {{field:date}}, {{field:currency}}
+ * @param {string} template - HTML template with {{field}} placeholders
+ * @param {object} data - Object containing field values
+ * @returns {string} - Processed HTML
+ */
+function processTemplate(template, data) {
+  return template.replace(/\{\{(\w+)(?::(\w+))?\}\}/g, (match, field, formatter) => {
+    let value = data[field];
+
+    if (value === undefined || value === null) {
+      return '';
+    }
+
+    // Apply formatter if specified
+    if (formatter) {
+      switch (formatter.toLowerCase()) {
+        case 'number':
+          value = formatNumber(value);
+          break;
+        case 'date':
+          value = formatDate(value);
+          break;
+        case 'currency':
+          value = typeof value === 'number' ? `$${formatNumber(value)}` : value;
+          break;
+        case 'uppercase':
+          value = String(value).toUpperCase();
+          break;
+        case 'lowercase':
+          value = String(value).toLowerCase();
+          break;
+      }
+    }
+
+    return value;
+  });
+}
 
 /**
  * Format a date string to a more readable format
@@ -31,7 +75,15 @@ function formatNumber(num) {
   return num.toLocaleString();
 }
 
-export function createCustomInfoBox(title, obj, position, map) {
+/**
+ * Create and display a custom info box on the map
+ * @param {string} title - The title/header for the info box
+ * @param {object} obj - Object containing field data to display
+ * @param {google.maps.LatLng} position - Position to display the info box
+ * @param {google.maps.Map} map - The Google Map instance
+ * @param {string} [template] - Optional custom HTML template with {{field}} placeholders
+ */
+export function createCustomInfoBox(title, obj, position, map, template) {
   // Close any existing open info box
   if (currentOpenInfoBox) {
     currentOpenInfoBox.setMap(null);
@@ -87,12 +139,31 @@ export function createCustomInfoBox(title, obj, position, map) {
     }
   }
 
-  const html = buildInfoBoxContent(title, obj);
+  // Use custom template if provided, otherwise use default styled layout
+  const html = template
+    ? buildTemplateContent(title, obj, template)
+    : buildInfoBoxContent(title, obj);
   const infoBox = new CustomInfoBox(position, html);
   infoBox.setMap(map);
   currentOpenInfoBox = infoBox;
 
   return infoBox;
+}
+
+/**
+ * Build info box content from a custom template
+ * Wraps the processed template in the standard container with close button
+ */
+function buildTemplateContent(title, obj, template) {
+  // Merge title into the data object so it can be used in templates as {{name}}
+  const data = { name: title, ...obj };
+  const processedContent = processTemplate(template, data);
+
+  return `
+    <div class="info-box-container">
+      <button class="info-close-btn">&times;</button>
+      ${processedContent}
+    </div>`;
 }
 
 function buildInfoBoxContent(title, obj) {

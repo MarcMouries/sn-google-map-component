@@ -11,6 +11,8 @@ import { WHO_DISEASE_OUTBREAKS, WHO_OUTBREAK_FIELDS } from './sample-data/WHO_DI
 
 const MARKER_TYPE_CHANGED = 'MARKER_TYPE_CHANGED';
 const SHOW_CIRCLE_CHANGED = 'SHOW_CIRCLE_CHANGED';
+const SHOW_ROUTES_CHANGED = 'SHOW_ROUTES_CHANGED';
+const SHOW_DISTANCE_LINES_CHANGED = 'SHOW_DISTANCE_LINES_CHANGED';
 const ADDRESS_CHANGED = 'ADDRESS_CHANGED';
 const DISTANCE_UNIT_CHANGED = 'DISTANCE_UNIT_CHANGED';
 const TEMPLATE_TOGGLE_CHANGED = 'TEMPLATE_TOGGLE_CHANGED';
@@ -94,7 +96,7 @@ const processedMarkerMap = Object.fromEntries(
 );
 
 const view = (state, { dispatch }) => {
-  const { markerType, circleEvent, showCircle, address, distanceUnit, useCustomTemplate } = state;
+  const { markerType, circleEvent, showCircle, showRoutes, showDistanceLines, address, distanceUnit, useCustomTemplate } = state;
   const currentData = processedMarkerMap[markerType] || processedMarkerMap[''];
   const markers = currentData.processedMarkers;
   const markerFields = currentData.fields;
@@ -118,6 +120,14 @@ const view = (state, { dispatch }) => {
 
   const handleTemplateToggle = (e) => {
     dispatch(TEMPLATE_TOGGLE_CHANGED, { useCustomTemplate: e.target.checked });
+  }
+
+  const handleRoutesToggle = (e) => {
+    dispatch(SHOW_ROUTES_CHANGED, { showRoutes: e.target.checked });
+  }
+
+  const handleDistanceLinesToggle = (e) => {
+    dispatch(SHOW_DISTANCE_LINES_CHANGED, { showDistanceLines: e.target.checked });
   }
 
   return (
@@ -151,6 +161,8 @@ const view = (state, { dispatch }) => {
             mapMarkers={markers}
             mapMarkersFields={markerFields}
             showCircle={showCircle}
+            showRoutes={showRoutes}
+            showDistanceLines={showDistanceLines}
             distanceUnit={distanceUnit}
             infoTemplate={useCustomTemplate ? CUSTOM_INFO_TEMPLATE : ''}>
           </x-snc-gmap>
@@ -179,6 +191,34 @@ const view = (state, { dispatch }) => {
                   onchange={handleCircleToggle}
                 />
                 <span>Show Circle Overlay</span>
+              </label>
+            </div>
+            <div className="checkbox-control">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={showDistanceLines}
+                  onchange={handleDistanceLinesToggle}
+                  disabled={!markerType}
+                />
+                <span>Show Distance Lines</span>
+                {!markerType && (
+                  <span className="hint"> (select markers first)</span>
+                )}
+              </label>
+            </div>
+            <div className="checkbox-control">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={showRoutes}
+                  onchange={handleRoutesToggle}
+                  disabled={markerType !== 'MONEY_ORDERS'}
+                />
+                <span>Show Sequential Routes</span>
+                {markerType !== 'MONEY_ORDERS' && (
+                  <span className="hint"> (requires timestamp field)</span>
+                )}
               </label>
             </div>
             <div className="checkbox-control">
@@ -261,6 +301,8 @@ createCustomElement("x-snc-gmap-demo", {
     markerType: '', // Start with no markers selected
     circleEvent: null,
     showCircle: true, // Circle overlay visible by default
+    showRoutes: false, // Sequential routes hidden by default
+    showDistanceLines: false, // Distance lines from place hidden by default
     address: 'Washington, DC', // Default address
     distanceUnit: 'miles', // Default unit for distances
     useCustomTemplate: false, // Custom info template disabled by default
@@ -282,6 +324,16 @@ createCustomElement("x-snc-gmap-demo", {
       } else {
         updateState({ showCircle: payload.showCircle });
       }
+    },
+    [SHOW_ROUTES_CHANGED]: (coeffects) => {
+      const { action: { payload }, updateState } = coeffects;
+      Logger.action("🛤️ SHOW_ROUTES_CHANGED", payload);
+      updateState({ showRoutes: payload.showRoutes });
+    },
+    [SHOW_DISTANCE_LINES_CHANGED]: (coeffects) => {
+      const { action: { payload }, updateState } = coeffects;
+      Logger.action("📏 SHOW_DISTANCE_LINES_CHANGED", payload);
+      updateState({ showDistanceLines: payload.showDistanceLines });
     },
     [ADDRESS_CHANGED]: (coeffects) => {
       const { action: { payload }, updateState } = coeffects;

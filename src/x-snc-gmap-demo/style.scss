@@ -192,6 +192,7 @@ $sn-darker-bg: #061f2d;
         cursor: pointer;
         font-size: 0.9rem;
         color: rgba(white, 0.85);
+        flex-wrap: wrap;
 
         &:hover {
             color: white;
@@ -202,10 +203,21 @@ $sn-darker-bg: #061f2d;
             height: 18px;
             cursor: pointer;
             accent-color: $sn-green;
+
+            &:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
         }
 
         span {
             user-select: none;
+        }
+
+        .hint {
+            font-size: 0.8rem;
+            color: rgba(white, 0.5);
+            font-style: italic;
         }
     }
 }

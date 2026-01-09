@@ -11,13 +11,18 @@ import { MapQuest } from "./googleMapStyle";
 import svg_icon from "./assets/svg-icon.svg";
 import { createRadiusOverlay } from './radiusOverlay'
 import { Logger } from './logger';
-import { searchDistance } from './distanceService';
+import { searchDistance, drawRoutes, clearRoutes, drawRoutesFromPlace, clearPlaceRoutes } from './distanceService';
 
 
 // Note: gmMarkers, radiusOverlay, placeCircleRef are now stored in component state
 // to prevent memory leaks across component lifecycles. See initialState in index.js.
 let googleMapRef; // Reference to the map for toggling (kept module-level for event listeners)
 let currentInfoTemplate = ''; // Current info template (module-level so click handlers use latest value)
+let currentGmMarkers = []; // Current markers for circle detection
+let currentPlace = null; // Last searched place for distance line drawing
+let currentPlaceMarker = null; // Current place marker (to clean up when address changes)
+let currentCircleListeners = []; // Circle event listeners (to clean up when address changes)
+let currentAutoCompleteRef = null; // Reference to autocomplete input for updating address on marker drag
 
 /**
  * Debounce utility - delays function execution until after wait ms have elapsed
@@ -125,6 +130,8 @@ export const initializeMap = ({ state, updateState, dispatch }) => {
   };
   // Set the value of the input field to the place passed as property
   autoCompleteRef.current.value = properties.place;
+  // Store reference for updating when marker is dragged
+  currentAutoCompleteRef = autoCompleteRef.current;
 
   const addressSearch = new google.maps.places.Autocomplete(autoCompleteRef.current, autoCompleteOptions);
 
@@ -148,18 +155,38 @@ export const handlePlaceChanged = (place, googleMap, state, dispatch, updateStat
   Logger.debug("Place changed:", place.name);
   const { properties } = state;
 
-  let placeMarker = new google.maps.Marker({
+  // Store place for later use when distance lines are toggled
+  currentPlace = place;
+
+  // Clean up existing place marker before creating a new one
+  if (currentPlaceMarker) {
+    currentPlaceMarker.setMap(null);
+    currentPlaceMarker = null;
+  }
+
+  // Clean up existing circle and overlay before creating new ones
+  if (state.placeCircleRef) {
+    // Remove event listeners from old circle
+    currentCircleListeners.forEach(listener => {
+      google.maps.event.removeListener(listener);
+    });
+    currentCircleListeners = [];
+    // Remove old circle from map
+    state.placeCircleRef.setMap(null);
+  }
+  if (state.radiusOverlay) {
+    state.radiusOverlay.setMap(null);
+  }
+
+  // Create new place marker
+  currentPlaceMarker = new google.maps.Marker({
     map: googleMap,
     draggable: true,
     animation: google.maps.Animation.BOUNCE,
     position: place.geometry.location,
   });
-  placeMarker.setVisible(true);
-  googleMap.setCenter(placeMarker.getPosition());
-
-  //TODO - enable placeMarker or not
-  //const infowindow = createInfoWindow(place);
-  //infowindow.open(googleMap, placeMarker);
+  currentPlaceMarker.setVisible(true);
+  googleMap.setCenter(currentPlaceMarker.getPosition());
 
   const circleCenter = place.geometry.location;
   const radiusInMeters = convertRadiusToMeters(state.properties.circleRadius, state.properties.distanceUnit);
@@ -167,7 +194,13 @@ export const handlePlaceChanged = (place, googleMap, state, dispatch, updateStat
 
   // Store references for toggling visibility (in state to prevent memory leaks)
   googleMapRef = googleMap;
-  const newRadiusOverlay = getRadiusOverlay(placeCircle, googleMap, state);
+
+  // Create new overlay (don't reuse old one since circle changed)
+  let elm = document.createElement("div");
+  elm.classList.add("overlay-content");
+  const newRadiusOverlay = createRadiusOverlay(computeMarkerPosition(placeCircle, "bottom"), elm);
+  newRadiusOverlay.setMap(googleMap);
+
   updateState({ placeCircleRef: placeCircle, radiusOverlay: newRadiusOverlay });
 
   // Check if circle should be visible based on showCircle property
@@ -186,23 +219,81 @@ export const handlePlaceChanged = (place, googleMap, state, dispatch, updateStat
     handleCircleChanged(googleMap, placeCircle, newRadiusOverlay, state, dispatch);
   }, 150);
 
-  // LISTENERS
-  google.maps.event.addListener(placeCircle, "radius_changed", function () {
-    debouncedCircleChanged();
-  });
+  // LISTENERS - store references for cleanup
+  currentCircleListeners.push(
+    google.maps.event.addListener(placeCircle, "radius_changed", function () {
+      debouncedCircleChanged();
+    })
+  );
 
   // Update overlay position while dragging (real-time, no debounce needed)
-  google.maps.event.addListener(placeCircle, "center_changed", function () {
-    updateOverlayPosition(placeCircle, newRadiusOverlay);
-  });
+  currentCircleListeners.push(
+    google.maps.event.addListener(placeCircle, "center_changed", function () {
+      updateOverlayPosition(placeCircle, newRadiusOverlay);
+    })
+  );
 
-  google.maps.event.addListener(placeCircle, "dragend", function () {
-    debouncedCircleChanged();
+  currentCircleListeners.push(
+    google.maps.event.addListener(placeCircle, "dragend", function () {
+      debouncedCircleChanged();
+    })
+  );
+
+  // Add dragend listener to place marker - update address when marker is dropped
+  currentPlaceMarker.addListener('dragend', () => {
+    const newPosition = currentPlaceMarker.getPosition();
+    Logger.debug("Place marker dragged to:", newPosition.lat(), newPosition.lng());
+
+    // Reverse geocode to get address
+    const geocoder = new google.maps.Geocoder();
+    geocoder.geocode({ location: newPosition }, (results, status) => {
+      if (status === 'OK' && results[0]) {
+        const newAddress = results[0].formatted_address;
+        Logger.debug("Reverse geocoded address:", newAddress);
+
+        // Update the autocomplete input field
+        if (currentAutoCompleteRef) {
+          currentAutoCompleteRef.value = newAddress;
+        }
+
+        // Create a place-like object for consistency
+        const newPlace = {
+          name: newAddress,
+          formatted_address: newAddress,
+          geometry: {
+            location: newPosition
+          }
+        };
+
+        // Update module-level currentPlace for distance lines
+        currentPlace = newPlace;
+
+        // Move the circle to the new position
+        placeCircle.setCenter(newPosition);
+
+        // Recalculate distance lines if enabled
+        const { showDistanceLines, mapMarkers, distanceUnit } = state.properties;
+        if (showDistanceLines && mapMarkers && mapMarkers.length > 0) {
+          drawRoutesFromPlace(newPlace, googleMap, mapMarkers, distanceUnit);
+        }
+
+        // Recalculate markers inside circle (use local variables, not stale state)
+        handleCircleChanged(googleMap, placeCircle, newRadiusOverlay, state, dispatch);
+      } else {
+        Logger.error("Geocoder failed:", status);
+      }
+    });
   });
 
   Logger.log("  - googleMap            : ", googleMap);
 
   searchDistance(place, state);
+
+  // Draw route lines from place to markers if enabled
+  const { showDistanceLines, mapMarkers, distanceUnit } = state.properties;
+  if (showDistanceLines && mapMarkers && mapMarkers.length > 0) {
+    drawRoutesFromPlace(place, googleMap, mapMarkers, distanceUnit);
+  }
 };
 
 export const handleCircleChanged = (googleMap, placeCircle, overlay, state, dispatch) => {
@@ -219,7 +310,9 @@ export const handleCircleChanged = (googleMap, placeCircle, overlay, state, disp
   let markersInsideCircle = [];
   let addedMarkerIds = new Set();
 
-  const gmMarkers = state.gmMarkers || [];
+  // Use module-level currentGmMarkers instead of state.gmMarkers to avoid stale closure issue.
+  // The state captured in debounced handlers becomes stale; module-level variable always has fresh data.
+  const gmMarkers = currentGmMarkers;
   gmMarkers.forEach(function (marker) {
     let position = marker.getPosition();
     let distanceFromCenter = google.maps.geometry.spherical.computeDistanceBetween(center, position);
@@ -264,27 +357,6 @@ function sortObjects(arr, field) {
     }
   });
   return arr;
-}
-
-function getRadiusOverlay(placeCircle, googleMap, state) {
-  // Check if overlay exists in state - reuse it to prevent ghost overlays
-  const existingOverlay = state.radiusOverlay;
-  if (existingOverlay) {
-    // Re-add to map if it was removed (e.g., when circle was hidden)
-    if (!existingOverlay.getMap()) {
-      existingOverlay.setMap(googleMap);
-    }
-    return existingOverlay;
-  }
-
-  Logger.debug("Creating new radius overlay");
-
-  // Create new overlay only if none exists
-  let elm = document.createElement("div");
-  elm.classList.add("overlay-content");
-  const newOverlay = createRadiusOverlay(computeMarkerPosition(placeCircle, "bottom"), elm);
-  newOverlay.setMap(googleMap);
-  return newOverlay;
 }
 
 /**
@@ -336,6 +408,68 @@ export const updateInfoTemplate = ({ state }) => {
 };
 
 /**
+ * Handler for DRAW_ROUTES action
+ * Draws route lines between consecutive markers and calculates driving distances/times.
+ * If markers have timestamps, sorts by time and can detect suspicious transitions
+ * where the actual time gap is less than the required driving time (impossible travel).
+ */
+export const handleDrawRoutes = ({ action, state }) => {
+  const { enabled } = action.payload;
+  const { googleMapsRef, properties } = state;
+  const { mapMarkers, distanceUnit, timestampField } = properties;
+
+  Logger.action("DRAW_ROUTES", { enabled, timestampField });
+
+  if (!googleMapsRef) {
+    Logger.warn("DRAW_ROUTES: No map reference found");
+    return;
+  }
+
+  if (enabled) {
+    // Check if markers have the configured timestamp field
+    const hasTimestampData = mapMarkers?.some(m => m[timestampField]);
+    if (!hasTimestampData) {
+      Logger.warn(`DRAW_ROUTES: Markers don't have timestamp field "${timestampField}"`);
+      return;
+    }
+    drawRoutes(googleMapsRef, mapMarkers, distanceUnit, timestampField);
+  } else {
+    clearRoutes();
+  }
+};
+
+/**
+ * Handler for TOGGLE_DISTANCE_LINES action
+ * Draws or clears route lines from the searched place to all markers
+ */
+export const handleToggleDistanceLines = ({ action, state }) => {
+  const { enabled } = action.payload;
+  const { googleMapsRef, properties } = state;
+  const { mapMarkers, distanceUnit } = properties;
+
+  Logger.action("TOGGLE_DISTANCE_LINES", { enabled });
+
+  if (!googleMapsRef) {
+    Logger.warn("TOGGLE_DISTANCE_LINES: No map reference found");
+    return;
+  }
+
+  if (enabled) {
+    if (!currentPlace) {
+      Logger.warn("TOGGLE_DISTANCE_LINES: No place has been searched yet");
+      return;
+    }
+    if (!mapMarkers || mapMarkers.length === 0) {
+      Logger.warn("TOGGLE_DISTANCE_LINES: No markers to draw routes to");
+      return;
+    }
+    drawRoutesFromPlace(currentPlace, googleMapsRef, mapMarkers, distanceUnit);
+  } else {
+    clearPlaceRoutes();
+  }
+};
+
+/**
  * Handler for SET_PLACE action - updates the map to a new place/address
  * Called when the place property changes
  */
@@ -365,6 +499,7 @@ function getMarkerIcon(color) {
   return {
     url: "data:image/svg+xml;utf-8, " + svgSquare,
     scaledSize: new google.maps.Size(32, 32),
+    anchor: new google.maps.Point(16, 16), // Center anchor so lines end at marker center
     labelOrigin: new google.maps.Point(16, 16), // Center of 32x32 icon
   };
 }
@@ -566,6 +701,9 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
 
   let markerCluster = new MarkerClusterer(googleMap, markers, { imagePath: "https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m" });
 
+  // Update module-level reference for circle detection (avoids stale closure in debounced handlers)
+  currentGmMarkers = newGmMarkers;
+
   updateState({
     markers: markers,
     markerCluster: markerCluster,
@@ -586,6 +724,10 @@ export const updateMarkers = ({ state, updateState, dispatch }) => {
     Logger.warn("updateMarkers: No map reference found");
     return;
   }
+
+  // Clear routes when markers change (routes are marker-specific)
+  clearRoutes();
+  clearPlaceRoutes();
 
   setMarkers(state, updateState, dispatch, googleMapsRef);
 

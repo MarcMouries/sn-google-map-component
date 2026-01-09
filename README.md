@@ -4,17 +4,16 @@ A Google Maps component for ServiceNow Next Experience that provides location vi
 
 ## Key Capabilities
 
-```
-┌─────────────────────────────────────────────────┐
-│           Location Intelligence                 │
-├─────────────────────────────────────────────────┤
-│  1. Define a reference point (address/place)    │
-│  2. Set a radius of interest                    │
-│  3. Find items within that radius               │
-│  4. Calculate travel distances/times            │
-│  5. Support decision-making                     │
-└─────────────────────────────────────────────────┘
-```
+### Location Intelligence                 
+
+1. Define a reference point (address/place)    
+2. Set a radius of interest                    
+3. Find items within that radius               
+4. Calculate travel distances/times            
+5. Visualize sequential routes with direction  
+6. Detect suspicious/impossible transitions    
+7. Support decision-making                     
+
 
 See [USE_CASES.md](USE_CASES.md) for detailed real-world examples including fraud detection, audit planning, and disease outbreak tracking.
 
@@ -99,16 +98,19 @@ The component will be deployed to your ServiceNow instance and available in UI B
 
 | Property           | Description                                      | Type     | Example                  |
 | ------------------ | ------------------------------------------------ | -------- | ------------------------ |
-| `place`            | Initial place to center the map                  | string   | `"Washington, DC"`       |
-| `mapMarkers`       | Array of marker objects with position data       | array    | See below                |
-| `mapMarkersFields` | Fields to display in marker info popup           | array    | `["name", "description"]`|
-| `infoTemplate`     | Custom HTML template for info popups             | string   | See below                |
-| `language`         | Map language (BCP 47 code)                       | string   | `"en"`, `"fr"`, `"de"`   |
-| `initialZoom`      | Initial zoom level (1-20)                        | number   | `10`                     |
 | `centerOn`         | How to center the map                            | string   | `"MAP_MARKERS"`, `"ADDRESS"`, `"CURRENT_USER"` |
-| `showCircle`       | Show/hide the radius circle overlay              | boolean  | `true`                   |
 | `circleRadius`     | Radius of the circle (in distanceUnit)           | number   | `10`                     |
 | `distanceUnit`     | Unit for distances (miles or kilometers)         | string   | `"miles"`, `"kilometers"`|
+| `infoTemplate`     | Custom HTML template for info popups             | string   | [See Custom Info Templates](#custom-info-templates) |
+| `initialZoom`      | Initial zoom level (1-20)                        | number   | `10`                     |
+| `language`         | Map language (BCP 47 code)                       | string   | `"en"`, `"fr"`, `"de"`   |
+| `mapMarkers`       | Array of marker objects with position data       | array    | [See Marker Format](#marker-format) |
+| `mapMarkersFields` | Fields to display in marker info popup           | array    | `["name", "description"]`|
+| `place`            | Initial place to center the map                  | string   | `"Washington, DC"`       |
+| `showCircle`       | Show/hide the radius circle overlay              | boolean  | `true`                   |
+| `showDistanceLines`| Draw lines from place to all markers with distance/time | boolean | `false`           |
+| `showRoutes`       | Draw sequential route lines between markers      | boolean  | `false`                  |
+| `timestampField`   | Field name for timestamp data (for route sorting)| string   | `"timestamp"`            |
 
 ### Marker Format
 
@@ -120,12 +122,25 @@ The component will be deployed to your ServiceNow instance and available in UI B
   "markerColor": "#E53935",  // Optional: custom marker color (hex)
   "sys_id": "abc123...",     // Optional: ServiceNow record sys_id
   "table": "cmn_location",   // Optional: ServiceNow table name
+  "timestamp": "2025-01-15T10:30:00Z", // Optional: ISO 8601 timestamp for route sorting
   "position": {
     "lat": 38.9072,
     "lng": -77.0369
   }
 }
 ```
+
+**Field Reference:**
+| Field | Required | Description |
+|-------|----------|-------------|
+| `name` | Yes | Display name shown in info popup header |
+| `position` | Yes | Object with `lat` and `lng` coordinates |
+| `description` | No | Additional text shown in info popup |
+| `markerLabel` | No | Single character or emoji displayed on marker |
+| `markerColor` | No | Hex color code for marker background |
+| `sys_id` | No | ServiceNow record sys_id for dynamic data loading |
+| `table` | No | ServiceNow table name (used with sys_id) |
+| `timestamp` | No | ISO 8601 timestamp for sequential route ordering (required when using `showRoutes`) |
 
 ### ServiceNow Record Integration
 
@@ -195,13 +210,24 @@ gr.insert();
 
 - **Marker Clustering**: Automatic grouping of nearby markers at lower zoom levels
 - **Radius Circle**: Draggable/resizable circle to filter markers within a radius
+- **Sequential Routes**: Visualize travel paths with direction arrows and sequence numbers
+- **Suspicious Detection**: Automatically flag impossible transitions (travel faster than driving time allows)
+- **Distance Lines**: Show driving distance/time from a location to all markers
 - **Localization**: Support for multiple languages via BCP 47 codes
 - **User Location**: Option to center on user's location from ServiceNow or browser geolocation
-- **Info Windows**: Customizable popup information for each marker
+- **Info Windows**: Customizable popup information for each marker with HTML templates
 
 ## Version History
 
 ### 0.7
+
+**Sequential Routes & Distance Visualization**
+- **Sequential Routes**: New `showRoutes` property draws route lines between markers sorted by timestamp
+- **Direction Indicators**: Route lines display arrows showing direction of travel and numbered sequence markers
+- **Suspicious Detection**: Automatically flags impossible transitions where actual time < driving time (highlighted in red)
+- **Distance Lines**: New `showDistanceLines` property draws lines from searched place to all markers with driving distance/time
+- **Marker Positioning**: Fixed distance lines to correctly end at marker centers (anchor point fix)
+- **Draggable Place Marker**: Location marker can be dragged to update address via reverse geocoding
 
 **Info Window Customization**
 - **Custom HTML Templates**: New `infoTemplate` property allows defining custom HTML for marker info popups using `{{field}}` placeholders
@@ -210,19 +236,11 @@ gr.insert();
 
 ### 0.6
 
-**Performance & Memory Management**
-- **Fixed Memory Leaks**: Moved `gmMarkers`, `radiusOverlay`, and `placeCircleRef` from module-level variables to component state. Previously, these variables persisted across component mount/unmount cycles, causing memory accumulation. Now they are properly cleaned up when the component unmounts.
-
-**Developer Experience**
-- **Logger Utility**: New centralized logging with log levels (DEBUG, INFO, WARN, ERROR). Auto-detects development mode (localhost) to show debug output. Use `Logger.debug()`, `Logger.info()`, `Logger.warn()`, `Logger.error()`, and `Logger.action()` for tracking dispatched actions.
-- **Renamed API Methods**: Renamed `googleMapMethodActionHandlers` to `googleMapCredentialTypeActionHandlers` for clarity
-
 **Component Improvements**
 - **Styled Info Windows**: Redesigned marker info popups with styled header, formatted statistics (cases/deaths), status badges, and date formatting
 - **Custom Marker Colors**: Markers now support per-marker colors via the `markerColor` property for category-based visualization
 - **Distance Unit**: New `distanceUnit` property allows choosing between miles or kilometers for distance displays
-- **SET_PLACE Action**: Programmatically update the map location by dispatching SET_PLACE with a new address
-- **Distance Matrix Fix**: Resolved error that occurred when calculating driving distances with an empty marker set
+- **Dynamic Address Updates**: Programmatically update the map location by setting the `place` property or dispatching SET_PLACE action
 - **Circle Visibility**: New `showCircle` property to toggle circle overlay visibility
 
 **Demo & Documentation**
@@ -265,8 +283,8 @@ Future features under consideration:
 
 ### Route Optimization
 - Suggest best order to visit multiple locations
-- Multi-stop directions ("visit A, then B, then C")
-- Optimize for shortest distance or time
+- Multi-stop turn-by-turn directions
+- Optimize route order for shortest total distance/time
 
 ### Advanced Filtering
 - Filter markers by attributes (type, status, date)
@@ -279,9 +297,12 @@ Future features under consideration:
 - Export selected markers to reports
 
 ### Visualization
+- Custom marker icons per category ✅ 
+- Sequential route visualization with timestamps ✅ 
+- Direction arrows and sequence numbers on routes ✅
+- Suspicious transition detection ✅ 
 - Heat maps for data density
-- Time-based animations
-- Custom marker icons per category
+- Time-based animations (playback of sequential routes)
 
 ## Resources
 

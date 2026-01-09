@@ -7,7 +7,7 @@ import { googleMapCredentialTypeActionHandlers } from './actions/LoadGoogleApiMe
 
 import { actionTypes } from "@servicenow/ui-core";
 const { COMPONENT_BOOTSTRAPPED } = actionTypes;
-import { loadGoogleApi, initializeMap, updateMarkers, updateCircleLabel, updateInfoTemplate, toggleCircleVisibility, setPlace } from './loadGoogleMapsApi';
+import { loadGoogleApi, initializeMap, updateMarkers, updateCircleLabel, updateInfoTemplate, toggleCircleVisibility, setPlace, handleDrawRoutes, handleToggleDistanceLines } from './loadGoogleMapsApi';
 import { URL_CURRENT_USER } from "./constants";
 import { queryMarkerData, fetchTaskDataEffect, queryCurrentUserLocation } from "./dataProvider";
 import { createGraphQLEffect } from "@servicenow/ui-effect-graphql";
@@ -68,6 +68,10 @@ export const actionHandlers = {
           Logger.action('📗 TOGGLE_CIRCLE', { visible });
           toggleCircleVisibility(visible, state);
      },
+
+     [customActions.DRAW_ROUTES]: handleDrawRoutes,
+
+     [customActions.TOGGLE_DISTANCE_LINES]: handleToggleDistanceLines,
 
      [customActions.SET_PLACE]: setPlace,
 

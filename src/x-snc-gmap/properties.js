@@ -80,4 +80,30 @@ export default {
       dispatch(customActions.TOGGLE_CIRCLE, { visible: currentValue });
     },
   },
+  showRoutes: {
+    // When enabled, draws route lines between consecutive markers (sorted by timestamp if available)
+    // and calculates driving distances/times. Can detect suspicious transitions where actual time < driving time.
+    // For timestamp-based sequencing, provide marker data with a timestamp field (configurable via timestampField).
+    default: false,
+    schema: { type: "boolean" },
+    onChange(currentValue, previousValue, dispatch) {
+      dispatch(customActions.DRAW_ROUTES, { enabled: currentValue });
+    },
+  },
+  timestampField: {
+    // Field name in marker data containing ISO 8601 timestamp (e.g., "2020-01-12T09:30:00")
+    // Used by showRoutes to sort markers chronologically and detect suspicious transitions.
+    // Default: "timestamp"
+    default: "timestamp",
+    schema: { type: "string" },
+  },
+  showDistanceLines: {
+    // When enabled, draws route lines from the searched place to all markers
+    // showing driving distance and time. Click on a line to see details.
+    default: false,
+    schema: { type: "boolean" },
+    onChange(currentValue, previousValue, dispatch) {
+      dispatch(customActions.TOGGLE_DISTANCE_LINES, { enabled: currentValue });
+    },
+  },
 };

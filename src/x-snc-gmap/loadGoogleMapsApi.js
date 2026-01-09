@@ -1,6 +1,6 @@
 import loadGoogleMapsApi from "load-google-maps-api";
 import MarkerClusterer from "@google/markerclustererplus";
-import { customActions, COLOR, MARKER_STYLE } from "./constants";
+import { customActions, COLOR, MARKER_STYLE, CIRCLE_DEFAULTS } from "./constants";
 import { CENTER_ON } from "./constants";
 import { translate } from "./translate";
 import { createCircle, computeMarkerPosition, convertRadiusToMeters } from "./googleMapUtils";
@@ -8,14 +8,16 @@ import { extractFields, getCircleRadiusDescription, getPlaceDetails } from "./go
 import { createCustomInfoBox } from "./customInfoBox";
 import { SVG_SQUARE } from "./constants";
 import { MapQuest } from "./googleMapStyle";
-import { svg_icon } from "./assets/svg-icon.svg";
+import svg_icon from "./assets/svg-icon.svg";
 import { createRadiusOverlay } from './radiusOverlay'
 import { Logger } from './logger';
+import { searchDistance } from './distanceService';
 
 
 // Note: gmMarkers, radiusOverlay, placeCircleRef are now stored in component state
 // to prevent memory leaks across component lifecycles. See initialState in index.js.
 let googleMapRef; // Reference to the map for toggling (kept module-level for event listeners)
+let currentInfoTemplate = ''; // Current info template (module-level so click handlers use latest value)
 
 /**
  * Debounce utility - delays function execution until after wait ms have elapsed
@@ -175,12 +177,13 @@ export const handlePlaceChanged = (place, googleMap, state, dispatch, updateStat
     newRadiusOverlay.setMap(null);
   }
 
-  handleCircleChanged(googleMap, placeCircle, state, dispatch);
+  handleCircleChanged(googleMap, placeCircle, newRadiusOverlay, state, dispatch);
 
-  // Create debounced version of handleCircleChanged (150ms delay)
-  // This prevents excessive processing during rapid drag/resize operations
+  // IMPORTANT: Pass newRadiusOverlay directly to all handlers below.
+  // DO NOT call getRadiusOverlay() inside these handlers or use state.radiusOverlay.
+  // The state captured in these closures becomes stale, causing ghost/duplicate labels.
   const debouncedCircleChanged = debounce(() => {
-    handleCircleChanged(googleMap, placeCircle, state, dispatch, updateState);
+    handleCircleChanged(googleMap, placeCircle, newRadiusOverlay, state, dispatch);
   }, 150);
 
   // LISTENERS
@@ -202,89 +205,10 @@ export const handlePlaceChanged = (place, googleMap, state, dispatch, updateStat
   searchDistance(place, state);
 };
 
-
-const searchDistance = (place, state) => {
-  Logger.log('SEARCH DISTANCE:');
-  Logger.log("  - formatted_address: ", place.formatted_address);
-  Logger.log("  - state            : ", state);
-
-  const { googleMap, gmMarkers, properties: { mapMarkers, mapMarkersFields } } = state;
-  Logger.log("  - mapMarkers       : ", mapMarkers);
-
-  // Guard: Skip distance calculation if no markers exist
-  if (!mapMarkers || mapMarkers.length === 0) {
-    Logger.log("  - No markers to calculate distance to, skipping");
-    return;
-  }
-
-  let origins = [place.formatted_address];
-  let destinations = [];
-  mapMarkers.forEach((marker) => {
-    destinations.push(marker.position);
-  });
-  Logger.log("  - destinations       : ", destinations);
-
-  let distanceMatrixService = new google.maps.DistanceMatrixService();
-  distanceMatrixService.getDistanceMatrix(
-    {
-      origins: origins,
-      destinations: destinations,
-      travelMode: 'DRIVING',
-      unitSystem: google.maps.UnitSystem.IMPERIAL,
-    }, function (response, status) {
-      if (status !== google.maps.DistanceMatrixStatus.OK) {
-        Logger.error("Distance Matrix Service error with origins:", origins); //TODO check if orginis are set
-      } else {
-       displayMarkersWithDrivingTime(response, googleMap, gmMarkers);
-      }
-    });
-}
-
-const displayMarkersWithDrivingTime = (response, googleMap, gmMarkers) => {
-  Logger.log('SHOW DISTANCE:');
-  Logger.log("  - response       : ", response);
-
-  var origins = response.originAddresses;
-  var destinations = response.destinationAddresses;
-  for (var i = 0; i < origins.length; i++) {
-    var results = response.rows[i].elements; // each row corresponds to an origin
-    for (var j = 0; j < results.length; j++) {
-      var element = results[j];
-      if (element.status === "OK") {
-        let element = results[j];
-        let distance = element.distance.text;
-        let duration = element.duration.text;
-        let origin = origins[i];
-        let destination = destinations[j];
-
-        Logger.log(`#${j} ${duration} away ${distance}`);
-        Logger.log("  - origin       : ", origin);
-        Logger.log("  - destination  : ", destination);
-
-        let marker = gmMarkers[j];
-        let content = duration + ' away, ' + distance;
-        var infowindow = new google.maps.InfoWindow({
-          content: '<div class="info-distance" id="infowindowContent">' + content + '</div>',
-          pixelOffset: new google.maps.Size(0, 90) // pixel down the marker
-        });
-        infowindow.open(googleMap, marker);
-
-        //Logger.log("  - gmMarkers  : ", gmMarkers);
-        //Logger.log("  - MARKER  : " + marker.title);
-
-      }
-    }
-  }
-}
-
-
-
-
-export const handleCircleChanged = (googleMap, placeCircle, state, dispatch, updateState) => {
+export const handleCircleChanged = (googleMap, placeCircle, overlay, state, dispatch) => {
   Logger.debug("Circle changed");
 
   const radiusUnit = state.properties?.distanceUnit;
-  const overlay = getRadiusOverlay(placeCircle, googleMap, state);
   if (overlay) {
     overlay.setContentText(getCircleRadiusDescription(placeCircle, radiusUnit));
     overlay.setPosition(computeMarkerPosition(placeCircle, "bottom"));
@@ -343,15 +267,19 @@ function sortObjects(arr, field) {
 }
 
 function getRadiusOverlay(placeCircle, googleMap, state) {
-  // Check if overlay exists in state and is still attached to the map
+  // Check if overlay exists in state - reuse it to prevent ghost overlays
   const existingOverlay = state.radiusOverlay;
-  if (existingOverlay && existingOverlay.getMap()) {
+  if (existingOverlay) {
+    // Re-add to map if it was removed (e.g., when circle was hidden)
+    if (!existingOverlay.getMap()) {
+      existingOverlay.setMap(googleMap);
+    }
     return existingOverlay;
   }
 
   Logger.debug("Creating new radius overlay");
 
-  // Create new overlay
+  // Create new overlay only if none exists
   let elm = document.createElement("div");
   elm.classList.add("overlay-content");
   const newOverlay = createRadiusOverlay(computeMarkerPosition(placeCircle, "bottom"), elm);
@@ -394,6 +322,17 @@ export const updateCircleLabel = ({ state }) => {
   if (radiusOverlay && placeCircleRef) {
     radiusOverlay.setContentText(getCircleRadiusDescription(placeCircleRef, radiusUnit));
   }
+};
+
+/**
+ * Handler for UPDATE_INFO_TEMPLATE action
+ * Updates the module-level template variable without recreating markers
+ * This prevents marker flickering when toggling the template
+ */
+export const updateInfoTemplate = ({ state }) => {
+  const template = state.properties?.infoTemplate || '';
+  Logger.action("UPDATE_INFO_TEMPLATE", { hasTemplate: !!template });
+  currentInfoTemplate = template;
 };
 
 /**
@@ -470,7 +409,10 @@ function createMarkerContent(label, backgroundColor = COLOR.INITIAL_MARKER) {
 const setMarkers = (state, updateState, dispatch, googleMap) => {
   Logger.debug("Setting markers");
 
-  const { googleMapsApi, properties: { mapMarkers, mapMarkersFields } } = state;
+  const { googleMapsApi, properties: { mapMarkers, mapMarkersFields, infoTemplate } } = state;
+
+  // Update module-level template so click handlers always use the latest value
+  currentInfoTemplate = infoTemplate || '';
 
   // Clear existing markers from the map
   if (state.markerCluster) state.markerCluster.setMap(null);
@@ -537,11 +479,13 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
       Logger.debug("Marker clicked:", this.markerData?.title);
 
       // Create custom info box at marker position
+      // Use module-level currentInfoTemplate so changes apply without recreating markers
       createCustomInfoBox(
         this.markerData.title,
         this.markerData.fields,
         this.getPosition(),
-        googleMap
+        googleMap,
+        currentInfoTemplate
       );
       updateState({ currentMarker: googleMarker });
 
@@ -616,8 +560,8 @@ const setMarkers = (state, updateState, dispatch, googleMap) => {
     //map.setMapTypeId('styled_map');
     infowindow.open(googleMap, marker);
 
-    // Set default circle radius when centering on user location (80km)
-    updateState({ circleRadius: 80000 });
+    // Set default circle radius when centering on user location
+    updateState({ circleRadius: CIRCLE_DEFAULTS.RADIUS_METERS });
   }
 
   let markerCluster = new MarkerClusterer(googleMap, markers, { imagePath: "https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m" });

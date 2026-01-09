@@ -1,4 +1,4 @@
-export const MONEY_ORDERS = 
+export const MONEY_ORDERS =
 [
     {
         "serialNumber": "88002206235",
@@ -30,6 +30,7 @@ export const MONEY_ORDERS =
             "clerk": "002",
             "debit": "N"
         },
+        "timestamp": "2020-01-11T08:30:00",
         "sender": {
             "name": "One Cashew",
             "address": {
@@ -97,6 +98,7 @@ export const MONEY_ORDERS =
             "clerk": "004",
             "debit": "N"
         },
+        "timestamp": "2020-01-12T09:00:00",
         "sender": {
             "name": "One Cashew",
             "address": {
@@ -164,6 +166,7 @@ export const MONEY_ORDERS =
             "clerk": "003",
             "debit": "N"
         },
+        "timestamp": "2020-01-12T09:00:00",
         "sender": {
             "name": "Two Cashew",
             "address": {
@@ -231,6 +234,7 @@ export const MONEY_ORDERS =
             "clerk": "001",
             "debit": "N"
         },
+        "timestamp": "2020-01-12T09:30:00",
         "sender": {
             "name": "Two Cashew",
             "address": {
@@ -298,6 +302,7 @@ export const MONEY_ORDERS =
             "clerk": "001",
             "debit": "N"
         },
+        "timestamp": "2020-01-13T09:30:00",
         "sender": {
             "name": "Two Cashew",
             "address": {
